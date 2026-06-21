@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnLogin  = findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(v-> {
-            Intent intent = new Intent(MainActivity.this, PlaceholderActivity.class);
+            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
             startActivity(intent);
             finish();
         });
