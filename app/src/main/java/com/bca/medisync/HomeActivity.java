@@ -63,23 +63,25 @@ public class HomeActivity extends AppCompatActivity {
                 "Hospitals"
         );
         List<Integer> icons = Arrays.asList(
-                android.R.drawable.ic_menu_agenda,
+                R.drawable.ic_nav_calendar,
                 android.R.drawable.ic_menu_edit,
-                android.R.drawable.ic_menu_add,
-                android.R.drawable.ic_menu_myplaces,
+                R.drawable.ic_nav_medicine,
+                R.drawable.ic_nav_profile,
                 android.R.drawable.ic_menu_info_details,
-                android.R.drawable.ic_menu_compass
+                R.drawable.hospital
         );
 
         DashboardAdapter adapter = new DashboardAdapter(this, titles, icons, positons -> {
             switch (positons){
                 case 0:
+                    startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
                     break;
                 case 1:
                     break;
                 case 2:
                     break;
                 case 3:
+                    startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
                     break;
                 case 4:
                     break;
@@ -97,9 +99,8 @@ public class HomeActivity extends AppCompatActivity {
             int id = item.getItemId();
             if (id== R.id.nav_home){
                 return true;
-            }  else if (id == R.id.nav_appointments) {
-                return true;
             } else if (id == R.id.nav_appointments) {
+                startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
                 return true;
             } else if (id == R.id.nav_medications) {
                 return true;
