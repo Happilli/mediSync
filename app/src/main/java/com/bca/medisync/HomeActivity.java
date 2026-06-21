@@ -79,6 +79,7 @@ public class HomeActivity extends AppCompatActivity {
                 case 1:
                     break;
                 case 2:
+                    startActivity(new Intent(HomeActivity.this, MedicationActivity.class));
                     break;
                 case 3:
                     startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
@@ -103,6 +104,7 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
                 return true;
             } else if (id == R.id.nav_medications) {
+                startActivity(new Intent(HomeActivity.this, MedicationActivity.class));
                 return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
