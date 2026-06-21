@@ -40,7 +40,7 @@
                        android:id="@+id/txtPatientName"
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
-                       android:text="Sirish Chaudhary"
+                       android:text=""
                        android:textSize="20sp"
                        android:textStyle="bold"
                        android:textColor="?attr/colorOnSurface"/>
@@ -83,8 +83,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Your health\n is our \npriority"
-                                android:textSize="22sp"
+                                android:text="Your health is our \npriority"
+                                android:textSize="28sp"
                                 android:textStyle="bold"
                                 android:lineSpacingExtra="4dp"
                                 android:textColor="?attr/colorOnPrimaryContainer"/>
@@ -93,7 +93,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentBottom="true"
                                 android:text="We are here to care !"
-                                android:textSize="12sp"
+                                android:textSize="20sp"
+                                android:textStyle="italic"
                                 android:textColor="?attr/colorOnPrimaryContainer"/>
                             <ImageView
                                 android:id="@+id/imgBanner"

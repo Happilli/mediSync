@@ -1,6 +1,8 @@
 package com.bca.medisync;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.adapter.DashboardAdapter;
 import com.bca.medisync.data.model.Appointment;
 import com.bca.medisync.data.model.DataProvider;
+import com.bca.medisync.data.model.Patient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Arrays;
@@ -21,6 +24,9 @@ import java.util.List;
 public class HomeActivity extends AppCompatActivity {
     private RecyclerView rvDashboard;
     private BottomNavigationView  bottomNav;
+
+    private TextView txtPatientName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +38,18 @@ public class HomeActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
+
+        txtPatientName = findViewById(R.id.txtPatientName);
         rvDashboard=findViewById(R.id.rvDashboard);
         bottomNav=findViewById(R.id.bottomNav);
+
+       //setting patient name
+        Patient patient = DataProvider.getCurrentPatient();
+        txtPatientName.setText(patient.getName());
+
         setupDashboard();
         setupBottomNav();
         setUpAppointmentCard();
-
     }
 
 
@@ -92,6 +104,7 @@ public class HomeActivity extends AppCompatActivity {
             } else if (id == R.id.nav_medications) {
                 return true;
             } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
                 return true;
             }
             return false;
