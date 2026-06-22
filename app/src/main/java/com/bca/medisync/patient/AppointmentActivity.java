@@ -1,5 +1,6 @@
-package com.bca.medisync;
+package com.bca.medisync.patient;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -11,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
 import com.bca.medisync.data.model.DataProvider;
@@ -95,13 +97,29 @@ public class AppointmentActivity extends AppCompatActivity {
         }));
 
         rvHistory.setLayoutManager(new LinearLayoutManager(this));
-        rvHistory.setAdapter(new AppointmentAdapter(this, upcoming, appointment -> {
+        rvHistory.setAdapter(new AppointmentAdapter(this, history, appointment -> {
 // appointment details
         }));
     }
     private  void setupFab(){
         faBookAppointment.setOnClickListener(v ->{
             // booking appointment flow nav something
+            startActivity(new Intent(AppointmentActivity.this, HospitalActivity.class));
         });
+    }
+
+    public static class DoctorHomeActivity extends AppCompatActivity {
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            EdgeToEdge.enable(this);
+            setContentView(R.layout.activity_doctor_home);
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
+        }
     }
 }

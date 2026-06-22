@@ -1,4 +1,4 @@
-package com.bca.medisync;
+package com.bca.medisync.patient;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -11,6 +11,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bca.medisync.R;
 import com.google.android.material.button.MaterialButton;
 
 public class HospitalDetailActivity extends AppCompatActivity {

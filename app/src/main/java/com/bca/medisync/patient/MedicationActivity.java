@@ -1,4 +1,4 @@
-package com.bca.medisync;
+package com.bca.medisync.patient;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bca.medisync.R;
 import com.bca.medisync.adapter.MedicationAdapter;
 import com.bca.medisync.data.model.DataProvider;
 import com.bca.medisync.data.model.Medication;

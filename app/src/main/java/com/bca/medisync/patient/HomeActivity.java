@@ -1,4 +1,4 @@
-package com.bca.medisync;
+package com.bca.medisync.patient;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,11 +12,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bca.medisync.R;
 import com.bca.medisync.adapter.DashboardAdapter;
 import com.bca.medisync.data.model.Appointment;
 import com.bca.medisync.data.model.DataProvider;
 import com.bca.medisync.data.model.Patient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -119,8 +121,17 @@ public class HomeActivity extends AppCompatActivity {
         List<Appointment> appointments  = DataProvider.getAppointments();
         if (!appointments.isEmpty()){
             Appointment next = appointments.get(0);
-            findViewById(R.id.cardAppointment).setOnClickListener(v->{
+            TextView txtDoctor = findViewById(R.id.txtAppointmentDoctor);
+            TextView txtSpeciality = findViewById(R.id.txtAppointmentSpeciality);
+            TextView txtDate  = findViewById(R.id.txtAppointmentDate);
+            TextView txtTime = findViewById(R.id.txtAppointmentTime);
 
+            txtDoctor.setText(next.getDoctorName());
+            txtSpeciality.setText(next.getSpeciality());
+            txtDate.setText(next.getDate());
+            txtTime.setText(next.getTime());
+            findViewById(R.id.cardAppointment).setOnClickListener(v->{
+                startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
             });
         }
     }

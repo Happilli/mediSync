@@ -203,14 +203,6 @@
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="?attr/colorOnSurface" />
-                        <TextView
-                            android:id="@+id/txtViewAll"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="View All"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorPrimary" />
                     </LinearLayout>
 
                     <com.google.android.material.card.MaterialCardView
@@ -251,7 +243,7 @@
                                     android:id="@+id/txtAppointmentDoctor"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Dr. Kakashi Hatake"
+                                    android:text=""
                                     android:textSize="15sp"
                                     android:textStyle="bold"
                                     android:textColor="?attr/colorOnSurface" />
@@ -259,7 +251,7 @@
                                     android:id="@+id/txtAppointmentSpeciality"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Cardiologist"
+                                    android:text=""
                                     android:textSize="12sp"
                                     android:textColor="?attr/colorOnSurfaceVariant" />
                             </LinearLayout>
@@ -273,7 +265,7 @@
                                     android:id="@+id/txtAppointmentDate"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="25 May 2024"
+                                    android:text=""
                                     android:textSize="12sp"
                                     android:textStyle="bold"
                                     android:textColor="?attr/colorOnSurface" />
@@ -282,7 +274,7 @@
                                     android:id="@+id/txtAppointmentTime"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="10:30 AM"
+                                    android:text=""
                                     android:textSize="12sp"
                                     android:textColor="?attr/colorOnSurfaceVariant" />
                             </LinearLayout>

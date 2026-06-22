@@ -1,4 +1,4 @@
-package com.bca.medisync;
+package com.bca.medisync.patient;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,69 +13,69 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bca.medisync.adapter.HospitalAdapter;
+import com.bca.medisync.R;
+import com.bca.medisync.adapter.DoctorAdapter;
 import com.bca.medisync.data.model.DataProvider;
-import com.bca.medisync.data.model.Hospital;
+import com.bca.medisync.data.model.Doctor;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
 
-public class HospitalActivity extends AppCompatActivity {
-    private RecyclerView rvHospitals;
+
+public class DoctorActivity extends AppCompatActivity {
+    private RecyclerView rvDoctors;
     private MaterialToolbar toolbar;
-    private HospitalAdapter adapter;
     private TextInputEditText etSearch;
+    private DoctorAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_hospital);
+        setContentView(R.layout.activity_doctor);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        initView();
+        initViews();
         setupToolbar();
-        setupRecycleView();
+        setupRecyclerView();
         setupSearch();
     }
-    private void initView(){
-        rvHospitals = findViewById(R.id.rvHospitals);
+    private void initViews(){
+        rvDoctors = findViewById(R.id.rvDoctors);
         toolbar = findViewById(R.id.toolbar);
         etSearch = findViewById(R.id.etSearch);
     }
-    private  void setupToolbar(){
-        toolbar.setNavigationOnClickListener(v -> {
+    private void setupToolbar(){
+        toolbar.setNavigationOnClickListener(v->{
             finish();
         });
     }
-
-    private void setupRecycleView(){
-        List<Hospital> hospitals = DataProvider.getHospitals();
-        adapter = new HospitalAdapter(this, hospitals, hospital -> {
-            Intent intent = new Intent(HospitalActivity.this, HospitalDetailActivity.class);
-            intent.putExtra("hospital_id", hospital.getId());
-            intent.putExtra("hospital_name", hospital.getName());
-            intent.putExtra("hospital_address", hospital.getAddress());
-            intent.putExtra("hospital_phone", hospital.getPhone());
-            intent.putExtra("hospital_website", hospital.getWebsite());
-            intent.putExtra("hospital_description", hospital.getDescription());
-            intent.putExtra("hospita_rating", hospital.getRating());
+    private void setupRecyclerView(){
+        List<Doctor> doctors = DataProvider.getDoctors();
+        adapter = new DoctorAdapter(this, doctors, doctor -> {
+            Intent intent = new Intent(DoctorActivity.this, BookAppointmentActivity.class);
+            intent.putExtra("doctor_id", doctor.getId());
+            intent.putExtra("doctor_name", doctor.getName());
+            intent.putExtra("doctor_speciality", doctor.getSpeciality());
+            intent.putExtra("doctor_info", doctor.getInfo());
+            intent.putExtra("doctor_department", doctor.getDepartment());
             startActivity(intent);
         });
-        rvHospitals.setLayoutManager(new LinearLayoutManager(this));
-        rvHospitals.setAdapter(adapter);
+        rvDoctors.setLayoutManager(new LinearLayoutManager(this));
+        rvDoctors.setAdapter(adapter);
     }
     private void setupSearch(){
-        etSearch.addTextChangedListener(new TextWatcher() {
+        etSearch.addTextChangedListener(new TextWatcher(){
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after){
+            public void beforeTextChanged(CharSequence s,  int start, int count, int after){
+
             }
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count){
+            public void onTextChanged(CharSequence s,  int start, int before, int count){
                 adapter.filter(s.toString());
             }
             @Override

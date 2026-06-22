@@ -1,4 +1,4 @@
-package com.bca.medisync;
+package com.bca.medisync.patient;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
+
+import com.bca.medisync.R;
 
 public class AlarmReceiver extends BroadcastReceiver {
     private static final String CHANNEL_ID = "MEDICATION_CHANNEL";

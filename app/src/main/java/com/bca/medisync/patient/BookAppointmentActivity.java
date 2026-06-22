@@ -1,4 +1,4 @@
-package com.bca.medisync;
+package com.bca.medisync.patient;
 
 import android.os.Bundle;
 import android.widget.TextView;
@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bca.medisync.R;
 import com.bca.medisync.adapter.TimeSlotAdapter;
 import com.bca.medisync.data.model.DataProvider;
 import com.bca.medisync.data.model.TimeSlot;

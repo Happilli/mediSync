@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MediSync">
         <receiver
-            android:name=".AlarmReceiver"
+            android:name=".patient.AlarmReceiver"
             android:enabled="true"
             android:exported="false" />
 
@@ -30,35 +30,43 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HomeActivity"
+            android:name=".patient.HomeActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ProfileActivity"
+            android:name=".patient.ProfileActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".AppointmentActivity"
+            android:name=".patient.AppointmentActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".MedicationActivity"
+            android:name=".patient.MedicationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".HospitalActivity"
+            android:name=".patient.HospitalActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".HospitalDetailActivity"
+            android:name=".patient.HospitalDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".DoctorActivity"
+            android:name=".patient.DoctorActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".BookAppointmentActivity"
+            android:name=".patient.BookAppointmentActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".patient.AppointmentActivity$DoctorHomeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".doctor.DoctorHomeActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>
