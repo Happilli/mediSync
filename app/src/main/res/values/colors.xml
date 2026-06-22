@@ -6,7 +6,7 @@
     <color name="surface_container">#ebf0e0</color>
     <color name="surface_container_low">#f1f6e5</color>
     <color name="surface_container_high">#e5eada</color>
-    <color name="surface_container_highest">#e0e4d4</color>
+    <color name="surface_container_highest">#e1e4d4</color>
     <color name="surface_dim">#d7dccc</color>
 
     <color name="primary">#376b00</color>
