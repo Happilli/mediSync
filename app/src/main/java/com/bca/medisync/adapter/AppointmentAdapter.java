@@ -72,7 +72,7 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
 
     public class ViewHolder extends RecyclerView.ViewHolder {
        TextView txtDoctorName, txtSpeciality, txtDate, txtDepartment, txtStatus;
-       public ViewHolder(@NotNull View itemView){
+       public ViewHolder(@NonNull View itemView){
            super(itemView);
            txtDoctorName = itemView.findViewById(R.id.txtDoctorName);
            txtSpeciality = itemView.findViewById(R.id.txtSpeciality);

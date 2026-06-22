@@ -64,10 +64,10 @@ public class HomeActivity extends AppCompatActivity {
         );
         List<Integer> icons = Arrays.asList(
                 R.drawable.ic_nav_calendar,
-                android.R.drawable.ic_menu_edit,
+                R.drawable.edit,
                 R.drawable.ic_nav_medicine,
                 R.drawable.ic_nav_profile,
-                android.R.drawable.ic_menu_info_details,
+                R.drawable.record,
                 R.drawable.hospital
         );
 
@@ -87,6 +87,7 @@ public class HomeActivity extends AppCompatActivity {
                 case 4:
                     break;
                 case 5:
+                    startActivity(new Intent(HomeActivity.this, HospitalActivity.class));
                     break;
             }
         });

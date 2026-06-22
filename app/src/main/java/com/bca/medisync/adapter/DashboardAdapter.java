@@ -53,7 +53,7 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.View
         ImageView imgIcon;
         TextView txtTitle;
 
-        public ViewHolder(@NotNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imgIcon = itemView.findViewById(R.id.imgFeature);
             txtTitle = itemView.findViewById(R.id.txtFeature);

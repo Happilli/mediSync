@@ -52,7 +52,7 @@ public class MedicationAdapter extends RecyclerView.Adapter<MedicationAdapter.Vi
     }
     public class ViewHolder extends  RecyclerView.ViewHolder{
         TextView tvMedName, tvMedFrequency, tvMedTime;
-        public ViewHolder(@NotNull View itemView){
+        public ViewHolder(@NonNull View itemView){
             super(itemView);
             tvMedFrequency = itemView.findViewById(R.id.tvMedFrequency);
             tvMedName = itemView.findViewById(R.id.tvMedName);
