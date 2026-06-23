@@ -52,7 +52,36 @@ public class DataProvider {
         return list;
 
     }
+    public static List<Patient> getPatients() {
+        List<Patient> list = new ArrayList<>();
+        list.add(new Patient("pat001", "Prasamsha Poudel", "prasamsha@gmail.com", "+977-9800000001", "Bharatpur-1, Chitwan", "2003-12-12", "Female", "O+", "+977-9800000002"));
+        list.add(new Patient("pat002", "Aarav Sharma", "aarav@gmail.com", "+977-9800000003", "Pokhara-5", "1989-06-15", "Male", "B+", "+977-9800000004"));
+        list.add(new Patient("pat003", "Hari Yadav", "hari@gmail.com", "+977-9800000005", "Kathmandu-10", "1982-03-22", "Male", "A+", "+977-9800000006"));
+        return list;
+    }
 
+    public static MedicalHistory getMedicalHistory(String patientName) {
+        List<MedicalHistoryEntry> timeline = new ArrayList<>();
+
+        timeline.add(new MedicalHistoryEntry(
+                "12 Jan 2026",
+                "Hypertension",
+                "Patient complained of elevated blood pressure and dizziness."
+        ));
+        timeline.add(new MedicalHistoryEntry(
+                "02 Mar 2026",
+                "Chest Pain",
+                "ECG performed. No major abnormalities found."
+        ));
+
+        return new MedicalHistory(
+                "Amlodipine 5mg",
+                "Once Daily • 30 Days",
+                "Blood Test Report",
+                "CBC + Lipid Panel",
+                timeline
+        );
+    }
     public static List<TimeSlot> getTimeSlots() {
         List<TimeSlot> list = new ArrayList<>();
         String[] times = {
