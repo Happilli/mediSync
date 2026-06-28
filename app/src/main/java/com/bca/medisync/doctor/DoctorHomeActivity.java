@@ -16,6 +16,7 @@ import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.DataProvider;
+import com.bca.medisync.data.model.Doctor;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.MaterialColors;
 
@@ -45,22 +46,22 @@ public class DoctorHomeActivity extends AppCompatActivity {
         txtViewAll = findViewById(R.id.txtViewAll);
 
         findViewById(R.id.btnProfile).setOnClickListener(v -> {
-            Intent intent = new Intent(DoctorHomeActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            startActivity(new Intent(DoctorHomeActivity.this, DoctorProfileActivity.class));
         });
     }
     private void setupAppointments(){
         rvAppointments.setLayoutManager(new LinearLayoutManager(this));
         rvAppointments.setAdapter(new AppointmentAdapter(
-                this, DataProvider.getAppointments(), appointment -> {}
+                this, DataProvider.getDoctorSchedule(),true, appointment -> {}
         ));
     }
     private void setupListeners(){
         btnPatients.setOnClickListener(v->{
             startActivity(new Intent(DoctorHomeActivity.this, PatientActivity.class));
         });
-        btnSchedule.setOnClickListener(v->{});
+        btnSchedule.setOnClickListener(v->{
+            startActivity(new Intent(DoctorHomeActivity.this, ScheduleActivity.class));
+        });
         txtViewAll.setOnClickListener(v->{});
     }
 }

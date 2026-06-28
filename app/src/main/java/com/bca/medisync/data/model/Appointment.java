@@ -3,6 +3,8 @@ package com.bca.medisync.data.model;
 public class Appointment {
     private final String id;
     private final String doctorName;
+
+    private final String patientName;
     private final String department;
     private final String date;
     private final String speciality;
@@ -10,9 +12,10 @@ public class Appointment {
     private final String status;
     private final String notes;
 
-public Appointment(String id, String doctorName, String department, String speciality, String date, String time, String status, String notes){
+public Appointment(String id,String patientName,  String doctorName, String department, String speciality, String date, String time, String status, String notes){
     this.id = id;
     this.doctorName = doctorName;
+    this.patientName = patientName;
     this.department =department;
     this.speciality = speciality;
     this.date = date;
@@ -46,6 +49,10 @@ public Appointment(String id, String doctorName, String department, String speci
 
     public String getStatus() {
         return status;
+    }
+
+    public String getPatientName() {
+        return patientName;
     }
 
     public String getNotes() {

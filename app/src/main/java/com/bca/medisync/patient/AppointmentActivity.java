@@ -92,12 +92,12 @@ public class AppointmentActivity extends AppCompatActivity {
             }
         }
         rvUpcoming.setLayoutManager(new LinearLayoutManager(this));
-        rvUpcoming.setAdapter(new AppointmentAdapter(this, upcoming, appointment -> {
+        rvUpcoming.setAdapter(new AppointmentAdapter(this, upcoming,false, appointment -> {
 // appointment details
         }));
 
         rvHistory.setLayoutManager(new LinearLayoutManager(this));
-        rvHistory.setAdapter(new AppointmentAdapter(this, history, appointment -> {
+        rvHistory.setAdapter(new AppointmentAdapter(this, history, false, appointment -> {
 // appointment details
         }));
     }

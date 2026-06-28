@@ -1,6 +1,9 @@
 package com.bca.medisync.data.model;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class DataProvider {
 
@@ -33,15 +36,23 @@ public class DataProvider {
         list.add(new Hospital("h002", "B&B Hospital", "Gwarko, Lalitpur", "+977-01-5199600", "https://bpkihs.edu", "One of the largest private hospitals in Nepal.", 4.5, null));
         return list;
     }
-
-    public static List<Appointment> getAppointments() {
+    public static List<Appointment> getDoctorSchedule() {
         List<Appointment> list = new ArrayList<>();
-        list.add(new Appointment("a001", "Dr. Kakashi Hatake", "Cardiologist", "Cardiology Department", "25 May 2024", "10:30 AM", "Confirmed", ""));
-        list.add(new Appointment("a002", "Dr. Tsunade Senju", "Dermatologist", "Dermatology Department", "02 Jun 2024", "11:00 AM", "Pending", ""));
-        list.add(new Appointment("a003", "Dr. Kiyomi Takada", "Neurologist", "Neurology Department", "10 Jun 2024", "09:00 AM", "Scheduled", ""));
+        SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        String today = fmt.format(new Date());
+
+        list.add(new Appointment("s001", "Prasamsha Poudel", "Dr. Kakashi Hatake", "Cardiology Department", "Cardiologist", today, "09:00 AM", "Confirmed", ""));
+        list.add(new Appointment("s002", "Aarav Sharma", "Dr. Kakashi Hatake", "Cardiology Department", "Cardiologist", today, "10:30 AM", "Confirmed", ""));
+        list.add(new Appointment("s003", "Hari Yadav", "Dr. Kakashi Hatake", "Cardiology Department", "Cardiologist", today, "11:30 AM", "Pending", ""));
         return list;
     }
-
+    public static List<Appointment> getAppointments() {
+        List<Appointment> list = new ArrayList<>();
+        list.add(new Appointment("a001", "Sirish Chaudhary", "Dr. Kakashi Hatake", "Cardiology Department", "Cardiologist", "25 May 2024", "10:30 AM", "Confirmed", ""));
+        list.add(new Appointment("a002", "Sirish Chaudhary", "Dr. Tsunade Senju", "Dermatology Department", "Dermatologist", "02 Jun 2024", "11:00 AM", "Pending", ""));
+        list.add(new Appointment("a003", "Sirish Chaudhary", "Dr. Kiyomi Takada", "Neurology Department", "Neurologist", "10 Jun 2024", "09:00 AM", "Scheduled", ""));
+        return list;
+    }
     public static List<Medication> getMedications() {
         List<Medication> list = new ArrayList<>();
         list.add(new Medication("m001", "Telma", "40mg", "Once Daily", "01:00 PM", "30 Days", false));
@@ -100,5 +111,26 @@ public class DataProvider {
             list.add(new TimeSlot(times[i], available[i]));
         }
         return list;
+    }
+    public static DoctorProfile getCurrentDoctorProfile() {
+        List<AvailabilityDay> availability = new ArrayList<>();
+        availability.add(new AvailabilityDay("Mon", "09:00 AM", "05:00 PM"));
+        availability.add(new AvailabilityDay("Tue", "09:00 AM", "05:00 PM"));
+        availability.add(new AvailabilityDay("Wed", "09:00 AM", "05:00 PM"));
+
+        return new DoctorProfile(
+                "Dr. Kakashi Hatake",
+                "General Physician",
+                "MBBS, MD (General Medicine)",
+                "MC123456",
+                "9876543210",
+                "kakashi9@gmail.com",
+                "General Physician",
+                5,
+                "Chitwan Medical Hospital",
+                "Senior Consultant",
+                availability,
+                230, 1200, 98, 4.9
+        );
     }
 }

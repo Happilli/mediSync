@@ -22,11 +22,13 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
    private final Context context;
    private final List<Appointment> appointments;
    private final OnItemClickListener listener;
+   private final boolean showPatientView;
 
 
-   public AppointmentAdapter(Context context, List<Appointment> appointments, OnItemClickListener listener){
+   public AppointmentAdapter(Context context, List<Appointment> appointments, Boolean showPatientView, OnItemClickListener listener){
        this.context =context;
        this.appointments = appointments;
+       this.showPatientView = showPatientView;
        this.listener  = listener;
    }
 
@@ -41,7 +43,8 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
        Appointment a = appointments.get(position);
 
-        holder.txtDoctorName.setText(a.getDoctorName());
+//        holder.txtDoctorName.setText(a.getDoctorName());
+        holder.txtDoctorName.setText(showPatientView ? a.getPatientName() : a.getDoctorName());
         holder.txtSpeciality.setText(a.getSpeciality());
         holder.txtDepartment.setText(a.getDepartment());
         holder.txtStatus.setText(a.getStatus());
