@@ -18,40 +18,49 @@
             android:layout_height="wrap_content">
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="800dp"
-                android:layout_height="800dp"
-                android:layout_marginStart="-200dp"
-                android:layout_marginTop="-500dp"
+                android:id="@+id/heroBackground"
+                android:layout_width="0dp"
+                android:layout_height="290dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="48dp"
+                android:layout_marginEnd="24dp"
                 app:cardBackgroundColor="?attr/colorPrimaryContainer"
-                app:cardCornerRadius="400dp"
+                app:cardCornerRadius="32dp"
                 app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 
             <TextView
                 android:id="@+id/tvHeader"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="64dp"
-                android:fontFamily="sans-serif-black"
+                android:layout_marginStart="44dp"
+                android:layout_marginTop="88dp"
+                android:layout_marginEnd="24dp"
                 android:text=""
                 android:textColor="?attr/colorOnPrimaryContainer"
-                android:textSize="44sp"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardRx"
-                android:layout_width="160dp"
-                android:layout_height="200dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="24dp"
+                android:layout_width="0dp"
+                android:layout_height="180dp"
+                android:layout_marginStart="36dp"
+                android:layout_marginTop="232dp"
+                android:layout_marginEnd="8dp"
                 app:cardBackgroundColor="?attr/colorTertiaryContainer"
-                app:cardCornerRadius="32dp"
-                app:cardElevation="12dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:layout_constraintEnd_toStartOf="@+id/cardLab"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvHeader">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -71,10 +80,10 @@
                         android:id="@+id/tvRxName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-black"
                         android:text=""
                         android:textColor="?attr/colorOnTertiaryContainer"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
                         app:layout_constraintBottom_toTopOf="@+id/tvRxDesc"
                         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -93,15 +102,18 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardLab"
-                android:layout_width="160dp"
-                android:layout_height="160dp"
-                android:layout_marginTop="72dp"
-                android:layout_marginEnd="32dp"
+                android:layout_width="0dp"
+                android:layout_height="180dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="232dp"
+                android:layout_marginEnd="36dp"
                 app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
-                app:cardCornerRadius="32dp"
-                app:cardElevation="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvHeader">
+                app:layout_constraintStart_toEndOf="@+id/cardRx"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -121,10 +133,10 @@
                         android:id="@+id/tvLabTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-black"
                         android:text=""
                         android:textColor="?attr/colorOnSurface"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
                         app:layout_constraintBottom_toTopOf="@+id/tvLabDesc"
                         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -145,47 +157,46 @@
                 android:id="@+id/tvTimelineHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
+                android:layout_marginStart="24dp"
                 android:layout_marginTop="48dp"
-                android:fontFamily="sans-serif-black"
                 android:letterSpacing="0.1"
                 android:text="HISTORY TIMELINE"
                 android:textColor="?attr/colorPrimary"
-                android:textSize="12sp"
+                android:textSize="13sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cardRx"/>
+
+            <View
+                android:id="@+id/dot1"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/record"
+                android:backgroundTint="?attr/colorPrimary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvTimelineHeader"/>
 
             <View
                 android:id="@+id/timelineLine"
                 android:layout_width="2dp"
                 android:layout_height="0dp"
-                android:layout_marginStart="41dp"
-                android:layout_marginTop="24dp"
                 android:background="?attr/colorOutlineVariant"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvTimelineHeader"/>
-
-            <View
-                android:id="@+id/dot1"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginTop="32dp"
-                android:background="@drawable/record"
-                android:backgroundTint="?attr/colorPrimary"
-                app:layout_constraintEnd_toEndOf="@id/timelineLine"
-                app:layout_constraintStart_toStartOf="@id/timelineLine"
-                app:layout_constraintTop_toTopOf="@id/timelineLine"/>
+                app:layout_constraintBottom_toTopOf="@id/dot2"
+                app:layout_constraintEnd_toEndOf="@id/dot1"
+                app:layout_constraintStart_toStartOf="@id/dot1"
+                app:layout_constraintTop_toBottomOf="@id/dot1"/>
 
             <TextView
                 android:id="@+id/date1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:fontFamily="sans-serif-black"
                 android:text=""
                 android:textColor="?attr/colorPrimary"
                 android:textSize="14sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/dot1"
                 app:layout_constraintStart_toEndOf="@id/dot1"
                 app:layout_constraintTop_toTopOf="@id/dot1"/>
@@ -195,11 +206,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="32dp"
-                android:fontFamily="sans-serif-medium"
+                android:layout_marginEnd="24dp"
                 android:text=""
                 android:textColor="?attr/colorOnSurface"
-                android:textSize="22sp"
+                android:textSize="20sp"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@id/date1"
                 app:layout_constraintTop_toBottomOf="@id/date1"/>
@@ -209,7 +220,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="32dp"
+                android:layout_marginEnd="24dp"
                 android:lineSpacingExtra="4dp"
                 android:text=""
                 android:textColor="?attr/colorOnSurfaceVariant"
@@ -220,13 +231,13 @@
 
             <View
                 android:id="@+id/dot2"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:layout_marginTop="48dp"
                 android:background="@drawable/record"
                 android:backgroundTint="?attr/colorOutline"
-                app:layout_constraintEnd_toEndOf="@id/timelineLine"
-                app:layout_constraintStart_toStartOf="@id/timelineLine"
+                app:layout_constraintEnd_toEndOf="@id/dot1"
+                app:layout_constraintStart_toStartOf="@id/dot1"
                 app:layout_constraintTop_toBottomOf="@id/desc1"/>
 
             <TextView
@@ -234,10 +245,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:fontFamily="sans-serif-black"
                 android:text=""
                 android:textColor="?attr/colorOutline"
                 android:textSize="14sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/dot2"
                 app:layout_constraintStart_toEndOf="@id/dot2"
                 app:layout_constraintTop_toTopOf="@id/dot2"/>
@@ -247,11 +258,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="32dp"
-                android:fontFamily="sans-serif-medium"
+                android:layout_marginEnd="24dp"
                 android:text=""
                 android:textColor="?attr/colorOnSurface"
-                android:textSize="22sp"
+                android:textSize="20sp"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@id/date2"
                 app:layout_constraintTop_toBottomOf="@id/date2"/>
@@ -261,7 +272,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="32dp"
+                android:layout_marginEnd="24dp"
                 android:lineSpacingExtra="4dp"
                 android:text=""
                 android:textColor="?attr/colorOnSurfaceVariant"
@@ -276,18 +287,17 @@
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabConsult"
         android:layout_width="wrap_content"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="32dp"
-        android:fontFamily="sans-serif-medium"
         android:text="Start Consultation"
         android:textColor="?attr/colorOnPrimary"
-        android:textSize="18sp"
+        android:textSize="16sp"
         app:backgroundTint="?attr/colorPrimary"
-        app:elevation="8dp"
+        app:elevation="4dp"
         app:icon="@drawable/stethoscope"
-        app:iconSize="28dp"
+        app:iconSize="24dp"
         app:iconTint="?attr/colorOnPrimary"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"/>
 
