@@ -12,11 +12,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.DataProvider;
-import com.bca.medisync.data.model.Doctor;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.MaterialColors;
 

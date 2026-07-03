@@ -135,7 +135,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="32dp"
-            android:text="No Account?\nRegister"
+            android:text=""
             android:textAlignment="center"
             android:textColor="?attr/colorPrimary"
             android:textStyle="bold"/>

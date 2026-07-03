@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingBottom="40dp">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -22,6 +24,7 @@
                 app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
                 app:cardCornerRadius="36dp"
                 app:cardElevation="0dp">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -35,38 +38,58 @@
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="140dp"
-                            android:background="?attr/colorPrimaryContainer"/>
-                        <com.google.android.material.card.MaterialCardView
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:background="?attr/colorPrimaryContainer" />
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/imgProfile"
+                            android:layout_width="135dp"
+                            android:layout_height="135dp"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="80dp"
-                            app:cardBackgroundColor="?attr/colorSecondaryContainer"
-                            app:cardCornerRadius="36dp"
-                            app:cardElevation="0dp"
-                            app:strokeColor="?attr/colorSurfaceContainerHigh"
-                            app:strokeWidth="6dp">
-
-                            <ImageView
-                                android:id="@+id/imgProfile"
-                                android:layout_width="match_parent"
-                                android:contentDescription="something something"
-                                android:layout_height="match_parent"
-                                android:padding="24dp"
-                                android:scaleType="fitCenter"
-                                android:src="@drawable/ic_nav_profile"
-                                app:tint="?attr/colorOnSecondaryContainer"/>
-                        </com.google.android.material.card.MaterialCardView>
+                            android:background="?attr/colorSecondaryContainer"
+                            android:contentDescription="something something"
+                            android:padding="24dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_nav_profile"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Tile"
+                            app:tint="?attr/colorOnSecondaryContainer" />
                     </FrameLayout>
-                    <TextView
-                        android:id="@+id/txtName"
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:textAlignment="center"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="26sp"
-                        android:textStyle="bold"/>
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/txtName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAlignment="center"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="26sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardVerifiedBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            app:cardCornerRadius="14dp"
+                            app:cardElevation="0dp">
+
+                            <TextView
+                                android:id="@+id/txtVerifiedBadge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingHorizontal="14dp"
+                                android:paddingVertical="6dp"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </com.google.android.material.card.MaterialCardView>
+
+                    </LinearLayout>
+
                     <TextView
                         android:id="@+id/txtAddress"
                         android:layout_width="match_parent"
@@ -74,7 +97,8 @@
                         android:layout_marginTop="6dp"
                         android:textAlignment="center"
                         android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="14sp"/>
+                        android:textSize="14sp" />
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnEditProfile"
                         android:layout_width="wrap_content"
@@ -87,9 +111,10 @@
                         android:textStyle="bold"
                         app:backgroundTint="?attr/colorSecondaryContainer"
                         app:cornerRadius="20dp"
-                        app:elevation="0dp"/>
+                        app:elevation="0dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -104,7 +129,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1" />
 
                 <include
                     android:id="@+id/statBloodGroup"
@@ -112,7 +137,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="6dp"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1" />
 
                 <include
                     android:id="@+id/statGender"
@@ -120,8 +145,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1" />
             </LinearLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -130,7 +156,7 @@
                 android:text="Personal Information"
                 android:textColor="?attr/colorPrimary"
                 android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <include
                 android:id="@+id/rowEmail"
@@ -138,28 +164,32 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp" />
+
             <include
                 android:id="@+id/rowPhone"
                 layout="@layout/item_profile_info_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp" />
+
             <include
                 android:id="@+id/rowDob"
                 layout="@layout/item_profile_info_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp" />
+
             <include
                 android:id="@+id/rowAddress"
                 layout="@layout/item_profile_info_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp" />
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -189,7 +219,7 @@
                             android:layout_gravity="center"
                             android:contentDescription="something something"
                             android:src="@drawable/emergency"
-                            app:tint="?attr/colorOnError"/>
+                            app:tint="?attr/colorOnError" />
 
                     </com.google.android.material.card.MaterialCardView>
 
@@ -206,7 +236,7 @@
                             android:text="Emergency Contact"
                             android:textColor="?attr/colorOnErrorContainer"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/txtEmergencyContact"
@@ -215,7 +245,7 @@
                             android:layout_marginTop="2dp"
                             android:textColor="?attr/colorOnErrorContainer"
                             android:textSize="16sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -251,29 +281,36 @@
                             android:text="Notifications"
                             android:textColor="?attr/colorOnSurface"
                             android:textSize="16sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <com.google.android.material.materialswitch.MaterialSwitch
                             android:id="@+id/switchNotifications"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content" />
 
                     </LinearLayout>
-                    <include layout="@layout/item_profile_divider"/>
+
+                    <include layout="@layout/item_profile_divider" />
+
                     <include
                         android:id="@+id/rowPrivacyPolicy"
-                        layout="@layout/item_profile_settings_row"/>
-                    <include layout="@layout/item_profile_divider"/>
+                        layout="@layout/item_profile_settings_row" />
+
+                    <include layout="@layout/item_profile_divider" />
+
                     <include
                         android:id="@+id/rowTerms"
-                        layout="@layout/item_profile_settings_row"/>
-                    <include layout="@layout/item_profile_divider"/>
+                        layout="@layout/item_profile_settings_row" />
+
+                    <include layout="@layout/item_profile_divider" />
+
                     <include
                         android:id="@+id/rowHelp"
-                        layout="@layout/item_profile_settings_row"/>
+                        layout="@layout/item_profile_settings_row" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogout"
                 android:layout_width="match_parent"
@@ -287,7 +324,7 @@
                 android:textStyle="bold"
                 app:backgroundTint="?attr/colorErrorContainer"
                 app:cornerRadius="32dp"
-                app:elevation="0dp"/>
+                app:elevation="0dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
