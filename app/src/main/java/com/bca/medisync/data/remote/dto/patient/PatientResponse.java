@@ -10,11 +10,16 @@ public class PatientResponse {
   private String blood_group;
   private String emergency_contact;
   private String citizenship_number;
+  private String profile_pic_url;
   private String citizenship_photo_url;
   private boolean is_verified;
 
   public int getId() {
     return id;
+  }
+
+  public String getProfile_pic_url() {
+    return profile_pic_url;
   }
 
   public String getName() {

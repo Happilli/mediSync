@@ -18,6 +18,7 @@ import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
+import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -55,6 +56,12 @@ public class ProfileActivity extends AppCompatActivity {
     setupSettingsRows();
     loadPatientData();
     setupListeners();
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    loadPatientData();
   }
 
   private void initViews() {
@@ -146,6 +153,22 @@ public class ProfileActivity extends AppCompatActivity {
     bindRow(rowAddress, R.drawable.location, "Address", patient.getAddress());
 
     bindVerificationBadge(patient.isIs_verified());
+    bindProfilePic(patient.getProfile_pic_url());
+  }
+
+  private void bindProfilePic(String profilePicUrl) {
+    ShapeableImageView imgProfile = findViewById(R.id.imgProfile);
+    if (profilePicUrl == null || profilePicUrl.isEmpty()) {
+      imgProfile.setImageResource(R.drawable.ic_nav_profile);
+      return;
+    }
+
+    Glide.with(this)
+        .load(ApiClient.BASE_URL.replaceAll("/$", "") + profilePicUrl)
+        .placeholder(R.drawable.ic_nav_profile)
+        .error(R.drawable.ic_nav_profile)
+        .centerCrop()
+        .into(imgProfile);
   }
 
   private void bindVerificationBadge(boolean isVerified) {
@@ -158,8 +181,8 @@ public class ProfileActivity extends AppCompatActivity {
       txtVerifiedBadge.setText("Not Verified - Tap to verify");
       txtVerifiedBadge.setTextColor(getColor(R.color.on_error_container));
       cardVerifiedBadge.setCardBackgroundColor(getColor(R.color.error_container));
-      //      cardVerifiedBadge.setOnClickListener(
-      //          v -> startActivity(new Intent(this, VerificationActivity.class)));
+      cardVerifiedBadge.setOnClickListener(
+          v -> startActivity(new Intent(this, VerificationActivity.class)));
     }
   }
 

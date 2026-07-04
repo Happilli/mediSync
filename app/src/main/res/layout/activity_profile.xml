@@ -48,11 +48,9 @@
                             android:layout_marginTop="80dp"
                             android:background="?attr/colorSecondaryContainer"
                             android:contentDescription="something something"
-                            android:padding="24dp"
                             android:scaleType="fitCenter"
                             android:src="@drawable/ic_nav_profile"
-                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Tile"
-                            app:tint="?attr/colorOnSecondaryContainer" />
+                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Tile" />
                     </FrameLayout>
 
                     <LinearLayout
