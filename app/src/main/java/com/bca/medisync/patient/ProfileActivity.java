@@ -164,7 +164,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     Glide.with(this)
-        .load(ApiClient.BASE_URL.replaceAll("/$", "") + profilePicUrl)
+        .load(ApiClient.BASE_URL.replaceAll("/$", "")+ "/api/v1" + profilePicUrl)
         .placeholder(R.drawable.ic_nav_profile)
         .error(R.drawable.ic_nav_profile)
         .centerCrop()
