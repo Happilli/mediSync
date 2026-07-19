@@ -1,5 +1,6 @@
 package com.bca.medisync.data.remote.api;
 
+import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 
 import java.util.List;
@@ -17,6 +18,10 @@ public interface DoctorApi {
       @Query("speciality") String speciality,
       @Query("search") String search);
 
-  @GET("/api/v1/doctors/{doctor_id)")
+  @GET("/api/v1/doctors/{doctor_id}")
   Call<DoctorResponse> getDoctorDetail(@Path("doctor_id") int doctorId);
+
+  @GET("/api/v1/doctors/{doctor_id}/timeslots")
+  Call<List<TimeSlotResponse>> getDoctorTimeslots(
+      @Path("doctor_id") int doctorId, @Query("available_only") boolean availableOnly);
 }

@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.DoctorAdapter;
-import com.bca.medisync.data.model.DataProvider;
 import com.bca.medisync.data.model.Doctor;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
@@ -72,11 +71,10 @@ public class DoctorActivity extends AppCompatActivity {
   }
 
   private void setupRecyclerView() {
-    List<Doctor> doctors = DataProvider.getDoctors();
     adapter =
         new DoctorAdapter(
             this,
-            doctors,
+            new ArrayList<>(),
             doctor -> {
               Intent intent = new Intent(DoctorActivity.this, BookAppointmentActivity.class);
               intent.putExtra("doctor_id", doctor.getId());

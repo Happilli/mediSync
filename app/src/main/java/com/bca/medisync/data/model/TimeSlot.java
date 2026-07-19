@@ -1,18 +1,31 @@
 package com.bca.medisync.data.model;
 
 public class TimeSlot {
-    private final String time;
-    private final boolean available;
+  private final int id;
+  private final String appointmentAt;
+  private final String displayTime;
+  private final boolean available;
 
-    public  TimeSlot(String time, boolean available){
-        this.time = time;
-        this.available = available;
-    }
-    public String getTime() {
-        return time;
-    }
+  public TimeSlot(int id, String appointmentAt, String displayTime, boolean available) {
+    this.id = id;
+    this.appointmentAt = appointmentAt;
+    this.displayTime = displayTime;
+    this.available = available;
+  }
 
-    public boolean isAvailable() {
-        return available;
-    }
+  public int getId() {
+    return id;
+  }
+
+  public String getAppointmentAt() {
+    return appointmentAt;
+  }
+
+  public String getDisplayTime() {
+    return displayTime;
+  }
+
+  public boolean isAvailable() {
+    return available;
+  }
 }

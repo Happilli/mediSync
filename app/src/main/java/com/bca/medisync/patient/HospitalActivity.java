@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.HospitalAdapter;
-import com.bca.medisync.data.model.DataProvider;
 import com.bca.medisync.data.model.Hospital;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.HospitalApi;
@@ -70,11 +69,10 @@ public class HospitalActivity extends AppCompatActivity {
   }
 
   private void setupRecycleView() {
-    List<Hospital> hospitals = DataProvider.getHospitals();
     adapter =
         new HospitalAdapter(
             this,
-            hospitals,
+            new ArrayList<>(),
             hospital -> {
               Intent intent = new Intent(HospitalActivity.this, HospitalDetailActivity.class);
               intent.putExtra("hospital_id", hospital.getId());

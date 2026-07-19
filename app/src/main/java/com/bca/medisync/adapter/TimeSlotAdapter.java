@@ -21,7 +21,7 @@ import java.util.List;
 public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.ViewHolder> {
 
     public interface OnTimeSelectedListener{
-        void ontimeSelected(String time);
+        void ontimeSelected(TimeSlot slot);
     }
     private final Context context;
     private final List<TimeSlot> slots;
@@ -44,7 +44,7 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TimeSlot slot = slots.get(position);
-        holder.tvTime.setText(slot.getTime());
+        holder.tvTime.setText(slot.getDisplayTime());
 
         if(!slot.isAvailable()){
             //unavailable
@@ -75,7 +75,7 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.ViewHo
             selectedPositon = holder.getAbsoluteAdapterPosition();
             notifyItemChanged(prev);
             notifyItemChanged(selectedPositon);
-            listener.ontimeSelected(slot.getTime());
+            listener.ontimeSelected(slot);
         });
     }
 
