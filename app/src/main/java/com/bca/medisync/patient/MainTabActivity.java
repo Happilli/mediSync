@@ -67,7 +67,7 @@ public class MainTabActivity extends AppCompatActivity {
 
   private Fragment createFragment(int itemId) {
     if (itemId == R.id.nav_appointments) return new AppointmentFragment();
-    //    if (itemId == R.id.nav_medications) return new MedicationFragment();
+    if (itemId == R.id.nav_medications) return new MedicationFragment();
     if (itemId == R.id.nav_profile) return new ProfileFragment();
     return new HomeFragment();
   }

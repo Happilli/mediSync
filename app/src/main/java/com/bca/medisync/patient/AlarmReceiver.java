@@ -32,7 +32,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             );
             manager.createNotificationChannel(channel);
         }
-        Intent openIntent = new Intent(context, MedicationActivity.class);
+        Intent openIntent = new Intent(context, MedicationFragment.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context, 0, openIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE

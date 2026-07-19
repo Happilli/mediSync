@@ -174,7 +174,7 @@ public class HomeFragment extends Fragment {
                 case 1:
                   break;
                 case 2:
-                  startActivity(new Intent(requireContext(), MedicationActivity.class));
+                  goToTab(R.id.nav_medications);
                   break;
                 case 3:
                   goToTab(R.id.nav_profile);
