@@ -16,22 +16,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
-import com.bca.medisync.data.model.DataProvider;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
-import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
-import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
+import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -128,7 +122,8 @@ public class AppointmentActivity extends AppCompatActivity {
                   Call<List<AppointmentResponse>> call,
                   Response<List<AppointmentResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                  enrichAndBind(response.body());
+                  AppointmentEnricher.enrichAll(
+                      response.body(), AppointmentActivity.this::bindLists);
                 } else {
                   Toast.makeText(
                           AppointmentActivity.this,
@@ -147,88 +142,6 @@ public class AppointmentActivity extends AppCompatActivity {
                     .show();
               }
             });
-  }
-
-  private void enrichAndBind(List<AppointmentResponse> responses) {
-    if (responses.isEmpty()) {
-      bindLists(new ArrayList<>());
-      return;
-    }
-
-    List<Appointment> result = new ArrayList<>();
-    AtomicInteger remaining = new AtomicInteger(responses.size());
-    DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
-
-    for (AppointmentResponse r : responses) {
-      doctorApi
-          .getDoctorDetail(r.getDoctor_id())
-          .enqueue(
-              new Callback<DoctorResponse>() {
-                @Override
-                public void onResponse(
-                    Call<DoctorResponse> call, Response<DoctorResponse> doctorResp) {
-                  Appointment appointment =
-                      mapToAppointment(r, doctorResp.isSuccessful() ? doctorResp.body() : null);
-                  synchronized (result) {
-                    result.add(appointment);
-                  }
-                  if (remaining.decrementAndGet() == 0) {
-                    bindLists(result);
-                  }
-                }
-
-                @Override
-                public void onFailure(Call<DoctorResponse> call, Throwable t) {
-                  Appointment appointment = mapToAppointment(r, null);
-                  synchronized (result) {
-                    result.add(appointment);
-                  }
-                  if (remaining.decrementAndGet() == 0) {
-                    bindLists(result);
-                  }
-                }
-              });
-    }
-  }
-
-  private Appointment mapToAppointment(AppointmentResponse r, DoctorResponse d) {
-    String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctor_id();
-    String speciality = d != null ? d.getSpeciality() : "";
-    String department = d != null ? d.getDepartment() : "";
-
-    Date date = r.getAppointment_at() != null ? parseIso(r.getAppointment_at()) : null;
-    String dateStr =
-        date != null ? new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date) : "";
-    String timeStr =
-        date != null ? new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(date) : "";
-    String status = capitalize(r.getStatus());
-
-    return new Appointment(
-        String.valueOf(r.getId()),
-        "",
-        doctorName,
-        department,
-        speciality,
-        dateStr,
-        timeStr,
-        status,
-        r.getNotes());
-  }
-
-  private Date parseIso(String iso) {
-    try {
-      SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssj", Locale.getDefault());
-      return fmt.parse(iso);
-    } catch (Exception e) {
-      return null;
-    }
-  }
-
-  private String capitalize(String s) {
-    if (s == null || s.isEmpty()) {
-      return s;
-    }
-    return s.substring(0, 1).toUpperCase(Locale.ROOT) + s.substring(1);
   }
 
   private void bindLists(List<Appointment> all) {

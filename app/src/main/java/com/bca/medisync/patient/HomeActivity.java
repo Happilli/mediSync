@@ -2,7 +2,9 @@ package com.bca.medisync.patient;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,125 +16,190 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.DashboardAdapter;
-import com.bca.medisync.data.model.Appointment;
-import com.bca.medisync.data.model.DataProvider;
-import com.bca.medisync.data.model.Patient;
+import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.api.AppointmentApi;
+import com.bca.medisync.data.remote.api.PatientApi;
+import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
+import com.bca.medisync.data.remote.dto.patient.PatientResponse;
+import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.Arrays;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class HomeActivity extends AppCompatActivity {
-    private RecyclerView rvDashboard;
-    private BottomNavigationView  bottomNav;
+  private RecyclerView rvDashboard;
+  private BottomNavigationView bottomNav;
+  private TextView txtPatientName;
+  private MaterialCardView cardAppointment;
+  private TextView txtAppointmentDoctor,
+      txtAppointmentSpeciality,
+      txtAppointmentDate,
+      txtAppointmentTime;
 
-    private TextView txtPatientName;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_home);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
-            return insets;
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    EdgeToEdge.enable(this);
+    setContentView(R.layout.activity_home);
+    ViewCompat.setOnApplyWindowInsetsListener(
+        findViewById(R.id.main),
+        (v, insets) -> {
+          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+          v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
+          return insets;
         });
 
-        txtPatientName = findViewById(R.id.txtPatientName);
-        rvDashboard=findViewById(R.id.rvDashboard);
-        bottomNav=findViewById(R.id.bottomNav);
+    initViews();
+    setupDashboard();
+    setupBottomNav();
+  }
 
-       //setting patient name
-        Patient patient = DataProvider.getCurrentPatient();
-        txtPatientName.setText(patient.getName());
+  @Override
+  protected void onResume() {
+    super.onResume();
+    loadPatientName();
+    loadUpcomingAppointment();
+  }
 
-        setupDashboard();
-        setupBottomNav();
-        setUpAppointmentCard();
-    }
+  private void initViews() {
+    txtPatientName = findViewById(R.id.txtPatientName);
+    rvDashboard = findViewById(R.id.rvDashboard);
+    bottomNav = findViewById(R.id.bottomNav);
+    cardAppointment = findViewById(R.id.cardAppointment);
+    txtAppointmentDoctor = findViewById(R.id.txtAppointmentDoctor);
+    txtAppointmentSpeciality = findViewById(R.id.txtAppointmentSpeciality);
+    txtAppointmentDate = findViewById(R.id.txtAppointmentDate);
+    txtAppointmentTime = findViewById(R.id.txtAppointmentTime);
 
+    cardAppointment.setVisibility(View.GONE);
+    cardAppointment.setOnClickListener(
+        v -> startActivity(new Intent(HomeActivity.this, AppointmentActivity.class)));
+  }
 
-    private void setupDashboard(){
-        List<String> titles = Arrays.asList(
-                "Appointments",
-                "Prescriptions",
-                "Medications",
-                "My Profile",
-                "Health Records",
-                "Hospitals"
-        );
-        List<Integer> icons = Arrays.asList(
-                R.drawable.ic_nav_calendar,
-                R.drawable.edit,
-                R.drawable.ic_nav_medicine,
-                R.drawable.ic_nav_profile,
-                R.drawable.record,
-                R.drawable.hospital
-        );
+  private void loadPatientName() {
+    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    api.getMyProfile()
+        .enqueue(
+            new Callback<PatientResponse>() {
+              @Override
+              public void onResponse(
+                  Call<PatientResponse> call, Response<PatientResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                  txtPatientName.setText(response.body().getName());
+                }
+              }
 
-        DashboardAdapter adapter = new DashboardAdapter(this, titles, icons, positons -> {
-            switch (positons){
-                case 0:
-                    startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
-                    break;
-                case 1:
-                    break;
-                case 2:
-                    startActivity(new Intent(HomeActivity.this, MedicationActivity.class));
-                    break;
-                case 3:
-                    startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    startActivity(new Intent(HomeActivity.this, HospitalActivity.class));
-                    break;
-            }
-        });
-        rvDashboard.setLayoutManager(new GridLayoutManager(this, 3));
-        rvDashboard.setAdapter(adapter);
-    }
-
-
-    private void setupBottomNav(){
-        bottomNav.setOnItemSelectedListener(item->{
-            int id = item.getItemId();
-            if (id== R.id.nav_home){
-                return true;
-            } else if (id == R.id.nav_appointments) {
-                startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
-                return true;
-            } else if (id == R.id.nav_medications) {
-                startActivity(new Intent(HomeActivity.this, MedicationActivity.class));
-                return true;
-            } else if (id == R.id.nav_profile) {
-                startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
-                return true;
-            }
-            return false;
-        });
-    }
-
-    private void setUpAppointmentCard(){
-        List<Appointment> appointments  = DataProvider.getAppointments();
-        if (!appointments.isEmpty()){
-            Appointment next = appointments.get(0);
-            TextView txtDoctor = findViewById(R.id.txtAppointmentDoctor);
-            TextView txtSpeciality = findViewById(R.id.txtAppointmentSpeciality);
-            TextView txtDate  = findViewById(R.id.txtAppointmentDate);
-            TextView txtTime = findViewById(R.id.txtAppointmentTime);
-
-            txtDoctor.setText(next.getDoctorName());
-            txtSpeciality.setText(next.getSpeciality());
-            txtDate.setText(next.getDate());
-            txtTime.setText(next.getTime());
-            findViewById(R.id.cardAppointment).setOnClickListener(v->{
-                startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
+              @Override
+              public void onFailure(Call<PatientResponse> call, Throwable t) {
+                Toast.makeText(
+                        HomeActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT)
+                    .show();
+              }
             });
-        }
-    }
+  }
+
+  private void loadUpcomingAppointment() {
+    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    api.getMyAppointments(null, null)
+        .enqueue(
+            new Callback<List<AppointmentResponse>>() {
+              @Override
+              public void onResponse(
+                  Call<List<AppointmentResponse>> call,
+                  Response<List<AppointmentResponse>> response) {
+                if (!response.isSuccessful() || response.body() == null) return;
+
+                AppointmentResponse next = AppointmentEnricher.findNextUpcoming(response.body());
+                if (next == null) {
+                  cardAppointment.setVisibility(View.GONE);
+                  return;
+                }
+                AppointmentEnricher.enrichOne(
+                    next,
+                    appointment -> {
+                      txtAppointmentDoctor.setText(appointment.getDoctorName());
+                      txtAppointmentSpeciality.setText(appointment.getSpeciality());
+                      txtAppointmentDate.setText(appointment.getDate());
+                      txtAppointmentTime.setText(appointment.getTime());
+                      cardAppointment.setVisibility(View.VISIBLE);
+                    });
+              }
+
+              @Override
+              public void onFailure(Call<List<AppointmentResponse>> call, Throwable t) {}
+            });
+  }
+
+  private void setupDashboard() {
+    List<String> titles =
+        Arrays.asList(
+            "Appointments",
+            "Prescriptions",
+            "Medications",
+            "My Profile",
+            "Health Records",
+            "Hospitals");
+    List<Integer> icons =
+        Arrays.asList(
+            R.drawable.ic_nav_calendar,
+            R.drawable.edit,
+            R.drawable.ic_nav_medicine,
+            R.drawable.ic_nav_profile,
+            R.drawable.record,
+            R.drawable.hospital);
+
+    DashboardAdapter adapter =
+        new DashboardAdapter(
+            this,
+            titles,
+            icons,
+            position -> {
+              switch (position) {
+                case 0:
+                  startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
+                  break;
+                case 1:
+                  break;
+                case 2:
+                  startActivity(new Intent(HomeActivity.this, MedicationActivity.class));
+                  break;
+                case 3:
+                  startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
+                  break;
+                case 4:
+                  break;
+                case 5:
+                  startActivity(new Intent(HomeActivity.this, HospitalActivity.class));
+                  break;
+              }
+            });
+    rvDashboard.setLayoutManager(new GridLayoutManager(this, 3));
+    rvDashboard.setAdapter(adapter);
+  }
+
+  private void setupBottomNav() {
+    bottomNav.setOnItemSelectedListener(
+        item -> {
+          int id = item.getItemId();
+          if (id == R.id.nav_home) {
+            return true;
+          } else if (id == R.id.nav_appointments) {
+            startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
+            return true;
+          } else if (id == R.id.nav_medications) {
+            startActivity(new Intent(HomeActivity.this, MedicationActivity.class));
+            return true;
+          } else if (id == R.id.nav_profile) {
+            startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
+            return true;
+          }
+          return false;
+        });
+  }
 }
