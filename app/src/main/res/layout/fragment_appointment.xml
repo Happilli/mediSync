@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -31,49 +30,35 @@
             android:minHeight="48dp"
             android:paddingBottom="4dp"
             app:tabGravity="fill"
-            app:tabMode="fixed"
-            app:tabSelectedTextColor="?attr/colorPrimary"
             app:tabIndicatorColor="?attr/colorPrimary"
             app:tabIndicatorFullWidth="false"
-            app:tabRippleColor="?attr/colorPrimaryContainer">
-
-            <!--
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Upcoming" />
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="History" />
-                -->
-
-        </com.google.android.material.tabs.TabLayout>
+            app:tabMode="fixed"
+            app:tabRippleColor="?attr/colorPrimaryContainer"
+            app:tabSelectedTextColor="?attr/colorPrimary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="80dp"
         android:clipToPadding="false"
+        android:paddingBottom="80dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvUpcoming"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp"
             android:clipToPadding="false"
+            android:padding="16dp"
             android:visibility="visible" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvHistory"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp"
             android:clipToPadding="false"
+            android:padding="16dp"
             android:visibility="gone" />
 
     </FrameLayout>
@@ -86,8 +71,8 @@
         android:layout_margin="16dp"
         android:text="Book Appointment"
         android:textAllCaps="false"
-        app:icon="@android:drawable/ic_input_add"
         app:backgroundTint="?attr/colorPrimaryContainer"
+        app:icon="@android:drawable/ic_input_add"
         app:iconTint="?attr/colorOnPrimaryContainer" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

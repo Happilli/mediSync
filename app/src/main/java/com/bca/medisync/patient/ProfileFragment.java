@@ -2,16 +2,17 @@ package com.bca.medisync.patient;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
@@ -29,59 +30,60 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileFragment extends Fragment {
 
   private TextView txtName, txtAddress, txtEmergencyContact;
   private View statAge, statBloodGroup, statGender;
   private View rowEmail, rowPhone, rowDob, rowAddress;
   private MaterialCardView cardVerifiedBadge;
-  TextView txtVerifiedBadge;
+  private TextView txtVerifiedBadge;
   private MaterialSwitch switchNotifications;
   private SessionManager sessionManager;
 
+  public ProfileFragment() {}
+
+  @Nullable
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_profile);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
-        (v, insets) -> {
-          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-          v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-          return insets;
-        });
-    sessionManager = new SessionManager(this);
-    initViews();
+  public View onCreateView(
+      @NonNull LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.fragment_profile, container, false);
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    sessionManager = new SessionManager(requireContext());
+    initViews(view);
     setupSettingsRows();
-    loadPatientData();
     setupListeners();
   }
 
   @Override
-  protected void onResume() {
+  public void onResume() {
     super.onResume();
     loadPatientData();
   }
 
-  private void initViews() {
-    txtName = findViewById(R.id.txtName);
-    txtAddress = findViewById(R.id.txtAddress);
-    txtEmergencyContact = findViewById(R.id.txtEmergencyContact);
+  private void initViews(View view) {
+    txtName = view.findViewById(R.id.txtName);
+    txtAddress = view.findViewById(R.id.txtAddress);
+    txtEmergencyContact = view.findViewById(R.id.txtEmergencyContact);
 
-    statAge = findViewById(R.id.statAge);
-    statBloodGroup = findViewById(R.id.statBloodGroup);
-    statGender = findViewById(R.id.statGender);
+    statAge = view.findViewById(R.id.statAge);
+    statBloodGroup = view.findViewById(R.id.statBloodGroup);
+    statGender = view.findViewById(R.id.statGender);
 
-    rowEmail = findViewById(R.id.rowEmail);
-    rowPhone = findViewById(R.id.rowPhone);
-    rowDob = findViewById(R.id.rowDob);
-    rowAddress = findViewById(R.id.rowAddress);
+    rowEmail = view.findViewById(R.id.rowEmail);
+    rowPhone = view.findViewById(R.id.rowPhone);
+    rowDob = view.findViewById(R.id.rowDob);
+    rowAddress = view.findViewById(R.id.rowAddress);
 
-    cardVerifiedBadge = findViewById(R.id.cardVerifiedBadge);
-    txtVerifiedBadge = findViewById(R.id.txtVerifiedBadge);
+    cardVerifiedBadge = view.findViewById(R.id.cardVerifiedBadge);
+    txtVerifiedBadge = view.findViewById(R.id.txtVerifiedBadge);
 
-    switchNotifications = findViewById(R.id.switchNotifications);
+    switchNotifications = view.findViewById(R.id.switchNotifications);
   }
 
   private void bindStat(View statView, String value, String label) {
@@ -102,7 +104,8 @@ public class ProfileActivity extends AppCompatActivity {
   }
 
   private void setRowLabel(int rowId, String label) {
-    ((TextView) findViewById(rowId).findViewById(R.id.txtSettingsLabel)).setText(label);
+    ((TextView) requireView().findViewById(rowId).findViewById(R.id.txtSettingsLabel))
+        .setText(label);
   }
 
   private void loadPatientData() {
@@ -114,25 +117,27 @@ public class ProfileActivity extends AppCompatActivity {
               @Override
               public void onResponse(
                   Call<PatientResponse> call, Response<PatientResponse> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                   bindPatient(response.body());
                 } else if (response.code() == 403) {
                   Toast.makeText(
-                          ProfileActivity.this,
+                          requireContext(),
                           "Your account is pending verification",
                           Toast.LENGTH_LONG)
                       .show();
                 } else {
                   Toast.makeText(
-                          ProfileActivity.this, "Failed to load  your profile", Toast.LENGTH_SHORT)
+                          requireContext(), "Failed to load  your profile", Toast.LENGTH_SHORT)
                       .show();
                 }
               }
 
               @Override
               public void onFailure(Call<PatientResponse> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(
-                        ProfileActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
                     .show();
               }
             });
@@ -157,7 +162,7 @@ public class ProfileActivity extends AppCompatActivity {
   }
 
   private void bindProfilePic(String profilePicUrl) {
-    ShapeableImageView imgProfile = findViewById(R.id.imgProfile);
+    ShapeableImageView imgProfile = requireView().findViewById(R.id.imgProfile);
     if (profilePicUrl == null || profilePicUrl.isEmpty()) {
       imgProfile.setImageResource(R.drawable.ic_nav_profile);
       return;
@@ -174,15 +179,16 @@ public class ProfileActivity extends AppCompatActivity {
   private void bindVerificationBadge(boolean isVerified) {
     if (isVerified) {
       txtVerifiedBadge.setText("Verified");
-      txtVerifiedBadge.setTextColor(getColor(R.color.on_tertiary_container));
-      cardVerifiedBadge.setCardBackgroundColor(getColor(R.color.tertiary_container));
+      txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_tertiary_container));
+      cardVerifiedBadge.setCardBackgroundColor(
+          requireContext().getColor(R.color.tertiary_container));
       cardVerifiedBadge.setOnClickListener(null);
     } else {
       txtVerifiedBadge.setText("Not Verified - Tap to verify");
-      txtVerifiedBadge.setTextColor(getColor(R.color.on_error_container));
-      cardVerifiedBadge.setCardBackgroundColor(getColor(R.color.error_container));
+      txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_error_container));
+      cardVerifiedBadge.setCardBackgroundColor(requireContext().getColor(R.color.error_container));
       cardVerifiedBadge.setOnClickListener(
-          v -> startActivity(new Intent(this, VerificationActivity.class)));
+          v -> startActivity(new Intent(requireContext(), VerificationActivity.class)));
     }
   }
 
@@ -198,17 +204,19 @@ public class ProfileActivity extends AppCompatActivity {
   }
 
   private void setupListeners() {
-    findViewById(R.id.btnEditProfile).setOnClickListener(v -> {});
-    findViewById(R.id.rowPrivacyPolicy).setOnClickListener(v -> {});
-    findViewById(R.id.rowTerms).setOnClickListener(v -> {});
-    findViewById(R.id.rowHelp).setOnClickListener(v -> {});
-    findViewById(R.id.btnLogout)
+    requireView().findViewById(R.id.btnEditProfile).setOnClickListener(v -> {});
+    requireView().findViewById(R.id.rowPrivacyPolicy).setOnClickListener(v -> {});
+    requireView().findViewById(R.id.rowTerms).setOnClickListener(v -> {});
+    requireView().findViewById(R.id.rowHelp).setOnClickListener(v -> {});
+    requireView()
+        .findViewById(R.id.btnLogout)
         .setOnClickListener(
             v -> {
               sessionManager.clearSession();
-              Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
+              Intent intent = new Intent(requireContext(), MainActivity.class);
               intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
               startActivity(intent);
+              requireActivity().finish();
             });
   }
 }

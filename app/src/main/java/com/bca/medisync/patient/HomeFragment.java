@@ -2,15 +2,15 @@ package com.bca.medisync.patient;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,9 +32,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeFragment extends Fragment {
+
   private RecyclerView rvDashboard;
-  private BottomNavigationView bottomNav;
   private TextView txtPatientName;
   private MaterialCardView cardAppointment;
   private TextView txtAppointmentDoctor,
@@ -42,44 +42,47 @@ public class HomeActivity extends AppCompatActivity {
       txtAppointmentDate,
       txtAppointmentTime;
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_home);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
-        (v, insets) -> {
-          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-          v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
-          return insets;
-        });
+  public HomeFragment() {}
 
-    initViews();
-    setupDashboard();
-    setupBottomNav();
+  @Nullable
+  @Override
+  public View onCreateView(
+      @NonNull LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.fragment_home, container, false);
   }
 
   @Override
-  protected void onResume() {
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    initViews(view);
+    setupDashboard();
+  }
+
+  @Override
+  public void onResume() {
     super.onResume();
     loadPatientName();
     loadUpcomingAppointment();
   }
 
-  private void initViews() {
-    txtPatientName = findViewById(R.id.txtPatientName);
-    rvDashboard = findViewById(R.id.rvDashboard);
-    bottomNav = findViewById(R.id.bottomNav);
-    cardAppointment = findViewById(R.id.cardAppointment);
-    txtAppointmentDoctor = findViewById(R.id.txtAppointmentDoctor);
-    txtAppointmentSpeciality = findViewById(R.id.txtAppointmentSpeciality);
-    txtAppointmentDate = findViewById(R.id.txtAppointmentDate);
-    txtAppointmentTime = findViewById(R.id.txtAppointmentTime);
+  private void initViews(View view) {
+    txtPatientName = view.findViewById(R.id.txtPatientName);
+    rvDashboard = view.findViewById(R.id.rvDashboard);
+    cardAppointment = view.findViewById(R.id.cardAppointment);
+    txtAppointmentDoctor = view.findViewById(R.id.txtAppointmentDoctor);
+    txtAppointmentSpeciality = view.findViewById(R.id.txtAppointmentSpeciality);
+    txtAppointmentDate = view.findViewById(R.id.txtAppointmentDate);
+    txtAppointmentTime = view.findViewById(R.id.txtAppointmentTime);
 
     cardAppointment.setVisibility(View.GONE);
-    cardAppointment.setOnClickListener(
-        v -> startActivity(new Intent(HomeActivity.this, AppointmentActivity.class)));
+    cardAppointment.setOnClickListener(v -> goToTab(R.id.nav_appointments));
+  }
+
+  private void goToTab(int navItemId) {
+    BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottomNav);
+    bottomNav.setSelectedItemId(navItemId);
   }
 
   private void loadPatientName() {
@@ -90,6 +93,7 @@ public class HomeActivity extends AppCompatActivity {
               @Override
               public void onResponse(
                   Call<PatientResponse> call, Response<PatientResponse> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                   txtPatientName.setText(response.body().getName());
                 }
@@ -97,8 +101,9 @@ public class HomeActivity extends AppCompatActivity {
 
               @Override
               public void onFailure(Call<PatientResponse> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(
-                        HomeActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT)
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT)
                     .show();
               }
             });
@@ -113,6 +118,7 @@ public class HomeActivity extends AppCompatActivity {
               public void onResponse(
                   Call<List<AppointmentResponse>> call,
                   Response<List<AppointmentResponse>> response) {
+                if (!isAdded()) return;
                 if (!response.isSuccessful() || response.body() == null) return;
 
                 AppointmentResponse next = AppointmentEnricher.findNextUpcoming(response.body());
@@ -123,6 +129,7 @@ public class HomeActivity extends AppCompatActivity {
                 AppointmentEnricher.enrichOne(
                     next,
                     appointment -> {
+                      if (!isAdded()) return;
                       txtAppointmentDoctor.setText(appointment.getDoctorName());
                       txtAppointmentSpeciality.setText(appointment.getSpeciality());
                       txtAppointmentDate.setText(appointment.getDate());
@@ -156,50 +163,30 @@ public class HomeActivity extends AppCompatActivity {
 
     DashboardAdapter adapter =
         new DashboardAdapter(
-            this,
+            requireContext(),
             titles,
             icons,
             position -> {
               switch (position) {
                 case 0:
-                  startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
+                  goToTab(R.id.nav_appointments);
                   break;
                 case 1:
                   break;
                 case 2:
-                  startActivity(new Intent(HomeActivity.this, MedicationActivity.class));
+                  startActivity(new Intent(requireContext(), MedicationActivity.class));
                   break;
                 case 3:
-                  startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
+                  goToTab(R.id.nav_profile);
                   break;
                 case 4:
                   break;
                 case 5:
-                  startActivity(new Intent(HomeActivity.this, HospitalActivity.class));
+                  startActivity(new Intent(requireContext(), HospitalActivity.class));
                   break;
               }
             });
-    rvDashboard.setLayoutManager(new GridLayoutManager(this, 3));
+    rvDashboard.setLayoutManager(new GridLayoutManager(requireContext(), 3));
     rvDashboard.setAdapter(adapter);
-  }
-
-  private void setupBottomNav() {
-    bottomNav.setOnItemSelectedListener(
-        item -> {
-          int id = item.getItemId();
-          if (id == R.id.nav_home) {
-            return true;
-          } else if (id == R.id.nav_appointments) {
-            startActivity(new Intent(HomeActivity.this, AppointmentActivity.class));
-            return true;
-          } else if (id == R.id.nav_medications) {
-            startActivity(new Intent(HomeActivity.this, MedicationActivity.class));
-            return true;
-          } else if (id == R.id.nav_profile) {
-            startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
-            return true;
-          }
-          return false;
-        });
   }
 }

@@ -1,55 +1,57 @@
 package com.bca.medisync.patient;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.patient.HospitalActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.bca.medisync.R;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AppointmentActivity extends AppCompatActivity {
+public class AppointmentFragment extends Fragment {
   private RecyclerView rvUpcoming, rvHistory;
   private TabLayout tabLayout;
   private MaterialToolbar toolbar;
-  private ExtendedFloatingActionButton faBookAppointment;
+  private ExtendedFloatingActionButton fabBookAppointment;
+
+  public AppointmentFragment() {}
+
+  @Nullable
+  @Override
+  public View onCreateView(
+      @NonNull LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.fragment_appointment, container, false);
+  }
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_appointment);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
-        (v, insets) -> {
-          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-          v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-          return insets;
-        });
-    initViews();
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    initViews(view);
     setupToolbar();
     setupTabs();
     setUpRecylerViews();
@@ -58,21 +60,21 @@ public class AppointmentActivity extends AppCompatActivity {
   }
 
   @Override
-  protected void onResume() {
+  public void onResume() {
     super.onResume();
     loadAppointments();
   }
 
-  private void initViews() {
-    rvUpcoming = findViewById(R.id.rvUpcoming);
-    rvHistory = findViewById(R.id.rvHistory);
-    tabLayout = findViewById(R.id.tabLayout);
-    toolbar = findViewById(R.id.toolbar);
-    faBookAppointment = findViewById(R.id.fabBookAppointment);
+  private void initViews(View view) {
+    rvUpcoming = view.findViewById(R.id.rvUpcoming);
+    rvHistory = view.findViewById(R.id.rvHistory);
+    tabLayout = view.findViewById(R.id.tabLayout);
+    toolbar = view.findViewById(R.id.toolbar);
+    fabBookAppointment = view.findViewById(R.id.fabBookAppointment);
   }
 
   private void setupToolbar() {
-    toolbar.setNavigationOnClickListener(v -> finish());
+    toolbar.setNavigationOnClickListener(null);
   }
 
   private void setupTabs() {
@@ -100,16 +102,13 @@ public class AppointmentActivity extends AppCompatActivity {
   }
 
   private void setUpRecylerViews() {
-    rvUpcoming.setLayoutManager(new LinearLayoutManager(this));
-    rvHistory.setLayoutManager(new LinearLayoutManager(this));
+    rvUpcoming.setLayoutManager(new LinearLayoutManager(requireContext()));
+    rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
   }
 
   private void setupFab() {
-    faBookAppointment.setOnClickListener(
-        v -> {
-          // booking appointment flow nav something
-          startActivity(new Intent(AppointmentActivity.this, HospitalActivity.class));
-        });
+    fabBookAppointment.setOnClickListener(
+        v -> startActivity(new android.content.Intent(requireContext(), HospitalActivity.class)));
   }
 
   private void loadAppointments() {
@@ -121,30 +120,29 @@ public class AppointmentActivity extends AppCompatActivity {
               public void onResponse(
                   Call<List<AppointmentResponse>> call,
                   Response<List<AppointmentResponse>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                   AppointmentEnricher.enrichAll(
-                      response.body(), AppointmentActivity.this::bindLists);
+                      response.body(), AppointmentFragment.this::bindLists);
                 } else {
                   Toast.makeText(
-                          AppointmentActivity.this,
-                          "failed to load appointments",
-                          Toast.LENGTH_SHORT)
+                          requireContext(), "failed to load appointments", Toast.LENGTH_SHORT)
                       .show();
                 }
               }
 
               @Override
               public void onFailure(Call<List<AppointmentResponse>> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(
-                        AppointmentActivity.this,
-                        "Network err: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
+                        requireContext(), "Network err: " + t.getMessage(), Toast.LENGTH_LONG)
                     .show();
               }
             });
   }
 
   private void bindLists(List<Appointment> all) {
+    if (!isAdded()) return;
     List<Appointment> upcoming = new ArrayList<>();
     List<Appointment> history = new ArrayList<>();
     for (Appointment a : all) {
@@ -155,7 +153,9 @@ public class AppointmentActivity extends AppCompatActivity {
         history.add(a);
       }
     }
-    rvUpcoming.setAdapter(new AppointmentAdapter(this, upcoming, false, appointment -> {}));
-    rvHistory.setAdapter(new AppointmentAdapter(this, history, false, appointment -> {}));
+    rvUpcoming.setAdapter(
+        new AppointmentAdapter(requireContext(), upcoming, false, appointment -> {}));
+    rvHistory.setAdapter(
+        new AppointmentAdapter(requireContext(), history, false, appointment -> {}));
   }
 }

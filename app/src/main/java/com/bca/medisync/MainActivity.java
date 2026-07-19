@@ -17,7 +17,7 @@ import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.doctor.DoctorHomeActivity;
 import com.bca.medisync.data.remote.dto.login.LoginRequest;
 import com.bca.medisync.data.remote.dto.login.LoginResponse;
-import com.bca.medisync.patient.HomeActivity;
+import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.ChipGroup;
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
       if ("doctor".equalsIgnoreCase(sessionManager.getRole())) {
         intent = new Intent(MainActivity.this, DoctorHomeActivity.class);
       } else {
-        intent = new Intent(MainActivity.this, HomeActivity.class);
+        intent = new Intent(MainActivity.this, MainTabActivity.class);
       }
       startActivity(intent);
       finish();
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                   if ("doctor".equalsIgnoreCase(body.getRole())) {
                     intent = new Intent(MainActivity.this, DoctorHomeActivity.class);
                   } else {
-                    intent = new Intent(MainActivity.this, HomeActivity.class);
+                    intent = new Intent(MainActivity.this, MainTabActivity.class);
                   }
                   startActivity(intent);
                   finish();
