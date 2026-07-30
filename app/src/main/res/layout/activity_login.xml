@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mainStuff"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface"
     android:fillViewport="true">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:gravity="center_horizontal">
+        android:padding="24dp">
+
         <ImageView
             android:id="@+id/imgLogo"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="48dp"
-            android:src="@drawable/ic_medisync_logo"
             android:contentDescription="mediSync Logo"
+            android:src="@drawable/ic_medisync_logo"
             app:tint="?attr/colorPrimary" />
 
         <TextView
@@ -27,35 +28,39 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="mediSync"
+            android:textColor="?attr/colorPrimary"
             android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorPrimary" />
+            android:textStyle="bold" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Welcome Back !"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface" />
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_height="25dp"
+            android:layout_gravity="start"
+            android:layout_marginTop="40dp"
             android:text="Sign In to continue..."
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="14sp"/>
+            android:textSize="15sp"
+            android:textStyle="bold|italic" />
 
 
-       <!-- email -->
+        <!-- email -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutEmail"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="4dp"
             android:hint="Email">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
@@ -72,50 +77,62 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="Password"
-            app:passwordToggleEnabled="true"
             app:endIconMode="password_toggle"
-            >
+            app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:maxLines="1"/>
+                android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:id="@+id/txtForgotPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="12dp"
+            android:text="Forgot Password?"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
         <!-- role selection -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="start"
             android:layout_marginTop="24dp"
             android:gravity="start"
             android:text="Login As"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface"/>
+            android:textStyle="bold" />
+
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipGroupRole"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_gravity="start"
-            app:singleSelection="true"
-            app:selectionRequired="true">
+            android:layout_marginTop="8dp"
+            app:selectionRequired="true"
+            app:singleSelection="true">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipPatient"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Patient"
-                android:checked="true" />
+                android:checked="true"
+                android:text="Patient" />
+
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipDoctor"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Doctor"/>
+                android:text="Doctor" />
         </com.google.android.material.chip.ChipGroup>
 
         <!-- Login Button -->
@@ -123,10 +140,10 @@
             android:id="@+id/btnLogin"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="12dp"
             android:text="Login"
             android:textSize="16sp"
-            app:cornerRadius="12dp"/>
+            app:cornerRadius="12dp" />
 
         <!-- register Button -->
         <TextView
@@ -138,6 +155,6 @@
             android:text=""
             android:textAlignment="center"
             android:textColor="?attr/colorPrimary"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>

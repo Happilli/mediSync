@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
         v -> {
           attemptLogin();
         });
+    findViewById(R.id.txtForgotPassword)
+        .setOnClickListener(
+            v -> startActivity(new Intent(MainActivity.this, ForgotPasswordActivity.class)));
   }
 
   private void updateRegisterLabel() {
