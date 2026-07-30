@@ -34,18 +34,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".patient.ProfileActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".patient.AppointmentActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".patient.MedicationActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".patient.HospitalActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -61,7 +49,6 @@
             android:name=".patient.BookAppointmentActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".doctor.DoctorHomeActivity"
             android:exported="false"
@@ -104,6 +91,10 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".patient.MainTabActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".patient.NotificationsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

@@ -1,5 +1,6 @@
 package com.bca.medisync.patient;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,6 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
-import com.bca.medisync.patient.HospitalActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -154,8 +154,81 @@ public class AppointmentFragment extends Fragment {
       }
     }
     rvUpcoming.setAdapter(
-        new AppointmentAdapter(requireContext(), upcoming, false, appointment -> {}));
+        new AppointmentAdapter(requireContext(), upcoming, false, this::onAppointmentClicked));
     rvHistory.setAdapter(
-        new AppointmentAdapter(requireContext(), history, false, appointment -> {}));
+        new AppointmentAdapter(requireContext(), history, false, this::onAppointmentClicked));
+  }
+
+  private void onAppointmentClicked(Appointment appointment) {
+    boolean cancellable = appointment.getStatus().equalsIgnoreCase("Pending");
+
+    if (!cancellable) {
+      Toast.makeText(
+              requireContext(), "Only pending appointments can be cancelled.", Toast.LENGTH_SHORT)
+          .show();
+      return;
+    }
+
+    new AlertDialog.Builder(requireContext())
+        .setTitle("Cancel Appointment")
+        .setMessage(
+            "Cancel your appointment with "
+                + appointment.getDoctorName()
+                + " on "
+                + appointment.getDate()
+                + " at "
+                + appointment.getTime()
+                + "?")
+        .setPositiveButton("Yes, Cancel", (dialog, which) -> cancelAppointment(appointment))
+        .setNegativeButton("Keep it", null)
+        .show();
+  }
+
+  private void cancelAppointment(Appointment appointment) {
+    int appointmentId;
+    try {
+      appointmentId = Integer.parseInt(appointment.getId());
+    } catch (NumberFormatException e) {
+      Toast.makeText(requireContext(), "Invalid appointment reference", Toast.LENGTH_SHORT).show();
+      return;
+    }
+
+    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    api.cancelAppointment(appointmentId)
+        .enqueue(
+            new Callback<AppointmentResponse>() {
+              @Override
+              public void onResponse(
+                  Call<AppointmentResponse> call, Response<AppointmentResponse> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful()) {
+                  Toast.makeText(requireContext(), "Appointment cancelled.", Toast.LENGTH_SHORT)
+                      .show();
+                  loadAppointments();
+                } else if (response.code() == 400) {
+                  Toast.makeText(
+                          requireContext(),
+                          "This appointment can no longer be cancelled.",
+                          Toast.LENGTH_LONG)
+                      .show();
+                  loadAppointments();
+                } else if (response.code() == 403) {
+                  Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
+                      .show();
+                } else {
+                  Toast.makeText(
+                          requireContext(), "Failed to cancel appointment.", Toast.LENGTH_SHORT)
+                      .show();
+                }
+              }
+
+              @Override
+              public void onFailure(Call<AppointmentResponse> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
   }
 }

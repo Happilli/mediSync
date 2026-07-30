@@ -18,10 +18,12 @@ import com.bca.medisync.R;
 import com.bca.medisync.adapter.DashboardAdapter;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
+import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.patient.NotificationsActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 
@@ -78,6 +80,10 @@ public class HomeFragment extends Fragment {
 
     cardAppointment.setVisibility(View.GONE);
     cardAppointment.setOnClickListener(v -> goToTab(R.id.nav_appointments));
+
+    view.findViewById(R.id.btnNotification)
+        .setOnClickListener(
+            v -> startActivity(new Intent(requireContext(), NotificationsActivity.class)));
   }
 
   private void goToTab(int navItemId) {
