@@ -2,6 +2,7 @@ package com.bca.medisync.data.remote.api;
 
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
+import com.bca.medisync.data.remote.dto.appointment.AppointmentStatusUpdateRequest;
 
 import java.util.List;
 
@@ -23,4 +24,12 @@ public interface AppointmentApi {
 
   @PATCH("api/v1/appointments/{appointment_id}/cancel")
   Call<AppointmentResponse> cancelAppointment(@Path("appointment_id") int appointmentId);
+
+  @GET("api/v1/appointments/me/doctor")
+  Call<List<AppointmentResponse>> getDoctorAppointments();
+
+  @PATCH("api/v1/appointments/{appointment_id}/status")
+  Call<AppointmentResponse> updateAppointmentStatus(
+      @Path("appointment_id") String appointmentId,
+      @Body AppointmentStatusUpdateRequest request);
 }

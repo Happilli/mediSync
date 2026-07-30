@@ -1,59 +1,85 @@
 package com.bca.medisync.data.remote.dto.doctor;
 
+import com.google.gson.annotations.SerializedName;
+
 public class DoctorResponse {
-  private int id;
-  private int hospital_id;
-  private String name;
-  private String phone;
-  private String department;
-  private String speciality;
-  private String bio;
-  private String address;
-  private Integer years_experience;
-  private boolean is_verified;
-  private String profile_pic_url;
 
-  public int getId() {
-    return id;
-  }
+    private int id;
 
-  public int getHospital_id() {
-    return hospital_id;
-  }
+    @SerializedName("hospital_id")
+    private int hospitalId;
 
-  public String getName() {
-    return name;
-  }
+    private String name;
+    private String phone;
+    private String department;
+    private String speciality;
+    private String bio;
+    private String address;
 
-  public String getPhone() {
-    return phone;
-  }
+    @SerializedName("years_experience")
+    private int yearsExperience;
 
-  public String getDepartment() {
-    return department;
-  }
+    @SerializedName("is_verified")
+    private boolean isVerified;
 
-  public String getSpeciality() {
-    return speciality;
-  }
+    @SerializedName("profile_pic_url")
+    private String profilePicUrl;
 
-  public String getBio() {
-    return bio;
-  }
+    @SerializedName("patients_this_month")
+    private int patientsThisMonth;
 
-  public String getAddress() {
-    return address;
-  }
+    @SerializedName("total_patients")
+    private int totalPatients;
 
-  public Integer getYears_experience() {
-    return years_experience;
-  }
+    public int getId() {
+        return id;
+    }
 
-  public boolean isIs_verified() {
-    return is_verified;
-  }
+    public int getHospitalId() {
+        return hospitalId;
+    }
 
-  public String getProfile_pic_url() {
-    return profile_pic_url;
-  }
+    public String getName() {
+        return name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public String getSpeciality() {
+        return speciality;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public int getYearsExperience() {
+        return yearsExperience;
+    }
+
+    public boolean isVerified() {
+        return isVerified;
+    }
+
+    public String getProfilePicUrl() {
+        return profilePicUrl;
+    }
+
+    public int getPatientsThisMonth() {
+        return patientsThisMonth;
+    }
+
+    public int getTotalPatients() {
+        return totalPatients;
+    }
 }

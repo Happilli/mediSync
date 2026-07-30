@@ -9,7 +9,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.jetbrains.annotations.NotNull;
 import com.bca.medisync.R;
 
 import java.util.List;
@@ -39,7 +38,7 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(@NonNull DashboardAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.txtTitle.setText(titles.get(position));
         holder.imgIcon.setImageResource(icons.get(position));
         holder.itemView.setOnClickListener(v-> listener.onItemClick(position));

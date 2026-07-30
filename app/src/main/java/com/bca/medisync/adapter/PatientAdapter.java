@@ -9,8 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bca.medisync.data.model.Patient;
 import com.bca.medisync.R;
+import com.bca.medisync.data.model.Patient;
 
 import java.util.List;
 

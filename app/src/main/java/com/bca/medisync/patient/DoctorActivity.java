@@ -119,12 +119,12 @@ public class DoctorActivity extends AppCompatActivity {
 
   private Doctor mapToDoctor(DoctorResponse r) {
     String info =
-        r.getYears_experience() != null
-            ? r.getYears_experience() + "+ Years Exp"
+        r.getYearsExperience() > 0
+            ? r.getYearsExperience() + "+ Years Exp"
             : (r.getBio() != null ? r.getBio() : "");
     String imageUrl =
-        r.getProfile_pic_url() != null
-            ? ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + r.getProfile_pic_url()
+        r.getProfilePicUrl() != null
+            ? ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + r.getProfilePicUrl()
             : null;
     return new Doctor(
         String.valueOf(r.getId()),

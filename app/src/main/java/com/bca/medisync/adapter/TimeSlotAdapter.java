@@ -4,95 +4,112 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bca.medisync.data.model.TimeSlot;
-
 import com.bca.medisync.R;
-import com.google.android.material.color.MaterialColors;
+import com.bca.medisync.data.remote.dto.timeslot.TimeSlotResponse;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.ViewHolder> {
 
-    public interface OnTimeSelectedListener{
-        void ontimeSelected(TimeSlot slot);
+    public interface OnTimeSlotClickListener {
+        void onTimeSlotClick(TimeSlotResponse slot);
     }
-    private final Context context;
-    private final List<TimeSlot> slots;
-    private final OnTimeSelectedListener listener;
-    private int selectedPositon = -1;
 
-    public TimeSlotAdapter(Context context, List<TimeSlot> slots,  OnTimeSelectedListener listener){
+    private final Context context;
+    private final List<TimeSlotResponse> timeSlots;
+    private final OnTimeSlotClickListener listener;
+
+    public TimeSlotAdapter(Context context, List<TimeSlotResponse> timeSlots) {
+        this(context, timeSlots, null);
+    }
+
+    public TimeSlotAdapter(Context context, List<TimeSlotResponse> timeSlots, OnTimeSlotClickListener listener) {
         this.context = context;
-        this.slots = slots;
+        this.timeSlots = timeSlots;
         this.listener = listener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_time_slot, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_timeslot, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        TimeSlot slot = slots.get(position);
-        holder.tvTime.setText(slot.getDisplayTime());
+        TimeSlotResponse slot = timeSlots.get(position);
 
-        if(!slot.isAvailable()){
-            //unavailable
-            holder.tvTime.setAlpha(0.4f);
-            holder.ivSlotIcon.setImageResource(R.drawable.locked);
-            holder.ivSlotIcon.setColorFilter(MaterialColors.getColor(holder.tvTime, com.google.android.material.R.attr.colorOnSurfaceVariant));
-            holder.tvTime.setClickable(false);
-        } else if (position == selectedPositon) { // selected
-            holder.tvTime.setAlpha(1f);
-            holder.ivSlotIcon.setImageResource(R.drawable.lock_selected);
-            holder.tvTime.setTextColor(context.getColor(R.color.on_primary_container));
-            holder.ivSlotIcon.setColorFilter(MaterialColors.getColor(holder.tvTime, com.google.android.material.R.attr.colorOnPrimaryContainer));
-            holder.tvTime.setTextColor(MaterialColors.getColor(holder.tvTime, com.google.android.material.R.attr.colorOnPrimaryContainer));
-            holder.tvTime.setClickable(true);
-        }else {
-            //available for is not selected
-            holder.tvTime.setAlpha(1f);
-            holder.ivSlotIcon.setImageResource(R.drawable.openforlocked);
-            holder.ivSlotIcon.setColorFilter(MaterialColors.getColor(holder.tvTime, com.google.android.material.R.attr.colorOnSurface));
-            holder.tvTime.setTextColor(MaterialColors.getColor(holder.tvTime, com.google.android.material.R.attr.colorOnSurface));
-            holder.tvTime.setClickable(true);
+        String formattedTime = formatTime(slot.getAppointment_at());
+        holder.txtTime.setText(formattedTime);
+
+        if (slot.isIs_available()) {
+            holder.txtStatusBadge.setText("Available");
+            holder.txtStatusBadge.setTextColor(context.getColor(R.color.primary));
+            holder.txtStatusBadge.setBackgroundTintList(context.getColorStateList(R.color.primary_container));
+
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onTimeSlotClick(slot);
+                }
+            });
+        } else {
+            holder.txtStatusBadge.setText("Booked");
+            holder.txtStatusBadge.setTextColor(context.getColor(R.color.secondary));
+            holder.txtStatusBadge.setBackgroundTintList(context.getColorStateList(R.color.secondary_container));
+
+            holder.itemView.setOnClickListener(null);
         }
-        holder.slotContainer.setOnClickListener(v -> {
-            if(!slot.isAvailable()){
-                return;
-            }
-            int prev = selectedPositon;
-            selectedPositon = holder.getAbsoluteAdapterPosition();
-            notifyItemChanged(prev);
-            notifyItemChanged(selectedPositon);
-            listener.ontimeSelected(slot);
-        });
     }
 
     @Override
     public int getItemCount() {
-        return slots.size();
+        return timeSlots.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
-        TextView tvTime;
-        ImageView ivSlotIcon;
-        LinearLayout slotContainer;
-        public ViewHolder(@NonNull View itemView){
+    public void updateList(List<TimeSlotResponse> newList) {
+        this.timeSlots.clear();
+        this.timeSlots.addAll(newList);
+        notifyDataSetChanged();
+    }
+
+    private String formatTime(String timestamp) {
+        if (timestamp == null || timestamp.isEmpty()) return "";
+        try {
+            // Match ISO formats including microseconds
+            SimpleDateFormat input;
+            if (timestamp.contains(".")) {
+                input = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault());
+            } else {
+                input = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            }
+            input.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date date = input.parse(timestamp);
+            SimpleDateFormat output = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+            output.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return output.format(date);
+        } catch (ParseException e) {
+            return timestamp;
+        }
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView txtTime, txtStatusBadge;
+
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvTime = itemView.findViewById(R.id.tvTime);
-            ivSlotIcon = itemView.findViewById(R.id.ivSlotIcon);
-            slotContainer = itemView.findViewById(R.id.slotContainer);
+            txtTime = itemView.findViewById(R.id.txtTime);
+            txtStatusBadge = itemView.findViewById(R.id.txtStatusBadge);
         }
     }
 }

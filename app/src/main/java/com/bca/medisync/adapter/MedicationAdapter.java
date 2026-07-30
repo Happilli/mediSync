@@ -9,10 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.R;
-
-import org.jetbrains.annotations.NotNull;
+import com.bca.medisync.data.model.Medication;
 
 import java.util.List;
 

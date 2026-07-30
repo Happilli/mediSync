@@ -14,9 +14,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AuthApi;
-import com.bca.medisync.doctor.DoctorHomeActivity;
 import com.bca.medisync.data.remote.dto.login.LoginRequest;
 import com.bca.medisync.data.remote.dto.login.LoginResponse;
+import com.bca.medisync.doctor.DoctorHomeActivity;
 import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
 import com.google.android.material.button.MaterialButton;
@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
       finish();
       return;
     }
+
 
     EdgeToEdge.enable(this);
     setContentView(R.layout.activity_login);
@@ -125,7 +126,26 @@ public class MainActivity extends AppCompatActivity {
                     return;
                   }
                   sessionManager.saveSession(
-                      body.getAccess_token(), body.getRole(), body.getEmail());
+                          body.getAccess_token(),
+                          body.getRole(),
+                          body.getEmail()
+                  );
+
+                  String token = sessionManager.getToken();
+
+                  Toast.makeText(
+                          MainActivity.this,
+                          "Saved Token:\n" + token,
+                          Toast.LENGTH_LONG
+                  ).show();
+
+                  android.util.Log.d("LOGIN_TOKEN", token);
+
+                  Toast.makeText(
+                          MainActivity.this,
+                          "Token: " + body.getAccess_token(),
+                          Toast.LENGTH_LONG
+                  ).show();
 
                   Intent intent;
                   if ("doctor".equalsIgnoreCase(body.getRole())) {

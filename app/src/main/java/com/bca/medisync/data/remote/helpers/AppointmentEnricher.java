@@ -36,7 +36,7 @@ public class AppointmentEnricher {
 
     for (AppointmentResponse r : responses) {
       doctorApi
-          .getDoctorDetail(r.getDoctor_id())
+          .getDoctorDetail(r.getDoctorId())
           .enqueue(
               new Callback<DoctorResponse>() {
                 @Override
@@ -69,7 +69,7 @@ public class AppointmentEnricher {
   public static void enrichOne(AppointmentResponse r, Callback1<Appointment> callback) {
     DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
     doctorApi
-        .getDoctorDetail(r.getDoctor_id())
+        .getDoctorDetail(r.getDoctorId())
         .enqueue(
             new Callback<DoctorResponse>() {
               @Override
@@ -87,11 +87,11 @@ public class AppointmentEnricher {
   }
 
   public static Appointment mapToAppointment(AppointmentResponse r, DoctorResponse d) {
-    String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctor_id();
+    String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctorId();
     String speciality = d != null ? d.getSpeciality() : "";
     String department = d != null ? d.getDepartment() : "";
 
-    Date date = parseIso(r.getAppointment_at());
+    Date date = parseIso(r.getAppointmentAt());
     String dateStr =
         date != null ? new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date) : "";
     String timeStr =
@@ -133,7 +133,7 @@ public class AppointmentEnricher {
       if (!status.equalsIgnoreCase("confirmed") && !status.equalsIgnoreCase("pending")) {
         continue;
       }
-      if (best == null || compareIso(a.getAppointment_at(), best.getAppointment_at()) < 0) {
+      if (best == null || compareIso(a.getAppointmentAt(), best.getAppointmentAt()) < 0) {
         best = a;
       }
     }

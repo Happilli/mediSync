@@ -1,5 +1,6 @@
 package com.bca.medisync.doctor;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -83,8 +84,13 @@ public class PrescriptionActivity extends AppCompatActivity {
                 return;
             }
 
-            Toast.makeText(this, "Prescription saved for " + patientName + "\n" + medicine + " " + dosage
-                            + "\n" + frequency + " - " + duration, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Prescription saved for " + patientName, Toast.LENGTH_LONG).show();
+
+            // Return to Patient Overview and clear intermediate activities
+            Intent intent = new Intent(this, DoctorPatientDetailActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
         });
     }
 }

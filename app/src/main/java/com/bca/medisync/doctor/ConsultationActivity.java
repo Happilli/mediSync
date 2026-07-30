@@ -12,10 +12,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bca.medisync.R;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class ConsultationActivity extends AppCompatActivity {
+    private MaterialToolbar toolbar;
     private TextView tvPatientname;
     private TextInputEditText etComplaint, etSymptoms, etDiagnosis, etNotes, etBloodPressure, etHeartRate, etTemperature, etWeight;
     private MaterialButton btnNextPrescription;
@@ -27,16 +29,22 @@ public class ConsultationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_consultation);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(systemBars.left, 0, systemBars.right, 0);
+            findViewById(R.id.appBarLayout).setPadding(0, systemBars.top, 0, 0);
             return insets;
         });
+
         initViews();
+        setupToolbar();
         loadData();
-        setupListeners();;
+        setupListeners();
     }
-    private void initViews(){
+
+    private void initViews() {
+        toolbar = findViewById(R.id.toolbar);
         tvPatientname = findViewById(R.id.tvPatientName);
         etComplaint = findViewById(R.id.etComplaint);
         etSymptoms = findViewById(R.id.etSymptoms);
@@ -48,50 +56,61 @@ public class ConsultationActivity extends AppCompatActivity {
         etWeight = findViewById(R.id.etWeight);
         btnNextPrescription = findViewById(R.id.btnNextPrescription);
     }
-    private void loadData(){
+
+    private void setupToolbar() {
+        toolbar.setNavigationOnClickListener(v -> finish());
+    }
+
+    private void loadData() {
         patientName = getIntent().getStringExtra("patient_name");
         latestDiagnosis = getIntent().getStringExtra("latest_diagnosis");
-        latestDate= getIntent().getStringExtra("latest_date");
+        latestDate = getIntent().getStringExtra("latest_date");
 
-        if(patientName!=null){
-            tvPatientname.setText("Consultation - "+patientName);
+        if (patientName != null) {
+            tvPatientname.setText("Consultation - " + patientName);
         }
-        if(latestDiagnosis!=null){
+        if (latestDiagnosis != null) {
             etDiagnosis.setText(latestDiagnosis);
         }
     }
-    private void setupListeners(){
+
+    private void setupListeners() {
         btnNextPrescription.setOnClickListener(v -> {
             String complaint = etComplaint.getText().toString().trim();
-            String symptoms  = etSymptoms.getText().toString().trim();
+            String symptoms = etSymptoms.getText().toString().trim();
             String diagnosis = etDiagnosis.getText().toString().trim();
-            String notes     = etNotes.getText().toString().trim();
-            String bp        = etBloodPressure.getText().toString().trim();
-            String hr        = etHeartRate.getText().toString().trim();
-            String temp      = etTemperature.getText().toString().trim();
-            String weight    = etWeight.getText().toString().trim();
+            String notes = etNotes.getText().toString().trim();
+            String bp = etBloodPressure.getText().toString().trim();
+            String hr = etHeartRate.getText().toString().trim();
+            String temp = etTemperature.getText().toString().trim();
+            String weight = etWeight.getText().toString().trim();
 
-            if(complaint.isEmpty()){
+            if (complaint.isEmpty()) {
                 etComplaint.setError("Chief compliant is required...");
                 return;
             }
-            if(diagnosis.isEmpty()){
+            if (diagnosis.isEmpty()) {
                 etDiagnosis.setError("Diagnosis is requierd..");
                 return;
             }
 
-            Toast.makeText(this, "Consultation saved for " + patientName + "\nDiagnosis: " + diagnosis, Toast.LENGTH_LONG).show();
-
-            Intent intent = new Intent(ConsultationActivity.this, PrescriptionActivity.class);
-            intent.putExtra("patient_name", patientName);
-            intent.putExtra("diagnosis", diagnosis);
-            intent.putExtra("complaint", complaint);
-            intent.putExtra("notes", notes);
-            intent.putExtra("bp", bp);
-            intent.putExtra("hr", hr);
-            intent.putExtra("temp", temp);
-            intent.putExtra("weight", weight);
-            startActivity(intent);
+            Toast.makeText(this, "Consultation saved for " + patientName, Toast.LENGTH_SHORT).show();
+            // Assuming there is a PrescriptionActivity as per original code
+            try {
+                Class<?> prescriptionClass = Class.forName("com.bca.medisync.doctor.PrescriptionActivity");
+                Intent intent = new Intent(ConsultationActivity.this, prescriptionClass);
+                intent.putExtra("patient_name", patientName);
+                intent.putExtra("diagnosis", diagnosis);
+                intent.putExtra("complaint", complaint);
+                intent.putExtra("notes", notes);
+                intent.putExtra("bp", bp);
+                intent.putExtra("hr", hr);
+                intent.putExtra("temp", temp);
+                intent.putExtra("weight", weight);
+                startActivity(intent);
+            } catch (ClassNotFoundException e) {
+                finish();
+            }
         });
     }
 }

@@ -1,6 +1,9 @@
 package com.bca.medisync.data.remote.api;
 
+import com.bca.medisync.data.remote.dto.patient.DoctorPatientResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
+
+import java.util.List;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -18,4 +21,7 @@ public interface PatientApi {
   @POST("/api/v1/patients/request-verification")
   Call<PatientResponse> requestVerification(
       @Part("citizenship_number") RequestBody citizenshipNumber, @Part MultipartBody.Part file);
+
+  @GET("/api/v1/patients/doctor")
+  Call<List<DoctorPatientResponse>> getDoctorPatients();
 }

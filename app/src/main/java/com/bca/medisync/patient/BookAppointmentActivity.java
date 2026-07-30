@@ -19,9 +19,9 @@ import com.bca.medisync.data.model.TimeSlot;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.api.DoctorApi;
-import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
+import com.bca.medisync.data.remote.dto.timeslot.TimeSlotResponse;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -43,7 +43,7 @@ public class BookAppointmentActivity extends AppCompatActivity {
   private TextInputEditText etNotes;
   private RecyclerView rvTimeSlots;
 
-  private TimeSlot selectedTimeSlot;
+  private TimeSlotResponse selectedTimeSlot;
 
   // doctor info from DoctorActivity
   private String doctorName, doctorSpeciality, doctorInfo, doctorDepartment;
@@ -126,11 +126,7 @@ public class BookAppointmentActivity extends AppCompatActivity {
               public void onResponse(
                   Call<List<TimeSlotResponse>> call, Response<List<TimeSlotResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                  List<TimeSlot> slots = new ArrayList<>();
-                  for (TimeSlotResponse r : response.body()) {
-                    slots.add(mapToTimeSlot(r));
-                  }
-                  bindTimeSlots(slots);
+                  bindTimeSlots(response.body());
                 } else {
                   Toast.makeText(
                           BookAppointmentActivity.this,
@@ -151,7 +147,7 @@ public class BookAppointmentActivity extends AppCompatActivity {
             });
   }
 
-  private void bindTimeSlots(List<TimeSlot> slots) {
+  private void bindTimeSlots(List<TimeSlotResponse> slots) {
     if (slots.isEmpty()) {
       rvTimeSlots.setVisibility(View.GONE);
       txtNoSlots.setVisibility(View.VISIBLE);
@@ -165,16 +161,6 @@ public class BookAppointmentActivity extends AppCompatActivity {
     TimeSlotAdapter adapter = new TimeSlotAdapter(this, slots, slot -> selectedTimeSlot = slot);
     rvTimeSlots.setLayoutManager(new GridLayoutManager(this, 3));
     rvTimeSlots.setAdapter(adapter);
-  }
-
-  private TimeSlot mapToTimeSlot(TimeSlotResponse r) {
-    String displayTime = r.getAppointment_at();
-    try {
-      LocalDateTime dt = LocalDateTime.parse(r.getAppointment_at());
-      displayTime = dt.format(DateTimeFormatter.ofPattern("dd MMM, hh:mm a", Locale.getDefault()));
-    } catch (Exception ignored) {
-    }
-    return new TimeSlot(r.getId(), r.getAppointment_at(), displayTime, r.isIs_available());
   }
 
   private void setupConfirmButton() {

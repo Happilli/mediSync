@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.PatientAdapter;
 import com.bca.medisync.data.model.DataProvider;
-import com.bca.medisync.data.model.Patient;
 import com.google.android.material.appbar.MaterialToolbar;
 
 public class PatientActivity extends AppCompatActivity {
