@@ -166,18 +166,6 @@ public class DataProvider {
     return list;
   }
 
-  public static List<Medication> getMedications() {
-    List<Medication> list = new ArrayList<>();
-    list.add(new Medication("m001", "Telma", "40mg", "Once Daily", "01:00 PM", "30 Days", false));
-    list.add(
-        new Medication("m002", "Ecosprin", "75mg", "Once Daily", "08:00 PM", "30 Days", false));
-    list.add(new Medication("m003", "Vitamin D3", "", "Once Daily", "09:00 PM", "30 Days", false));
-    list.add(
-        new Medication("m001", "paracetamol", "40mg", "Once Daily", "11:59 PM", "30 Days", false));
-    list.add(
-        new Medication("m001", "Fentanyl", "40mg", "Once Daily", "12:01 AM", "30 Days", false));
-    return list;
-  }
 
   public static List<Patient> getPatients() {
     List<Patient> list = new ArrayList<>();

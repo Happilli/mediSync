@@ -20,19 +20,32 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.MedicationAdapter;
-import com.bca.medisync.data.model.DataProvider;
 import com.bca.medisync.data.model.Medication;
+import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.api.MedicationApi;
+import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MedicationFragment extends Fragment {
   private RecyclerView rvMedications;
   private TextView tvActiveTime, tvActiveName, tvActiveDosage;
   private MaterialButton btnMarkTaken;
   private ExtendedFloatingActionButton fabAddMedication;
+  private MedicationAdapter adapter;
+
+  private Medication activeMedication;
 
   public MedicationFragment() {}
 
@@ -49,10 +62,15 @@ public class MedicationFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     initViews(view);
-    setUpActiveCard();
     setUpRecyclerView();
     setupFab();
-    scheduleAlarms();
+    loadMedications();
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    loadMedications();
   }
 
   private void initViews(View view) {
@@ -62,100 +80,147 @@ public class MedicationFragment extends Fragment {
     tvActiveDosage = view.findViewById(R.id.tvActiveDosage);
     btnMarkTaken = view.findViewById(R.id.btnMarkTaken);
     fabAddMedication = view.findViewById(R.id.fabAddMedication);
-  }
 
-  private void setUpActiveCard() {
-    List<Medication> meds = DataProvider.getMedications();
-    if (!meds.isEmpty()) {
-      Medication first = meds.get(0);
-      tvActiveName.setText(first.getName() + " " + first.getDosage());
-      tvActiveDosage.setText(first.getFrequency());
-      tvActiveTime.setText(first.getTime());
-    }
     btnMarkTaken.setOnClickListener(
-        v -> Toast.makeText(requireContext(), "Marked as taken", Toast.LENGTH_SHORT).show());
+        v -> {
+          if (activeMedication != null && !activeMedication.isTaken()) {
+            markTaken(activeMedication);
+          }
+        });
   }
 
   private void setUpRecyclerView() {
-    List<Medication> meds = DataProvider.getMedications();
-    rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
-    rvMedications.setAdapter(
+    adapter =
         new MedicationAdapter(
             requireContext(),
-            meds,
+            new ArrayList<>(),
             medication ->
-                Toast.makeText(requireContext(), medication.getName(), Toast.LENGTH_SHORT).show()));
+                Toast.makeText(requireContext(), medication.getInstruction(), Toast.LENGTH_SHORT)
+                    .show(),
+            this::markTaken);
+    rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
+    rvMedications.setAdapter(adapter);
   }
 
   private void setupFab() {
     fabAddMedication.setOnClickListener(
-        v -> {
-          // add medication stuff
-        });
+        v ->
+            Toast.makeText(
+                    requireContext(),
+                    "Medications are added by your doctor during prescriptions.",
+                    Toast.LENGTH_SHORT)
+                .show());
   }
 
-  private void scheduleAlarms() {
-    List<Medication> meds = DataProvider.getMedications();
-    for (Medication med : meds) {
-      try {
-        String[] parts = med.getTime().split("[:. ]");
-        int hour = Integer.parseInt(parts[0]);
-        int minute = Integer.parseInt(parts[1]);
-        String period = parts[2];
-        if (period.equalsIgnoreCase("PM") && hour != 12) {
-          hour += 12;
-        }
-        if (period.equalsIgnoreCase("AM") && hour == 12) {
-          hour = 0;
-        }
-        setAlarm(med.getName(), med.getDosage(), hour, minute);
-      } catch (Exception e) {
-        e.printStackTrace();
+  private void loadMedications() {
+    MedicationApi api = ApiClient.getRetrofit().create(MedicationApi.class);
+    api.getMyMedications()
+        .enqueue(
+            new Callback<List<MedicationResponse>>() {
+              @Override
+              public void onResponse(
+                  Call<List<MedicationResponse>> call,
+                  Response<List<MedicationResponse>> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful() && response.body() != null) {
+                  List<Medication> meds = new ArrayList<>();
+                  for (MedicationResponse r : response.body()) {
+                    meds.add(mapToMedication(r));
+                  }
+                  bindMedications(meds);
+                } else {
+                  Toast.makeText(requireContext(), "Failed to load medications", Toast.LENGTH_SHORT)
+                      .show();
+                }
+              }
+
+              @Override
+              public void onFailure(Call<List<MedicationResponse>> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
+  }
+
+  private void bindMedications(List<Medication> meds) {
+    adapter.updateData(meds);
+
+    activeMedication = null;
+    for (Medication m : meds) {
+      if (!m.isTaken()) {
+        activeMedication = m;
+        break;
       }
+    }
+
+    if (activeMedication != null) {
+      tvActiveName.setText(activeMedication.getName() + " " + activeMedication.getDosage());
+      tvActiveDosage.setText(activeMedication.getFrequency());
+      tvActiveTime.setText(activeMedication.getTime());
+      btnMarkTaken.setEnabled(true);
+      btnMarkTaken.setText("Mark as Taken");
+    } else {
+      tvActiveName.setText(meds.isEmpty() ? "No medications" : "All medications taken");
+      tvActiveDosage.setText("");
+      tvActiveTime.setText("--");
+      btnMarkTaken.setEnabled(false);
+      btnMarkTaken.setText("Nothing Pending");
     }
   }
 
-  private void setAlarm(String name, String dosage, int hour, int minute) {
-    AlarmManager alarmManager =
-        (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+  private void markTaken(Medication medication) {
+    MedicationApi api = ApiClient.getRetrofit().create(MedicationApi.class);
+    api.markTaken(medication.getId())
+        .enqueue(
+            new Callback<MedicationResponse>() {
+              @Override
+              public void onResponse(
+                  Call<MedicationResponse> call, Response<MedicationResponse> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful()) {
+                  Toast.makeText(requireContext(), "Marked as taken", Toast.LENGTH_SHORT).show();
+                  loadMedications();
+                } else if (response.code() == 403) {
+                  Toast.makeText(requireContext(), "Not your medication.", Toast.LENGTH_SHORT)
+                      .show();
+                } else {
+                  Toast.makeText(
+                          requireContext(), "Failed to update medication.", Toast.LENGTH_SHORT)
+                      .show();
+                }
+              }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-      if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-        Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-        startActivity(intent);
-        return;
-      }
+              @Override
+              public void onFailure(Call<MedicationResponse> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
+  }
+
+  private Medication mapToMedication(MedicationResponse r) {
+    String displayTime = r.getDosage_time();
+    try {
+      LocalTime t = LocalTime.parse(r.getDosage_time());
+      displayTime = t.format(DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault()));
+    } catch (Exception ignored) {
     }
 
-    Intent intent = new Intent(requireContext(), AlarmReceiver.class);
-    intent.putExtra("med_name", name);
-    intent.putExtra("med_dosage", dosage);
+    String frequencyLabel =
+        r.getFrequency_per_day() + "x Daily \u2022 " + r.getDuration_days() + " Days";
 
-    int requestCode = (name + hour + minute).hashCode();
-
-    PendingIntent pendingIntent =
-        PendingIntent.getBroadcast(
-            requireContext(),
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-    Calendar calendar = Calendar.getInstance();
-    calendar.set(Calendar.HOUR_OF_DAY, hour);
-    calendar.set(Calendar.MINUTE, minute);
-    calendar.set(Calendar.SECOND, 0);
-
-    if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
-      calendar.add(Calendar.DAY_OF_YEAR, 1);
-    }
-
-    if (alarmManager != null) {
-      try {
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-      } catch (SecurityException e) {
-        e.printStackTrace();
-      }
-    }
+    return new Medication(
+        r.getId(),
+        r.getName(),
+        r.getDosage(),
+        frequencyLabel,
+        displayTime,
+        r.getDuration_days() + " Days",
+        r.isIs_taken(),
+        r.getInstruction());
   }
 }

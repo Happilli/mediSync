@@ -1,48 +1,64 @@
 package com.bca.medisync.data.model;
 
 public class Medication {
-    private  final  String id;
-    private final String name;
-    private final String dosage;
-    private final  String frequency;
-    private final String time;
-    private final String duration;
-    private final boolean taken;
+  private final int id;
+  private final String name;
+  private final String dosage;
+  private final String frequency;
+  private final String time;
+  private final String duration;
+  private final boolean taken;
 
-    public  Medication(String id, String name, String dosage, String frequency, String time, String duration, boolean taken){
-        this.id = id;
-        this.name =name;
-        this.dosage = dosage;
-        this.frequency = frequency;
-        this.time = time;
-        this.duration = duration;
-        this.taken = taken;
-    }
-    public String getId() {
-        return id;
-    }
+  private final String instruction;
 
-    public String getName() {
-        return name;
-    }
+  public Medication(
+      int id,
+      String name,
+      String dosage,
+      String frequency,
+      String time,
+      String duration,
+      boolean taken,
+      String instruction) {
+    this.id = id;
+    this.name = name;
+    this.dosage = dosage;
+    this.frequency = frequency;
+    this.time = time;
+    this.duration = duration;
+    this.taken = taken;
+    this.instruction = instruction;
+  }
 
-    public String getDosage() {
-        return dosage;
-    }
+  public String getInstruction() {
+    return instruction;
+  }
 
-    public String getFrequency() {
-        return frequency;
-    }
+  public int getId() {
+    return id;
+  }
 
-    public String getTime() {
-        return time;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getDuration() {
-        return duration;
-    }
+  public String getDosage() {
+    return dosage;
+  }
 
-    public boolean isTaken() {
-        return taken;
-    }
+  public String getFrequency() {
+    return frequency;
+  }
+
+  public String getTime() {
+    return time;
+  }
+
+  public String getDuration() {
+    return duration;
+  }
+
+  public boolean isTaken() {
+    return taken;
+  }
 }

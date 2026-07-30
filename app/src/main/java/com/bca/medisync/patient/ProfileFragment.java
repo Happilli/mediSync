@@ -204,7 +204,10 @@ public class ProfileFragment extends Fragment {
   }
 
   private void setupListeners() {
-    requireView().findViewById(R.id.btnEditProfile).setOnClickListener(v -> {});
+    requireView()
+        .findViewById(R.id.btnEditProfile)
+        .setOnClickListener(
+            v -> startActivity(new Intent(requireContext(), EditProfileActivity.class)));
     requireView().findViewById(R.id.rowPrivacyPolicy).setOnClickListener(v -> {});
     requireView().findViewById(R.id.rowTerms).setOnClickListener(v -> {});
     requireView().findViewById(R.id.rowHelp).setOnClickListener(v -> {});

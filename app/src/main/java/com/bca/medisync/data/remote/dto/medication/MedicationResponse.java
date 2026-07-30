@@ -1,0 +1,59 @@
+package com.bca.medisync.data.remote.dto.medication;
+
+public class MedicationResponse {
+  private int id;
+  private int prescription_id;
+  private int patient_id;
+  private String name;
+  private String dosage;
+  private String dosage_time;
+  private String instruction;
+  private int frequency_per_day;
+  private int duration_days;
+  private boolean is_taken;
+  private String taken_at;
+
+  public int getId() {
+    return id;
+  }
+
+  public int getPrescription_id() {
+    return prescription_id;
+  }
+
+  public int getPatient_id() {
+    return patient_id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getDosage() {
+    return dosage;
+  }
+
+  public String getDosage_time() {
+    return dosage_time;
+  }
+
+  public String getInstruction() {
+    return instruction;
+  }
+
+  public int getFrequency_per_day() {
+    return frequency_per_day;
+  }
+
+  public int getDuration_days() {
+    return duration_days;
+  }
+
+  public boolean isIs_taken() {
+    return is_taken;
+  }
+
+  public String getTaken_at() {
+    return taken_at;
+  }
+}
