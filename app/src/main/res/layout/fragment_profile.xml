@@ -305,6 +305,12 @@
                     <include
                         android:id="@+id/rowHelp"
                         layout="@layout/item_profile_settings_row" />
+
+                    <include layout="@layout/item_profile_divider" />
+
+                    <include
+                        android:id="@+id/rowSecurityAnswer"
+                        layout="@layout/item_profile_settings_row" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>

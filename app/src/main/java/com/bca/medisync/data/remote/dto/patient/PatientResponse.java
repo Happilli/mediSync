@@ -13,6 +13,7 @@ public class PatientResponse {
   private String profile_pic_url;
   private String citizenship_photo_url;
   private boolean is_verified;
+  private boolean has_security_answer;
 
   public int getId() {
     return id;
@@ -48,6 +49,10 @@ public class PatientResponse {
 
   public String getEmergency_contact() {
     return emergency_contact;
+  }
+
+  public boolean isHas_security_answer() {
+    return has_security_answer;
   }
 
   public String getCitizenship_number() {

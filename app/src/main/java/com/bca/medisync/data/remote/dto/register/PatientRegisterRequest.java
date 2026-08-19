@@ -10,6 +10,7 @@ public class PatientRegisterRequest {
   private String gender;
   private String blood_group;
   private String emergency_contact;
+  private String security_answer;
 
   public PatientRegisterRequest(
       String email,
@@ -19,11 +20,13 @@ public class PatientRegisterRequest {
       String address,
       String date_of_birth,
       String gender,
+      String security_answer,
       String blood_group,
       String emergency_contact) {
     this.email = email;
     this.password = password;
     this.name = name;
+    this.security_answer = security_answer;
     this.phone = phone;
     this.address = address;
     this.date_of_birth = date_of_birth;

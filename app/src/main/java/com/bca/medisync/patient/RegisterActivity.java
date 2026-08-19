@@ -29,7 +29,13 @@ import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
-  private TextInputEditText etName, etEmail, etPassword, etPhone, etAddress, etEmergencyContact;
+  private TextInputEditText etName,
+      etEmail,
+      etPassword,
+      etPhone,
+      etAddress,
+      etEmergencyContact,
+      etSecurityAnswer;
   private AutoCompleteTextView etGender, etBloodGroup;
   private MaterialButton btnSelectDob, btnRegister;
   private android.widget.TextView txtSelectedDob, goToLogin;
@@ -68,6 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
     txtSelectedDob = findViewById(R.id.txtSelectedDob);
     btnRegister = findViewById(R.id.btnRegister);
     goToLogin = findViewById(R.id.GoToLogin);
+    etSecurityAnswer = findViewById(R.id.etSecurityAnswer);
   }
 
   private void setupDropdowns() {
@@ -109,6 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
     String emergencyContact = textOf(etEmergencyContact);
     String gender = etGender.getText().toString().trim();
     String bloodGroup = etBloodGroup.getText().toString().trim();
+    String securityAnswer = etSecurityAnswer.getText().toString().trim();
 
     if (name.isEmpty()) {
       etName.setError("Name is required");
@@ -142,6 +150,10 @@ public class RegisterActivity extends AppCompatActivity {
       Toast.makeText(this, "Please select blood group", Toast.LENGTH_SHORT).show();
       return;
     }
+    if (securityAnswer.isEmpty()) {
+      Toast.makeText(this, "Please answer the security Question... ", Toast.LENGTH_SHORT).show();
+      return;
+    }
     if (emergencyContact.isEmpty()) {
       etEmergencyContact.setError("Emergency contact is required");
       return;
@@ -158,6 +170,7 @@ public class RegisterActivity extends AppCompatActivity {
             address,
             selectedDob,
             gender.toLowerCase(Locale.ROOT),
+            securityAnswer,
             bloodGroup.toUpperCase(Locale.ROOT),
             emergencyContact);
 

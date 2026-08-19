@@ -1,5 +1,6 @@
 package com.bca.medisync.patient;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -23,8 +24,10 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -101,6 +104,7 @@ public class ProfileFragment extends Fragment {
     setRowLabel(R.id.rowPrivacyPolicy, "Privacy Policy");
     setRowLabel(R.id.rowTerms, "Terms and Conditions");
     setRowLabel(R.id.rowHelp, "Help and Support");
+    setRowLabel(R.id.rowSecurityAnswer, "Security Answer");
   }
 
   private void setRowLabel(int rowId, String label) {
@@ -203,6 +207,81 @@ public class ProfileFragment extends Fragment {
     }
   }
 
+  private void showSecurityAnswerDialog() {
+    View dialogView =
+        LayoutInflater.from(requireContext()).inflate(R.layout.dialog_security_answer, null);
+    TextInputEditText etAnswer = dialogView.findViewById(R.id.etDialogSecurityAnswer);
+    TextInputEditText etPassword = dialogView.findViewById(R.id.etDialogCurrentPassword);
+
+    AlertDialog dialog =
+        new AlertDialog.Builder(requireContext())
+            .setTitle("Set Security Answer")
+            .setView(dialogView)
+            .setPositiveButton("Save", null)
+            .setNegativeButton("Cancel", null)
+            .create();
+
+    dialog.setOnShowListener(
+        dialogInterface ->
+            dialog
+                .getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(
+                    v -> {
+                      String answer =
+                          etAnswer.getText() != null ? etAnswer.getText().toString().trim() : "";
+                      String password =
+                          etPassword.getText() != null
+                              ? etPassword.getText().toString().trim()
+                              : "";
+
+                      if (answer.isEmpty()) {
+                        etAnswer.setError("Answer is required");
+                        return;
+                      }
+                      if (password.isEmpty()) {
+                        etPassword.setError("Password is required");
+                        return;
+                      }
+                      submitSecurityAnswer(answer, password, dialog);
+                    }));
+
+    dialog.show();
+  }
+
+  private void submitSecurityAnswer(String answer, String password, AlertDialog dialog) {
+    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    api.updateSecurityAnswer(new PatientSecurityAnswerUpdateRequest(password, answer))
+        .enqueue(
+            new Callback<Map<String, String>>() {
+              @Override
+              public void onResponse(
+                  Call<Map<String, String>> call, Response<Map<String, String>> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful()) {
+                  Toast.makeText(requireContext(), "Security answer updated.", Toast.LENGTH_SHORT)
+                      .show();
+                  dialog.dismiss();
+                } else if (response.code() == 401) {
+                  Toast.makeText(
+                          requireContext(), "Current password is incorrect.", Toast.LENGTH_SHORT)
+                      .show();
+                } else {
+                  Toast.makeText(
+                          requireContext(), "Failed to update security answer.", Toast.LENGTH_SHORT)
+                      .show();
+                }
+              }
+
+              @Override
+              public void onFailure(Call<Map<String, String>> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
+  }
+
   private void setupListeners() {
     requireView()
         .findViewById(R.id.btnEditProfile)
@@ -211,6 +290,9 @@ public class ProfileFragment extends Fragment {
     requireView().findViewById(R.id.rowPrivacyPolicy).setOnClickListener(v -> {});
     requireView().findViewById(R.id.rowTerms).setOnClickListener(v -> {});
     requireView().findViewById(R.id.rowHelp).setOnClickListener(v -> {});
+    requireView()
+        .findViewById(R.id.rowSecurityAnswer)
+        .setOnClickListener(v -> showSecurityAnswerDialog());
     requireView()
         .findViewById(R.id.btnLogout)
         .setOnClickListener(

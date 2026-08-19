@@ -2,6 +2,9 @@ package com.bca.medisync.data.remote.api;
 
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
+import com.bca.medisync.patient.PatientSecurityAnswerUpdateRequest;
+
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -28,4 +31,7 @@ public interface PatientApi {
   @POST("/api/v1/patients/request-verification")
   Call<PatientResponse> requestVerification(
       @Part("citizenship_number") RequestBody citizenshipNumber, @Part MultipartBody.Part file);
+
+  @PATCH("/api/v1/patients/me/security-answer")
+  Call<Map<String, String>> updateSecurityAnswer(@Body PatientSecurityAnswerUpdateRequest request);
 }
