@@ -65,6 +65,10 @@ public class AppointmentFragment extends Fragment {
     loadAppointments();
   }
 
+  public void refresh() {
+    loadAppointments();
+  }
+
   private void initViews(View view) {
     rvUpcoming = view.findViewById(R.id.rvUpcoming);
     rvHistory = view.findViewById(R.id.rvHistory);

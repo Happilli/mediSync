@@ -65,10 +65,13 @@ public class PrescriptionListFragment extends Fragment {
             requireContext(),
             new ArrayList<>(),
             prescription -> {
-              Intent intent = new Intent(requireContext(), PrescriptionDetailActivity.class);
-              intent.putExtra("prescription_id", prescription.getId());
-              startActivity(intent);
+              Bundle args = new Bundle();
+              args.putInt("prescription_id", prescription.getId());
+              PrescriptionDetailFragment fragment = new PrescriptionDetailFragment();
+              fragment.setArguments(args);
+              ((MainTabActivity) requireActivity()).pushFragment(fragment);
             });
+
     rvPrescriptions.setAdapter(adapter);
   }
 

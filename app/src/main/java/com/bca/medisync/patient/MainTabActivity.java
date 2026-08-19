@@ -86,6 +86,16 @@ public class MainTabActivity extends AppCompatActivity {
     return new HomeFragment();
   }
 
+  public void popToRootAndRefreshAppointments() {
+    getSupportFragmentManager()
+        .popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    bottomNav.setVisibility(View.VISIBLE);
+    Fragment f = fragmentCache.get(R.id.nav_appointments);
+    if (f instanceof AppointmentFragment) {
+      ((AppointmentFragment) f).refresh();
+    }
+  }
+
   public void pushFragment(Fragment fragment) {
     bottomNav.setVisibility(View.VISIBLE);
     getSupportFragmentManager()

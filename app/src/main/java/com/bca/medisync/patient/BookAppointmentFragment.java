@@ -198,9 +198,9 @@ public class BookAppointmentFragment extends Fragment {
                       if (!isAdded()) return;
                       btnConfirm.setEnabled(true);
                       if (response.isSuccessful()) {
-                        Toast.makeText(requireContext(), "Appointment booked!", Toast.LENGTH_LONG)
+                       Toast.makeText(requireContext(), "Appointment booked!", Toast.LENGTH_LONG)
                             .show();
-                        requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                        ((MainTabActivity) requireActivity()).popToRootAndRefreshAppointments();
                       } else if (response.code() == 403) {
                         Toast.makeText(
                                 requireContext(),

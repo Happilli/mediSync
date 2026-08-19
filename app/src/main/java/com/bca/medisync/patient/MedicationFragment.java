@@ -1,6 +1,9 @@
 package com.bca.medisync.patient;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +22,7 @@ import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicationApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
+import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.google.android.material.button.MaterialButton;
 
 import java.time.LocalTime;
@@ -38,6 +42,7 @@ public class MedicationFragment extends Fragment {
   private MedicationAdapter adapter;
 
   private Medication activeMedication;
+  private final java.util.Map<Integer, String> rawDosageTimes = new java.util.HashMap<>();
 
   public MedicationFragment() {}
 
@@ -55,6 +60,7 @@ public class MedicationFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     initViews(view);
     setUpRecyclerView();
+    maybeRequestExactAlarmPermission();
     loadMedications();
   }
 
@@ -77,6 +83,19 @@ public class MedicationFragment extends Fragment {
             markTaken(activeMedication);
           }
         });
+  }
+
+  private void maybeRequestExactAlarmPermission() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        && !MedicationAlarmScheduler.canScheduleExactAlarms(requireContext())) {
+      Toast.makeText(
+              requireContext(),
+              "Allow exact alarms so mediSync can remind you to take medicine on time.",
+              Toast.LENGTH_LONG)
+          .show();
+      Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+      startActivity(intent);
+    }
   }
 
   private void setUpRecyclerView() {
@@ -105,9 +124,11 @@ public class MedicationFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                   List<Medication> meds = new ArrayList<>();
                   for (MedicationResponse r : response.body()) {
+                    rawDosageTimes.put(r.getId(), r.getDosage_time());
                     meds.add(mapToMedication(r));
                   }
                   bindMedications(meds);
+                  scheduleAllReminders(meds);
                 } else {
                   Toast.makeText(requireContext(), "Failed to load medications", Toast.LENGTH_SHORT)
                       .show();
@@ -122,6 +143,14 @@ public class MedicationFragment extends Fragment {
                     .show();
               }
             });
+  }
+
+  private void scheduleAllReminders(List<Medication> meds) {
+    if (!MedicationAlarmScheduler.canScheduleExactAlarms(requireContext())) return;
+    for (Medication m : meds) {
+      String raw = rawDosageTimes.get(m.getId());
+      MedicationAlarmScheduler.schedule(requireContext(), m, raw);
+    }
   }
 
   private void bindMedications(List<Medication> meds) {
@@ -160,6 +189,7 @@ public class MedicationFragment extends Fragment {
                   Call<MedicationResponse> call, Response<MedicationResponse> response) {
                 if (!isAdded()) return;
                 if (response.isSuccessful()) {
+                  MedicationAlarmScheduler.cancel(requireContext(), medication.getId());
                   Toast.makeText(requireContext(), "Marked as taken", Toast.LENGTH_SHORT).show();
                   loadMedications();
                 } else if (response.code() == 403) {

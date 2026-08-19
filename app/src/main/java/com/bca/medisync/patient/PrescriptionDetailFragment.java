@@ -1,22 +1,24 @@
 package com.bca.medisync.patient;
 
 import android.os.Bundle;
-import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.R;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.model.Prescription;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
+import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -26,43 +28,46 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PrescriptionDetailActivity extends AppCompatActivity {
+public class PrescriptionDetailFragment extends Fragment {
   private MaterialToolbar toolbar;
   private TextView txtDoctorName, txtDiagnosis, txtInstructions, txtFollowUp, txtNoMeds;
   private LinearLayout medicationsContainer;
   private int prescriptionId;
 
+  @Nullable
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_prescription_detail);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
-        (v, insets) -> {
-          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-          v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-          return insets;
-        });
-    initViews();
-    prescriptionId = getIntent().getIntExtra("prescription_id", -1);
+  public View onCreateView(
+      @NonNull LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.activity_prescription_detail, container, false);
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    initViews(view);
+
+    Bundle args = getArguments();
+    prescriptionId = args != null ? args.getInt("prescription_id", -1) : -1;
     if (prescriptionId == -1) {
-      Toast.makeText(this, "Invalid prescription", Toast.LENGTH_SHORT).show();
-      finish();
+      Toast.makeText(requireContext(), "Invalid prescription", Toast.LENGTH_SHORT).show();
+      requireActivity().getOnBackPressedDispatcher().onBackPressed();
       return;
     }
     loadDetail();
   }
 
-  private void initViews() {
-    toolbar = findViewById(R.id.toolbar);
-    toolbar.setNavigationOnClickListener(v -> finish());
-    txtDoctorName = findViewById(R.id.txtDoctorName);
-    txtDiagnosis = findViewById(R.id.txtDiagnosis);
-    txtInstructions = findViewById(R.id.txtInstructions);
-    txtFollowUp = findViewById(R.id.txtFollowUp);
-    medicationsContainer = findViewById(R.id.medicationsContainer);
-    txtNoMeds = findViewById(R.id.txtNoMeds);
+  private void initViews(View view) {
+    toolbar = view.findViewById(R.id.toolbar);
+    toolbar.setNavigationOnClickListener(
+        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+    txtDoctorName = view.findViewById(R.id.txtDoctorName);
+    txtDiagnosis = view.findViewById(R.id.txtDiagnosis);
+    txtInstructions = view.findViewById(R.id.txtInstructions);
+    txtFollowUp = view.findViewById(R.id.txtFollowUp);
+    medicationsContainer = view.findViewById(R.id.medicationsContainer);
+    txtNoMeds = view.findViewById(R.id.txtNoMeds);
   }
 
   private void loadDetail() {
@@ -73,49 +78,43 @@ public class PrescriptionDetailActivity extends AppCompatActivity {
               @Override
               public void onResponse(
                   Call<PrescriptionResponse> call, Response<PrescriptionResponse> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                   bind(PrescriptionEnricher.mapToPrescription(response.body(), null));
-                  // fetch doctor name separately so the screen isn't blocked on it
                   fetchDoctorName(response.body().getDoctor_id());
                 } else {
                   Toast.makeText(
-                          PrescriptionDetailActivity.this,
-                          "Failed to load prescription",
-                          Toast.LENGTH_SHORT)
+                          requireContext(), "Failed to load prescription", Toast.LENGTH_SHORT)
                       .show();
                 }
               }
 
               @Override
               public void onFailure(Call<PrescriptionResponse> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(
-                        PrescriptionDetailActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
                     .show();
               }
             });
   }
 
   private void fetchDoctorName(int doctorId) {
-    com.bca.medisync.data.remote.api.DoctorApi doctorApi =
-        ApiClient.getRetrofit().create(com.bca.medisync.data.remote.api.DoctorApi.class);
+    DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
     doctorApi
         .getDoctorDetail(doctorId)
         .enqueue(
-            new Callback<com.bca.medisync.data.remote.dto.doctor.DoctorResponse>() {
+            new Callback<DoctorResponse>() {
               @Override
-              public void onResponse(
-                  Call<com.bca.medisync.data.remote.dto.doctor.DoctorResponse> call,
-                  Response<com.bca.medisync.data.remote.dto.doctor.DoctorResponse> response) {
+              public void onResponse(Call<DoctorResponse> call, Response<DoctorResponse> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                   txtDoctorName.setText(response.body().getName());
                 }
               }
 
               @Override
-              public void onFailure(
-                  Call<com.bca.medisync.data.remote.dto.doctor.DoctorResponse> call, Throwable t) {}
+              public void onFailure(Call<DoctorResponse> call, Throwable t) {}
             });
   }
 
@@ -127,17 +126,17 @@ public class PrescriptionDetailActivity extends AppCompatActivity {
 
     medicationsContainer.removeAllViews();
     if (p.getMedications() == null || p.getMedications().isEmpty()) {
-      txtNoMeds.setVisibility(android.view.View.VISIBLE);
+      txtNoMeds.setVisibility(View.VISIBLE);
       return;
     }
-    txtNoMeds.setVisibility(android.view.View.GONE);
+    txtNoMeds.setVisibility(View.GONE);
     for (Medication m : p.getMedications()) {
       medicationsContainer.addView(buildMedicationRow(m));
     }
   }
 
   private MaterialCardView buildMedicationRow(Medication m) {
-    MaterialCardView card = new MaterialCardView(this);
+    MaterialCardView card = new MaterialCardView(requireContext());
     LinearLayout.LayoutParams cardLp =
         new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -145,31 +144,31 @@ public class PrescriptionDetailActivity extends AppCompatActivity {
     card.setLayoutParams(cardLp);
     card.setRadius(dp(16));
     card.setCardElevation(0f);
-    card.setCardBackgroundColor(getColor(R.color.surface_container));
+    card.setCardBackgroundColor(requireContext().getColor(R.color.surface_container));
 
-    LinearLayout content = new LinearLayout(this);
+    LinearLayout content = new LinearLayout(requireContext());
     content.setOrientation(LinearLayout.VERTICAL);
     content.setPadding(dp(16), dp(14), dp(16), dp(14));
 
-    TextView name = new TextView(this);
+    TextView name = new TextView(requireContext());
     name.setText(m.getName() + " " + m.getDosage());
     name.setTextSize(15);
     name.setTypeface(null, android.graphics.Typeface.BOLD);
-    name.setTextColor(getColor(R.color.on_surface));
+    name.setTextColor(requireContext().getColor(R.color.on_surface));
 
-    TextView freq = new TextView(this);
+    TextView freq = new TextView(requireContext());
     freq.setText(m.getFrequency() + " \u2022 " + m.getTime());
     freq.setTextSize(12);
-    freq.setTextColor(getColor(R.color.on_surface_variant));
+    freq.setTextColor(requireContext().getColor(R.color.on_surface_variant));
 
     content.addView(name);
     content.addView(freq);
 
     if (m.getInstruction() != null && !m.getInstruction().isEmpty()) {
-      TextView instr = new TextView(this);
+      TextView instr = new TextView(requireContext());
       instr.setText(m.getInstruction());
       instr.setTextSize(12);
-      instr.setTextColor(getColor(R.color.primary));
+      instr.setTextColor(requireContext().getColor(R.color.primary));
       instr.setPadding(0, dp(4), 0, 0);
       content.addView(instr);
     }
