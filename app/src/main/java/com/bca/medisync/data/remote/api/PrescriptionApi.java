@@ -9,9 +9,9 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public interface PrescriptionApi {
-  @GET("api/v1/prescription/me")
+  @GET("api/v1/prescriptions/me")
   Call<List<PrescriptionResponse>> getMyPrescriptions();
 
-  @GET("api/v1/prescription/{prescription_id}")
+  @GET("api/v1/prescriptions/{prescription_id}")
   Call<PrescriptionResponse> getPrescriptionDetail(@Path("prescription_id") int prescriptionId);
 }

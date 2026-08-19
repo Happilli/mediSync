@@ -7,6 +7,7 @@ public class Prescription {
   private final String doctor_name;
   private final String diagnosis;
   private final String instructions;
+  private final String createdAt;
   private final String followUpDate;
   private final List<Medication> medications;
 
@@ -15,12 +16,14 @@ public class Prescription {
       String doctor_name,
       String diagnosis,
       String instructions,
+      String createdAt,
       String followUpDate,
       List<Medication> medications) {
     this.id = id;
     this.doctor_name = doctor_name;
     this.diagnosis = diagnosis;
     this.instructions = instructions;
+    this.createdAt = createdAt;
     this.followUpDate = followUpDate;
     this.medications = medications;
   }
@@ -31,6 +34,10 @@ public class Prescription {
 
   public String getDoctor_name() {
     return doctor_name;
+  }
+
+  public String getCreatedAt() {
+    return createdAt;
   }
 
   public String getDiagnosis() {

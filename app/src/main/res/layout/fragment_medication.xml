@@ -114,15 +114,4 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fabAddMedication"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:text="Add Medication"
-        android:textAllCaps="false"
-        app:backgroundTint="?attr/colorPrimaryContainer"
-        app:icon="@android:drawable/ic_input_add"
-        app:iconTint="?attr/colorOnPrimaryContainer" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,16 +1,16 @@
 package com.bca.medisync.patient;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,7 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DoctorActivity extends AppCompatActivity {
+public class DoctorFragment extends Fragment {
   private RecyclerView rvDoctors;
   private MaterialToolbar toolbar;
   private TextInputEditText etSearch;
@@ -38,53 +38,64 @@ public class DoctorActivity extends AppCompatActivity {
 
   private Integer filterHospitalId;
 
+  @Nullable
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_doctor);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
-        (v, insets) -> {
-          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-          v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-          return insets;
-        });
-    initViews();
+  public View onCreateView(
+      @NonNull LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.activity_doctor, container, false);
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    Bundle args = getArguments();
+    if (args != null) {
+      String hospitalIdStr = args.getString("hospital_id");
+      if (hospitalIdStr != null) {
+        try {
+          filterHospitalId = Integer.parseInt(hospitalIdStr);
+        } catch (NumberFormatException ignored) {
+        }
+      }
+    }
+    initViews(view);
     setupToolbar();
     setupRecyclerView();
     setupSearch();
     loadDoctors(null);
   }
 
-  private void initViews() {
-    rvDoctors = findViewById(R.id.rvDoctors);
-    toolbar = findViewById(R.id.toolbar);
-    etSearch = findViewById(R.id.etSearch);
+  private void initViews(View view) {
+    rvDoctors = view.findViewById(R.id.rvDoctors);
+    toolbar = view.findViewById(R.id.toolbar);
+    etSearch = view.findViewById(R.id.etSearch);
   }
 
   private void setupToolbar() {
     toolbar.setNavigationOnClickListener(
-        v -> {
-          finish();
-        });
+        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
   }
 
   private void setupRecyclerView() {
     adapter =
         new DoctorAdapter(
-            this,
+            requireContext(),
             new ArrayList<>(),
             doctor -> {
-              Intent intent = new Intent(DoctorActivity.this, BookAppointmentActivity.class);
-              intent.putExtra("doctor_id", doctor.getId());
-              intent.putExtra("doctor_name", doctor.getName());
-              intent.putExtra("doctor_speciality", doctor.getSpeciality());
-              intent.putExtra("doctor_info", doctor.getInfo());
-              intent.putExtra("doctor_department", doctor.getDepartment());
-              startActivity(intent);
+              Bundle args = new Bundle();
+              args.putString("doctor_id", doctor.getId());
+              args.putString("doctor_name", doctor.getName());
+              args.putString("doctor_speciality", doctor.getSpeciality());
+              args.putString("doctor_info", doctor.getInfo());
+              args.putString("doctor_department", doctor.getDepartment());
+
+              BookAppointmentFragment fragment = new BookAppointmentFragment();
+              fragment.setArguments(args);
+              ((MainTabActivity) requireActivity()).pushFragment(fragment);
             });
-    rvDoctors.setLayoutManager(new LinearLayoutManager(this));
+    rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvDoctors.setAdapter(adapter);
   }
 
@@ -96,6 +107,7 @@ public class DoctorActivity extends AppCompatActivity {
               @Override
               public void onResponse(
                   Call<List<DoctorResponse>> call, Response<List<DoctorResponse>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                   List<Doctor> doctors = new ArrayList<>();
                   for (DoctorResponse r : response.body()) {
@@ -103,15 +115,16 @@ public class DoctorActivity extends AppCompatActivity {
                   }
                   adapter.updateData(doctors);
                 } else {
-                  Toast.makeText(DoctorActivity.this, "failed to load doctors", Toast.LENGTH_SHORT)
+                  Toast.makeText(requireContext(), "failed to load doctors", Toast.LENGTH_SHORT)
                       .show();
                 }
               }
 
               @Override
               public void onFailure(Call<List<DoctorResponse>> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(
-                        DoctorActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT)
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT)
                     .show();
               }
             });

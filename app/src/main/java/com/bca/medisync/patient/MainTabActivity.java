@@ -1,6 +1,7 @@
 package com.bca.medisync.patient;
 
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,7 @@ public class MainTabActivity extends AppCompatActivity {
   private BottomNavigationView bottomNav;
   private final Map<Integer, Fragment> fragmentCache = new HashMap<>();
   private Fragment activeFragment;
+  private int activeTabId = R.id.nav_home;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -41,12 +43,25 @@ public class MainTabActivity extends AppCompatActivity {
 
     bottomNav.setOnItemSelectedListener(
         item -> {
+          getSupportFragmentManager()
+              .popBackStackImmediate(
+                  null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
+          bottomNav.setVisibility(View.VISIBLE);
           switchTo(item.getItemId());
           return true;
         });
+
+    getSupportFragmentManager()
+        .addOnBackStackChangedListener(
+            () -> {
+              if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                bottomNav.setVisibility(View.VISIBLE);
+              }
+            });
   }
 
   private void switchTo(int itemId) {
+    activeTabId = itemId;
     Fragment fragment = fragmentCache.get(itemId);
     if (fragment == null) {
       fragment = createFragment(itemId);
@@ -69,5 +84,14 @@ public class MainTabActivity extends AppCompatActivity {
     if (itemId == R.id.nav_medications) return new MedicationFragment();
     if (itemId == R.id.nav_profile) return new ProfileFragment();
     return new HomeFragment();
+  }
+
+  public void pushFragment(Fragment fragment) {
+    bottomNav.setVisibility(View.VISIBLE);
+    getSupportFragmentManager()
+        .beginTransaction()
+        .add(R.id.fragmentContainer, fragment)
+        .addToBackStack(null)
+        .commit();
   }
 }

@@ -178,6 +178,8 @@ public class HomeFragment extends Fragment {
                   goToTab(R.id.nav_appointments);
                   break;
                 case 1:
+                  ((MainTabActivity) requireActivity())
+                      .pushFragment(new PrescriptionListFragment());
                   break;
                 case 2:
                   goToTab(R.id.nav_medications);
@@ -186,9 +188,11 @@ public class HomeFragment extends Fragment {
                   goToTab(R.id.nav_profile);
                   break;
                 case 4:
+                  ((MainTabActivity) requireActivity())
+                      .pushFragment(new PatientMedicalHistoryFragment());
                   break;
                 case 5:
-                  startActivity(new Intent(requireContext(), HospitalActivity.class));
+                  ((MainTabActivity) requireActivity()).pushFragment(new HospitalFragment());
                   break;
               }
             });

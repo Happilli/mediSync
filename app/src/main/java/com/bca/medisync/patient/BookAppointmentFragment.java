@@ -1,15 +1,15 @@
 package com.bca.medisync.patient;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,88 +36,89 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class BookAppointmentActivity extends AppCompatActivity {
+public class BookAppointmentFragment extends Fragment {
   private MaterialToolbar toolbar;
   private TextView txtDoctorName, txtDoctorSpeciality, txtDoctorInfo;
   private MaterialButton btnConfirm;
   private TextInputEditText etNotes;
   private RecyclerView rvTimeSlots;
-
-  private TimeSlot selectedTimeSlot;
-
-  // doctor info from DoctorActivity
-  private String doctorName, doctorSpeciality, doctorInfo, doctorDepartment;
-  private int doctorId = -1;
   private TextView txtNoSlots;
 
+  private TimeSlot selectedTimeSlot;
+  private String doctorName, doctorSpeciality, doctorInfo, doctorDepartment;
+  private int doctorId = -1;
+
+  @Nullable
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_book_appointment);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
-        (v, insets) -> {
-          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-          v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-          return insets;
-        });
-    initViews();
+  public View onCreateView(
+      @NonNull LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.activity_book_appointment, container, false);
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    initViews(view);
     setupToolbar();
     loadDoctorData();
     setupTimeSlots();
     setupConfirmButton();
   }
 
-  private void initViews() {
-    toolbar = findViewById(R.id.toolbar);
-    txtDoctorName = findViewById(R.id.txtDoctorName);
-    txtDoctorSpeciality = findViewById(R.id.txtDoctorSpeciality);
-    txtDoctorInfo = findViewById(R.id.txtDoctorInfo);
-    btnConfirm = findViewById(R.id.btnConfirm);
+  private void initViews(View view) {
+    toolbar = view.findViewById(R.id.toolbar);
+    txtDoctorName = view.findViewById(R.id.txtDoctorName);
+    txtDoctorSpeciality = view.findViewById(R.id.txtDoctorSpeciality);
+    txtDoctorInfo = view.findViewById(R.id.txtDoctorInfo);
+    btnConfirm = view.findViewById(R.id.btnConfirm);
     btnConfirm.setEnabled(false);
-    etNotes = findViewById(R.id.etNotes);
-    rvTimeSlots = findViewById(R.id.rvTimeSlots);
-    txtNoSlots = findViewById(R.id.txtNoSlots);
+    etNotes = view.findViewById(R.id.etNotes);
+    rvTimeSlots = view.findViewById(R.id.rvTimeSlots);
+    txtNoSlots = view.findViewById(R.id.txtNoSlots);
   }
 
   private void setupToolbar() {
-    toolbar.setNavigationOnClickListener(v -> finish());
+    toolbar.setNavigationOnClickListener(
+        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
   }
 
   private void loadDoctorData() {
-    String doctorIdStr = getIntent().getStringExtra("doctor_id");
-    doctorName = getIntent().getStringExtra("doctor_name");
-    doctorSpeciality = getIntent().getStringExtra("doctor_speciality");
-    doctorInfo = getIntent().getStringExtra("doctor_info");
-    doctorDepartment = getIntent().getStringExtra("doctor_department");
+    Bundle args = getArguments();
+    if (args == null) {
+      Toast.makeText(requireContext(), "Doctor not specified", Toast.LENGTH_SHORT).show();
+      requireActivity().getOnBackPressedDispatcher().onBackPressed();
+      return;
+    }
+
+    String doctorIdStr = args.getString("doctor_id");
+    doctorName = args.getString("doctor_name");
+    doctorSpeciality = args.getString("doctor_speciality");
+    doctorInfo = args.getString("doctor_info");
+    doctorDepartment = args.getString("doctor_department");
 
     if (doctorIdStr != null) {
       try {
         doctorId = Integer.parseInt(doctorIdStr);
       } catch (NumberFormatException e) {
-        Toast.makeText(this, "Invalid doctor reference", Toast.LENGTH_SHORT).show();
-        finish();
+        Toast.makeText(requireContext(), "Invalid doctor reference", Toast.LENGTH_SHORT).show();
+        requireActivity().getOnBackPressedDispatcher().onBackPressed();
         return;
       }
     } else {
-      Toast.makeText(this, "Doctor not specified", Toast.LENGTH_SHORT).show();
-      finish();
+      Toast.makeText(requireContext(), "Doctor not specified", Toast.LENGTH_SHORT).show();
+      requireActivity().getOnBackPressedDispatcher().onBackPressed();
       return;
     }
 
-    if (doctorName != null) {
-      txtDoctorName.setText(doctorName);
-    }
-    if (doctorSpeciality != null) {
-      txtDoctorSpeciality.setText(doctorSpeciality);
-    }
-    if (doctorInfo != null) {
-      txtDoctorInfo.setText(doctorInfo);
-    }
+    if (doctorName != null) txtDoctorName.setText(doctorName);
+    if (doctorSpeciality != null) txtDoctorSpeciality.setText(doctorSpeciality);
+    if (doctorInfo != null) txtDoctorInfo.setText(doctorInfo);
   }
 
   private void setupTimeSlots() {
+    if (doctorId == -1) return;
     DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
     api.getDoctorTimeslots(doctorId, true)
         .enqueue(
@@ -125,6 +126,7 @@ public class BookAppointmentActivity extends AppCompatActivity {
               @Override
               public void onResponse(
                   Call<List<TimeSlotResponse>> call, Response<List<TimeSlotResponse>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                   List<TimeSlot> slots = new ArrayList<>();
                   for (TimeSlotResponse r : response.body()) {
@@ -133,19 +135,16 @@ public class BookAppointmentActivity extends AppCompatActivity {
                   bindTimeSlots(slots);
                 } else {
                   Toast.makeText(
-                          BookAppointmentActivity.this,
-                          "Failed to load available slots",
-                          Toast.LENGTH_SHORT)
+                          requireContext(), "Failed to load available slots", Toast.LENGTH_SHORT)
                       .show();
                 }
               }
 
               @Override
               public void onFailure(Call<List<TimeSlotResponse>> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(
-                        BookAppointmentActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
                     .show();
               }
             });
@@ -162,8 +161,9 @@ public class BookAppointmentActivity extends AppCompatActivity {
     txtNoSlots.setVisibility(View.GONE);
     btnConfirm.setEnabled(true);
 
-    TimeSlotAdapter adapter = new TimeSlotAdapter(this, slots, slot -> selectedTimeSlot = slot);
-    rvTimeSlots.setLayoutManager(new GridLayoutManager(this, 3));
+    TimeSlotAdapter adapter =
+        new TimeSlotAdapter(requireContext(), slots, slot -> selectedTimeSlot = slot);
+    rvTimeSlots.setLayoutManager(new GridLayoutManager(requireContext(), 3));
     rvTimeSlots.setAdapter(adapter);
   }
 
@@ -181,7 +181,8 @@ public class BookAppointmentActivity extends AppCompatActivity {
     btnConfirm.setOnClickListener(
         v -> {
           if (selectedTimeSlot == null) {
-            Toast.makeText(this, "Please select a time slot", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Please select a time slot", Toast.LENGTH_SHORT)
+                .show();
             return;
           }
           String notes = etNotes.getText() != null ? etNotes.getText().toString() : "";
@@ -194,39 +195,37 @@ public class BookAppointmentActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(
                         Call<AppointmentResponse> call, Response<AppointmentResponse> response) {
+                      if (!isAdded()) return;
                       btnConfirm.setEnabled(true);
                       if (response.isSuccessful()) {
-                        Toast.makeText(
-                                BookAppointmentActivity.this,
-                                "Appointment booked!",
-                                Toast.LENGTH_LONG)
+                        Toast.makeText(requireContext(), "Appointment booked!", Toast.LENGTH_LONG)
                             .show();
-                        finish();
+                        requireActivity().getOnBackPressedDispatcher().onBackPressed();
                       } else if (response.code() == 403) {
                         Toast.makeText(
-                                BookAppointmentActivity.this,
+                                requireContext(),
                                 "You need to be verified before booking appointments.",
                                 Toast.LENGTH_LONG)
                             .show();
                       } else if (response.code() == 400) {
                         Toast.makeText(
-                                BookAppointmentActivity.this,
+                                requireContext(),
                                 "This slot is no longer available.",
                                 Toast.LENGTH_LONG)
                             .show();
                         setupTimeSlots();
                       } else {
-                        Toast.makeText(
-                                BookAppointmentActivity.this, "Booking failed.", Toast.LENGTH_SHORT)
+                        Toast.makeText(requireContext(), "Booking failed.", Toast.LENGTH_SHORT)
                             .show();
                       }
                     }
 
                     @Override
                     public void onFailure(Call<AppointmentResponse> call, Throwable t) {
+                      if (!isAdded()) return;
                       btnConfirm.setEnabled(true);
                       Toast.makeText(
-                              BookAppointmentActivity.this,
+                              requireContext(),
                               "Network error: " + t.getMessage(),
                               Toast.LENGTH_LONG)
                           .show();

@@ -1,10 +1,5 @@
 package com.bca.medisync.patient;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,12 +20,10 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicationApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -42,7 +35,6 @@ public class MedicationFragment extends Fragment {
   private RecyclerView rvMedications;
   private TextView tvActiveTime, tvActiveName, tvActiveDosage;
   private MaterialButton btnMarkTaken;
-  private ExtendedFloatingActionButton fabAddMedication;
   private MedicationAdapter adapter;
 
   private Medication activeMedication;
@@ -63,7 +55,6 @@ public class MedicationFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     initViews(view);
     setUpRecyclerView();
-    setupFab();
     loadMedications();
   }
 
@@ -79,7 +70,6 @@ public class MedicationFragment extends Fragment {
     tvActiveName = view.findViewById(R.id.tvActiveName);
     tvActiveDosage = view.findViewById(R.id.tvActiveDosage);
     btnMarkTaken = view.findViewById(R.id.btnMarkTaken);
-    fabAddMedication = view.findViewById(R.id.fabAddMedication);
 
     btnMarkTaken.setOnClickListener(
         v -> {
@@ -100,16 +90,6 @@ public class MedicationFragment extends Fragment {
             this::markTaken);
     rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvMedications.setAdapter(adapter);
-  }
-
-  private void setupFab() {
-    fabAddMedication.setOnClickListener(
-        v ->
-            Toast.makeText(
-                    requireContext(),
-                    "Medications are added by your doctor during prescriptions.",
-                    Toast.LENGTH_SHORT)
-                .show());
   }
 
   private void loadMedications() {

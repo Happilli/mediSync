@@ -108,7 +108,7 @@ public class AppointmentFragment extends Fragment {
 
   private void setupFab() {
     fabBookAppointment.setOnClickListener(
-        v -> startActivity(new android.content.Intent(requireContext(), HospitalActivity.class)));
+        v -> ((MainTabActivity) requireActivity()).pushFragment(new HospitalFragment()));
   }
 
   private void loadAppointments() {

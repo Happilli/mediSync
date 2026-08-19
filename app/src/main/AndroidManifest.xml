@@ -34,22 +34,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".patient.HospitalActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".patient.HospitalDetailActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".patient.DoctorActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".patient.BookAppointmentActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".doctor.DoctorHomeActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

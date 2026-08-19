@@ -1,16 +1,16 @@
 package com.bca.medisync.patient;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,61 +30,62 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HospitalActivity extends AppCompatActivity {
+public class HospitalFragment extends Fragment {
   private RecyclerView rvHospitals;
   private MaterialToolbar toolbar;
   private HospitalAdapter adapter;
   private TextInputEditText etSearch;
 
+  @Nullable
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_hospital);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
-        (v, insets) -> {
-          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-          v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-          return insets;
-        });
-    initView();
+  public View onCreateView(
+      @NonNull LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.activity_hospital, container, false);
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    initView(view);
     setupToolbar();
     setupRecycleView();
     setupSearch();
     loadHospitals(null);
   }
 
-  private void initView() {
-    rvHospitals = findViewById(R.id.rvHospitals);
-    toolbar = findViewById(R.id.toolbar);
-    etSearch = findViewById(R.id.etSearch);
+  private void initView(View view) {
+    rvHospitals = view.findViewById(R.id.rvHospitals);
+    toolbar = view.findViewById(R.id.toolbar);
+    etSearch = view.findViewById(R.id.etSearch);
   }
 
   private void setupToolbar() {
     toolbar.setNavigationOnClickListener(
-        v -> {
-          finish();
-        });
+        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
   }
 
   private void setupRecycleView() {
     adapter =
         new HospitalAdapter(
-            this,
+            requireContext(),
             new ArrayList<>(),
             hospital -> {
-              Intent intent = new Intent(HospitalActivity.this, HospitalDetailActivity.class);
-              intent.putExtra("hospital_id", hospital.getId());
-              intent.putExtra("hospital_name", hospital.getName());
-              intent.putExtra("hospital_address", hospital.getAddress());
-              intent.putExtra("hospital_phone", hospital.getPhone());
-              intent.putExtra("hospital_website", hospital.getWebsite());
-              intent.putExtra("hospital_description", hospital.getDescription());
-              intent.putExtra("hospita_rating", hospital.getRating());
-              startActivity(intent);
+              Bundle args = new Bundle();
+              args.putString("hospital_id", hospital.getId());
+              args.putString("hospital_name", hospital.getName());
+              args.putString("hospital_address", hospital.getAddress());
+              args.putString("hospital_phone", hospital.getPhone());
+              args.putString("hospital_website", hospital.getWebsite());
+              args.putString("hospital_description", hospital.getDescription());
+              args.putDouble("hospital_rating", hospital.getRating());
+
+              HospitalDetailFragment fragment = new HospitalDetailFragment();
+              fragment.setArguments(args);
+              ((MainTabActivity) requireActivity()).pushFragment(fragment);
             });
-    rvHospitals.setLayoutManager(new LinearLayoutManager(this));
+    rvHospitals.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvHospitals.setAdapter(adapter);
   }
 
@@ -96,6 +97,7 @@ public class HospitalActivity extends AppCompatActivity {
               @Override
               public void onResponse(
                   Call<List<HospitalResponse>> call, Response<List<HospitalResponse>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                   List<Hospital> hospitals = new ArrayList<>();
                   for (HospitalResponse r : response.body()) {
@@ -103,18 +105,16 @@ public class HospitalActivity extends AppCompatActivity {
                   }
                   adapter.updateData(hospitals);
                 } else {
-                  Toast.makeText(
-                          HospitalActivity.this, "Failed to load hosptials..", Toast.LENGTH_SHORT)
+                  Toast.makeText(requireContext(), "Failed to load hospitals..", Toast.LENGTH_SHORT)
                       .show();
                 }
               }
 
               @Override
               public void onFailure(Call<List<HospitalResponse>> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(
-                        HospitalActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
                     .show();
               }
             });
