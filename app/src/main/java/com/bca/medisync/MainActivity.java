@@ -14,7 +14,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AuthApi;
-import com.bca.medisync.doctor.DoctorHomeActivity;
 import com.bca.medisync.data.remote.dto.login.LoginRequest;
 import com.bca.medisync.data.remote.dto.login.LoginResponse;
 import com.bca.medisync.patient.MainTabActivity;
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     if (sessionManager.isLoggedIn()) {
       Intent intent;
       if ("doctor".equalsIgnoreCase(sessionManager.getRole())) {
-        intent = new Intent(MainActivity.this, DoctorHomeActivity.class);
+        intent = new Intent(MainActivity.this, DoctorTabActivity.class);
       } else {
         intent = new Intent(MainActivity.this, MainTabActivity.class);
       }
@@ -132,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
                   Intent intent;
                   if ("doctor".equalsIgnoreCase(body.getRole())) {
-                    intent = new Intent(MainActivity.this, DoctorHomeActivity.class);
+                    intent = new Intent(MainActivity.this, DoctorTabActivity.class);
                   } else {
                     intent = new Intent(MainActivity.this, MainTabActivity.class);
                   }

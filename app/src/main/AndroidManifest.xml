@@ -34,10 +34,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".doctor.DoctorHomeActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".doctor.PatientActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -87,6 +83,10 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ForgotPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".DoctorTabActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>
