@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,6 +14,8 @@ import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.DoctorTabActivity;
 import com.bca.medisync.R;
+import com.bca.medisync.data.remote.ApiClient;
+import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
@@ -20,6 +23,7 @@ public class PatientDetailsFragment extends Fragment {
 
   private int patientId = -1;
   private MaterialToolbar toolbar;
+  private ImageView imgProfile;
   private TextView txtName,
       txtGender,
       txtBlood,
@@ -62,6 +66,7 @@ public class PatientDetailsFragment extends Fragment {
     txtEmergency = view.findViewById(R.id.txtEmergency);
     btnHistory = view.findViewById(R.id.btnHistory);
     btnConsultation = view.findViewById(R.id.btnConsultation);
+    imgProfile = view.findViewById(R.id.imgPatientProfile);
   }
 
   private void setupToolbar() {
@@ -84,6 +89,20 @@ public class PatientDetailsFragment extends Fragment {
     txtDob.setText(args.getString("patient_dob"));
     txtAddress.setText(args.getString("patient_address"));
     txtEmergency.setText(args.getString("patient_emergency"));
+    bindProfilePic(args.getString("patient_pic_url"));
+  }
+
+  private void bindProfilePic(String url) {
+    if (url == null || url.isEmpty()) {
+      imgProfile.setImageResource(R.drawable.ic_nav_profile);
+      return;
+    }
+    Glide.with(this)
+        .load(ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + url)
+        .placeholder(R.drawable.ic_nav_profile)
+        .error(R.drawable.ic_nav_profile)
+        .centerCrop()
+        .into(imgProfile);
   }
 
   private void setupListener() {

@@ -18,7 +18,8 @@ public class DataProvider {
         "2001-05-15",
         "Male",
         "B+",
-        "+977-9875481229");
+        "+977-9875481229",
+        null);
   }
 
   public static List<Doctor> getDoctors() {
@@ -166,7 +167,6 @@ public class DataProvider {
     return list;
   }
 
-
   public static List<Patient> getPatients() {
     List<Patient> list = new ArrayList<>();
     list.add(
@@ -179,7 +179,8 @@ public class DataProvider {
             "2003-12-12",
             "Female",
             "O+",
-            "+977-9800000002"));
+            "+977-9800000002",
+            null));
     list.add(
         new Patient(
             "pat002",
@@ -190,7 +191,8 @@ public class DataProvider {
             "1989-06-15",
             "Male",
             "B+",
-            "+977-9800000004"));
+            "+977-9800000004",
+            null));
     list.add(
         new Patient(
             "pat003",
@@ -201,7 +203,7 @@ public class DataProvider {
             "1982-03-22",
             "Male",
             "A+",
-            "+977-9800000006"));
+            "+977-9800000006", null));
     return list;
   }
 

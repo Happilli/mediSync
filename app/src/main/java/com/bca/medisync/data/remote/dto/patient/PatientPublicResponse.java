@@ -8,6 +8,9 @@ public class PatientPublicResponse {
   private String blood_group;
   private String emergency_contact;
   private String profile_pic_url;
+  private String email;
+  private String address;
+  private String date_of_birth;
 
   public int getId() {
     return id;
@@ -35,5 +38,17 @@ public class PatientPublicResponse {
 
   public String getProfile_pic_url() {
     return profile_pic_url;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public String getAddress() {
+    return address;
+  }
+
+  public String getDate_of_birth() {
+    return date_of_birth;
   }
 }

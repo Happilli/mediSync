@@ -57,12 +57,11 @@
                         app:cardElevation="0dp">
 
                         <ImageView
+                            android:id="@+id/imgPatientProfile"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:padding="18dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/ic_nav_profile"
-                            app:tint="?attr/colorPrimaryContainer" />
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_nav_profile" />
                     </com.google.android.material.card.MaterialCardView>
 
                     <TextView

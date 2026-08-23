@@ -4,13 +4,16 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.data.model.Patient;
+import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.R;
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
@@ -42,10 +45,20 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
     holder.txtName.setText(p.getName());
     holder.txtBloodGroup.setText(p.getBloodGroup());
     holder.txtPhone.setText(p.getPhone());
-    holder.itemView.setOnClickListener(
-        v -> {
-          listener.onItemClick(p);
-        });
+
+    String url = p.getProfilePicUrl();
+    if (url != null && !url.isEmpty()) {
+      Glide.with(context)
+          .load(ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + url)
+          .placeholder(R.drawable.ic_nav_profile)
+          .error(R.drawable.ic_nav_profile)
+          .centerCrop()
+          .into(holder.imgPic);
+    } else {
+      holder.imgPic.setImageResource(R.drawable.ic_nav_profile);
+    }
+
+    holder.itemView.setOnClickListener(v -> listener.onItemClick(p));
   }
 
   @Override
@@ -55,12 +68,14 @@ public class PatientAdapter extends RecyclerView.Adapter<PatientAdapter.ViewHold
 
   public static class ViewHolder extends RecyclerView.ViewHolder {
     TextView txtName, txtBloodGroup, txtPhone;
+    ImageView imgPic;
 
     public ViewHolder(@NonNull View itemView) {
       super(itemView);
       txtName = itemView.findViewById(R.id.txtPatientName);
       txtBloodGroup = itemView.findViewById(R.id.txtBloodGroup);
       txtPhone = itemView.findViewById(R.id.txtPhone);
+      imgPic = itemView.findViewById(R.id.imgPatientPic);
     }
   }
 }

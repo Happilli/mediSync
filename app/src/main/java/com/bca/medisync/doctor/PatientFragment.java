@@ -142,6 +142,10 @@ public class PatientFragment extends Fragment {
               args.putString("patient_gender", patient.getGender());
               args.putString("patient_blood", patient.getBloodGroup());
               args.putString("patient_emergency", patient.getEmergencyContact());
+              args.putString("patient_email", patient.getEmail());
+              args.putString("patient_address", patient.getAddress());
+              args.putString("patient_dob", patient.getDateOfBirth());
+              args.putString("patient_pic_url", match != null ? match.getProfile_pic_url() : null);
 
               PatientDetailsFragment fragment = new PatientDetailsFragment();
               fragment.setArguments(args);
@@ -153,12 +157,13 @@ public class PatientFragment extends Fragment {
     return new Patient(
         String.valueOf(r.getId()),
         r.getName(),
-        "",
+        r.getEmail(),
         r.getPhone(),
-        "",
-        "",
+        r.getAddress(),
+        r.getDate_of_birth(),
         r.getGender(),
         r.getBlood_group(),
-        r.getEmergency_contact());
+        r.getEmergency_contact(),
+        r.getProfile_pic_url());
   }
 }
