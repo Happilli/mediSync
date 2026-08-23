@@ -7,6 +7,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionResponse;
+import com.bca.medisync.util.DateTimeUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
@@ -102,15 +103,6 @@ public class PrescriptionEnricher {
   }
 
   public static String formatDate(String iso) {
-    if (iso == null) return "";
-    try {
-      SimpleDateFormat inFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-      SimpleDateFormat outFmt = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-      String trimmed = iso.length() > 19 ? iso.substring(0, 19) : iso;
-      Date d = inFmt.parse(trimmed);
-      return d != null ? outFmt.format(d) : iso;
-    } catch (Exception e) {
-      return iso;
-    }
+    return DateTimeUtils.format(iso, "dd MMM yyyy");
   }
 }

@@ -5,6 +5,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
+import com.bca.medisync.util.DateTimeUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -111,13 +112,7 @@ public class AppointmentEnricher {
   }
 
   public static Date parseIso(String iso) {
-    if (iso == null) return null;
-    try {
-      SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-      return fmt.parse(iso);
-    } catch (Exception e) {
-      return null;
-    }
+    return DateTimeUtils.parseIsoToDate(iso);
   }
 
   public static String capitalize(String s) {

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
 import com.bca.medisync.data.model.Notification;
+import com.bca.medisync.util.DateTimeUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -69,14 +70,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
   }
 
   private String formatTime(String iso) {
-    if (iso == null) return "";
-    try {
-      SimpleDateFormat inFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-      SimpleDateFormat outFmt = new SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault());
-      return outFmt.format(inFmt.parse(iso.length() > 19 ? iso.substring(0, 19) : iso));
-    } catch (Exception e) {
-      return iso;
-    }
+    return DateTimeUtils.format(iso, "dd MMM, hh:mm a");
   }
 
   public static class ViewHolder extends RecyclerView.ViewHolder {

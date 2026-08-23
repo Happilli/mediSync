@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,12 +24,13 @@ import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
-import com.bca.medisync.patient.NotificationsActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,6 +40,7 @@ public class HomeFragment extends Fragment {
 
   private RecyclerView rvDashboard;
   private TextView txtPatientName;
+    private MaterialButton btnNotification;
   private MaterialCardView cardAppointment;
   private TextView txtAppointmentDoctor,
       txtAppointmentSpeciality,
@@ -67,6 +70,7 @@ public class HomeFragment extends Fragment {
     super.onResume();
     loadPatientName();
     loadUpcomingAppointment();
+    loadUnreadCount();
   }
 
   private void initViews(View view) {
@@ -77,6 +81,7 @@ public class HomeFragment extends Fragment {
     txtAppointmentSpeciality = view.findViewById(R.id.txtAppointmentSpeciality);
     txtAppointmentDate = view.findViewById(R.id.txtAppointmentDate);
     txtAppointmentTime = view.findViewById(R.id.txtAppointmentTime);
+    btnNotification = view.findViewById(R.id.btnNotification);
 
     cardAppointment.setVisibility(View.GONE);
     cardAppointment.setOnClickListener(v -> goToTab(R.id.nav_appointments));
@@ -112,6 +117,35 @@ public class HomeFragment extends Fragment {
                         requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT)
                     .show();
               }
+            });
+  }
+
+  private void loadUnreadCount() {
+    NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
+    api.getUnreadCount()
+        .enqueue(
+            new Callback<Map<String, Integer>>() {
+              @Override
+              public void onResponse(
+                  Call<Map<String, Integer>> call, Response<Map<String, Integer>> response) {
+                if (!isAdded()) return;
+                boolean hasUnread = false;
+                if (response.isSuccessful() && response.body() != null) {
+                  Integer count = response.body().get("unread_count");
+                  hasUnread = count != null && count > 0;
+                }
+                if (hasUnread) {
+                  btnNotification.setIcon(
+                      ContextCompat.getDrawable(requireContext(), R.drawable.notification_dot));
+                } else {
+                  btnNotification.setIcon(
+                      ContextCompat.getDrawable(
+                          requireContext(), R.drawable.notification));
+                }
+              }
+
+              @Override
+              public void onFailure(Call<Map<String, Integer>> call, Throwable t) {}
             });
   }
 

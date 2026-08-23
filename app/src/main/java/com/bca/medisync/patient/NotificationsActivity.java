@@ -96,6 +96,8 @@ public class NotificationsActivity extends AppCompatActivity {
                   Response<List<NotificationResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                   List<Notification> list = new ArrayList<>();
+                  //                  android.util.Log.d("NotifDebug", "count=" +
+                  // response.body().size());
                   for (NotificationResponse r : response.body()) {
                     list.add(mapToNotification(r));
                   }

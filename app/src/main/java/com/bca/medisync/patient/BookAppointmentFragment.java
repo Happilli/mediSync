@@ -22,6 +22,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
+import com.bca.medisync.util.DateTimeUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -168,12 +169,7 @@ public class BookAppointmentFragment extends Fragment {
   }
 
   private TimeSlot mapToTimeSlot(TimeSlotResponse r) {
-    String displayTime = r.getAppointment_at();
-    try {
-      LocalDateTime dt = LocalDateTime.parse(r.getAppointment_at());
-      displayTime = dt.format(DateTimeFormatter.ofPattern("dd MMM, hh:mm a", Locale.getDefault()));
-    } catch (Exception ignored) {
-    }
+    String displayTime = DateTimeUtils.format(r.getAppointment_at(), "dd MMM, hh:mm a");
     return new TimeSlot(r.getId(), r.getAppointment_at(), displayTime, r.isIs_available());
   }
 
@@ -198,7 +194,7 @@ public class BookAppointmentFragment extends Fragment {
                       if (!isAdded()) return;
                       btnConfirm.setEnabled(true);
                       if (response.isSuccessful()) {
-                       Toast.makeText(requireContext(), "Appointment booked!", Toast.LENGTH_LONG)
+                        Toast.makeText(requireContext(), "Appointment booked!", Toast.LENGTH_LONG)
                             .show();
                         ((MainTabActivity) requireActivity()).popToRootAndRefreshAppointments();
                       } else if (response.code() == 403) {
