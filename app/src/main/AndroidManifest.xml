@@ -34,31 +34,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".doctor.PatientActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".doctor.PatientDetailsActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".doctor.MedicalHistoryActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".doctor.ConsultationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".doctor.PrescriptionActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".doctor.ScheduleActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".doctor.DoctorProfileActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

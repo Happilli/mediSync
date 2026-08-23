@@ -1,9 +1,11 @@
 package com.bca.medisync.data.remote.api;
 
+import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
 import com.bca.medisync.patient.PatientSecurityAnswerUpdateRequest;
 
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.MultipartBody;
@@ -34,4 +36,7 @@ public interface PatientApi {
 
   @PATCH("/api/v1/patients/me/security-answer")
   Call<Map<String, String>> updateSecurityAnswer(@Body PatientSecurityAnswerUpdateRequest request);
+
+  @GET("/api/v1/patients/treated")
+  Call<List<PatientPublicResponse>> getTreatedPatients();
 }

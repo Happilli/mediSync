@@ -18,6 +18,7 @@ import com.google.android.material.button.MaterialButton;
 
 public class PatientDetailsFragment extends Fragment {
 
+  private int patientId = -1;
   private MaterialToolbar toolbar;
   private TextView txtName,
       txtGender,
@@ -72,6 +73,7 @@ public class PatientDetailsFragment extends Fragment {
     Bundle args = getArguments();
     if (args == null) return;
 
+    patientId = args.getInt("patient_id", -1);
     patientName = args.getString("patient_name");
     toolbar.setTitle(patientName);
     txtName.setText(patientName);
@@ -89,6 +91,7 @@ public class PatientDetailsFragment extends Fragment {
         v -> {
           Bundle args = new Bundle();
           args.putString("patient_name", patientName);
+          args.putInt("patient_id", patientId);
           MedicalHistoryFragment fragment = new MedicalHistoryFragment();
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
