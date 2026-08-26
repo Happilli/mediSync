@@ -17,6 +17,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 
 public interface PatientApi {
   @GET("/api/v1/patients/me")
@@ -39,4 +40,10 @@ public interface PatientApi {
 
   @GET("/api/v1/patients/treated")
   Call<List<PatientPublicResponse>> getTreatedPatients();
+
+  @GET("/api/v1/patients/doctor")
+  Call<List<PatientPublicResponse>> getMyDoctorPatients();
+
+  @GET("/api/v1/patients/{patient_id}")
+  Call<PatientPublicResponse> getPatientDetail(@Path("patient_id") int patientId);
 }

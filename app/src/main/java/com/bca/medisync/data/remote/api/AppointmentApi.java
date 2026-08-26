@@ -21,6 +21,10 @@ public interface AppointmentApi {
   Call<List<AppointmentResponse>> getMyAppointments(
       @Query("filter_date") String filtreDate, @Query("status") String status);
 
+  @GET("api/v1/appointments/me/doctor")
+  Call<List<AppointmentResponse>> getMyAppointmentsAsDoctor(
+      @Query("filter_date") String filterDate, @Query("status") String status);
+
   @PATCH("api/v1/appointments/{appointment_id}/cancel")
   Call<AppointmentResponse> cancelAppointment(@Path("appointment_id") int appointmentId);
 }
