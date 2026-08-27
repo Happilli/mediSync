@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.NotificationSocketManager;
 import com.bca.medisync.data.remote.api.AuthApi;
@@ -87,7 +88,9 @@ public class MainActivity extends AppCompatActivity {
         public void onSocketClosed() {}
 
         @Override
-        public void onNotification(NotificationResponse notification) {}
+        public void onNotification(NotificationResponse notification) {
+          NotificationCenter.get().broadcast(notification);
+        }
       };
 
   private void updateRegisterLabel() {

@@ -18,10 +18,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.DashboardAdapter;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
+import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -36,11 +38,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements NotificationCenter.Listener {
 
   private RecyclerView rvDashboard;
   private TextView txtPatientName;
-    private MaterialButton btnNotification;
+  private MaterialButton btnNotification;
   private MaterialCardView cardAppointment;
   private TextView txtAppointmentDoctor,
       txtAppointmentSpeciality,
@@ -68,9 +70,24 @@ public class HomeFragment extends Fragment {
   @Override
   public void onResume() {
     super.onResume();
+    NotificationCenter.get().register(this);
     loadPatientName();
     loadUpcomingAppointment();
     loadUnreadCount();
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    NotificationCenter.get().unregister(this);
+  }
+
+  @Override
+  public void onNotificationReceived(NotificationResponse notification) {
+    if (!isAdded()) {
+      return;
+    }
+    showUnreadIcon();
   }
 
   private void initViews(View view) {
@@ -135,18 +152,24 @@ public class HomeFragment extends Fragment {
                   hasUnread = count != null && count > 0;
                 }
                 if (hasUnread) {
-                  btnNotification.setIcon(
-                      ContextCompat.getDrawable(requireContext(), R.drawable.notification_dot));
+                  showUnreadIcon();
                 } else {
-                  btnNotification.setIcon(
-                      ContextCompat.getDrawable(
-                          requireContext(), R.drawable.notification));
+                  showReadIcon();
                 }
               }
 
               @Override
               public void onFailure(Call<Map<String, Integer>> call, Throwable t) {}
             });
+  }
+
+  private void showUnreadIcon() {
+    btnNotification.setIcon(
+        ContextCompat.getDrawable(requireContext(), R.drawable.notification_dot));
+  }
+
+  private void showReadIcon() {
+    btnNotification.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.notification));
   }
 
   private void loadUpcomingAppointment() {

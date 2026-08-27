@@ -16,6 +16,7 @@ import com.bca.medisync.R;
 import com.bca.medisync.adapter.NotificationAdapter;
 import com.bca.medisync.data.model.Notification;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -29,7 +30,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NotificationsActivity extends AppCompatActivity {
+public class NotificationsActivity extends AppCompatActivity
+    implements NotificationCenter.Listener {
 
   private MaterialToolbar toolbar;
   private RecyclerView rvNotifications;
@@ -54,6 +56,25 @@ public class NotificationsActivity extends AppCompatActivity {
     setupRecyclerView();
     setupListeners();
     loadNotifications();
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    NotificationCenter.get().register(this);
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    NotificationCenter.get().unregister(this);
+  }
+
+  @Override
+  public void onNotificationReceived(NotificationResponse notification) {
+    adapter.prependItem(mapToNotification(notification));
+    txtEmpty.setVisibility(View.GONE);
+    rvNotifications.setVisibility(View.VISIBLE);
   }
 
   private void initViews() {
@@ -96,8 +117,6 @@ public class NotificationsActivity extends AppCompatActivity {
                   Response<List<NotificationResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                   List<Notification> list = new ArrayList<>();
-                  //                  android.util.Log.d("NotifDebug", "count=" +
-                  // response.body().size());
                   for (NotificationResponse r : response.body()) {
                     list.add(mapToNotification(r));
                   }
