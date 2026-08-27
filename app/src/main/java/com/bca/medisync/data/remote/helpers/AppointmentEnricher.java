@@ -3,8 +3,10 @@ package com.bca.medisync.data.remote.helpers;
 import com.bca.medisync.data.model.Appointment;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
+import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
+import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.util.DateTimeUtils;
 
 import java.text.SimpleDateFormat;
@@ -87,6 +89,59 @@ public class AppointmentEnricher {
             });
   }
 
+  public static void enrichForDoctor(
+      List<AppointmentResponse> responses, Callback1<List<Appointment>> callback) {
+    if (responses.isEmpty()) {
+      callback.onResult(new ArrayList<>());
+      return;
+    }
+
+    // Check if we even need to enrich (if patient_name is already present in first item)
+    if (responses.get(0).getPatient_name() != null) {
+      List<Appointment> result = new ArrayList<>();
+      for (AppointmentResponse r : responses) {
+        result.add(mapToAppointmentForDoctor(r, null));
+      }
+      callback.onResult(result);
+      return;
+    }
+
+    List<Appointment> result = new ArrayList<>();
+    AtomicInteger remaining = new AtomicInteger(responses.size());
+    PatientApi patientApi = ApiClient.getRetrofit().create(PatientApi.class);
+
+    for (AppointmentResponse r : responses) {
+      patientApi
+          .getPatientDetail(r.getPatient_id())
+          .enqueue(
+              new Callback<PatientPublicResponse>() {
+                @Override
+                public void onResponse(
+                    Call<PatientPublicResponse> call, Response<PatientPublicResponse> patientResp) {
+                  Appointment appointment =
+                      mapToAppointmentForDoctor(r, patientResp.isSuccessful() ? patientResp.body() : null);
+                  synchronized (result) {
+                    result.add(appointment);
+                  }
+                  if (remaining.decrementAndGet() == 0) {
+                    callback.onResult(result);
+                  }
+                }
+
+                @Override
+                public void onFailure(Call<PatientPublicResponse> call, Throwable t) {
+                  Appointment appointment = mapToAppointmentForDoctor(r, null);
+                  synchronized (result) {
+                    result.add(appointment);
+                  }
+                  if (remaining.decrementAndGet() == 0) {
+                    callback.onResult(result);
+                  }
+                }
+              });
+    }
+  }
+
   public static Appointment mapToAppointment(AppointmentResponse r, DoctorResponse d) {
     String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctor_id();
     String speciality = d != null ? d.getSpeciality() : "";
@@ -105,6 +160,32 @@ public class AppointmentEnricher {
         doctorName,
         department,
         speciality,
+        dateStr,
+        timeStr,
+        status,
+        r.getNotes());
+  }
+
+  public static Appointment mapToAppointmentForDoctor(
+      AppointmentResponse r, PatientPublicResponse p) {
+    String patientName = r.getPatient_name();
+    if (patientName == null || patientName.isEmpty()) {
+      patientName = p != null ? p.getName() : "Patient #" + r.getPatient_id();
+    }
+
+    Date date = parseIso(r.getAppointment_at());
+    String dateStr =
+        date != null ? new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date) : "";
+    String timeStr =
+        date != null ? new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(date) : "";
+    String status = capitalize(r.getStatus());
+
+    return new Appointment(
+        String.valueOf(r.getId()),
+        patientName,
+        r.getDoctor_name() != null ? r.getDoctor_name() : "",
+        r.getDepartment() != null ? r.getDepartment() : "",
+        r.getSpeciality() != null ? r.getSpeciality() : "",
         dateStr,
         timeStr,
         status,
