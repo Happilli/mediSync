@@ -1,7 +1,7 @@
 package com.bca.medisync.data.remote.api;
 
-import com.bca.medisync.data.remote.dto.Consultation.ConsultationCreateRequest;
-import com.bca.medisync.data.remote.dto.Consultation.ConsultationResponse;
+import com.bca.medisync.data.remote.dto.consultation.ConsultationCreateRequest;
+import com.bca.medisync.data.remote.dto.consultation.ConsultationResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

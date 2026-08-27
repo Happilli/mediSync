@@ -17,16 +17,19 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bca.medisync.DoctorTabActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.api.DoctorApi;
+import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentStatusUpdateRequest;
 import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
 import com.bca.medisync.data.remote.dto.TimeSlotResponse;
+import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -250,7 +253,7 @@ public class ScheduleFragment extends Fragment {
 
   private void openPatientDetail(Appointment appointment, int appointmentId) {
     PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    api.getPatientDetailForDoctor(appointment.getPatientIdInt()) // see note below
+    api.getPatientDetailForDoctor(appointment.getPatientId()) // see note below
         .enqueue(
             new Callback<PatientPublicResponse>() {
               @Override

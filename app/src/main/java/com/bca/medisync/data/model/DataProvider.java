@@ -103,7 +103,8 @@ public class DataProvider {
             today,
             "09:00 AM",
             "Confirmed",
-            ""));
+            "",
+            0));
     list.add(
         new Appointment(
             "s002",
@@ -114,7 +115,8 @@ public class DataProvider {
             today,
             "10:30 AM",
             "Confirmed",
-            ""));
+            "",
+            0));
     list.add(
         new Appointment(
             "s003",
@@ -125,7 +127,8 @@ public class DataProvider {
             today,
             "11:30 AM",
             "Pending",
-            ""));
+            "",
+            0));
     return list;
   }
 
@@ -141,7 +144,8 @@ public class DataProvider {
             "25 May 2024",
             "10:30 AM",
             "Confirmed",
-            ""));
+            "",
+            0));
     list.add(
         new Appointment(
             "a002",
@@ -152,7 +156,8 @@ public class DataProvider {
             "02 Jun 2024",
             "11:00 AM",
             "Pending",
-            ""));
+            "",
+            0));
     list.add(
         new Appointment(
             "a003",
@@ -163,7 +168,8 @@ public class DataProvider {
             "10 Jun 2024",
             "09:00 AM",
             "Scheduled",
-            ""));
+            "",
+            0));
     return list;
   }
 
@@ -203,7 +209,8 @@ public class DataProvider {
             "1982-03-22",
             "Male",
             "A+",
-            "+977-9800000006", null));
+            "+977-9800000006",
+            null));
     return list;
   }
 

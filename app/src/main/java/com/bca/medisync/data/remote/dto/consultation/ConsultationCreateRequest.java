@@ -1,10 +1,7 @@
-package com.bca.medisync.data.remote.dto.Consultation;
+package com.bca.medisync.data.remote.dto.consultation;
 
-public class ConsultationResponse {
-  private int id;
+public class ConsultationCreateRequest {
   private int appointment_id;
-  private int doctor_id;
-  private int hospital_id;
   private String complaint;
   private String symptoms;
   private String diagnosis;
@@ -13,13 +10,9 @@ public class ConsultationResponse {
   private String heart_rate;
   private String temperature;
   private String weight;
-  private String created_at;
 
-  public ConsultationResponse(
-      int id,
+  public ConsultationCreateRequest(
       int appointment_id,
-      int doctor_id,
-      int hospital_id,
       String complaint,
       String symptoms,
       String diagnosis,
@@ -27,12 +20,8 @@ public class ConsultationResponse {
       String blood_pressure,
       String heart_rate,
       String temperature,
-      String weight,
-      String created_at) {
-    this.id = id;
+      String weight) {
     this.appointment_id = appointment_id;
-    this.doctor_id = doctor_id;
-    this.hospital_id = hospital_id;
     this.complaint = complaint;
     this.symptoms = symptoms;
     this.diagnosis = diagnosis;
@@ -41,6 +30,5 @@ public class ConsultationResponse {
     this.heart_rate = heart_rate;
     this.temperature = temperature;
     this.weight = weight;
-    this.created_at = created_at;
   }
 }
