@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.DoctorTabActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.PatientAdapter;
-import com.bca.medisync.data.model.DataProvider;
 import com.bca.medisync.data.model.Patient;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
@@ -56,37 +55,6 @@ public class PatientFragment extends Fragment {
   }
 
   private void loadPatients() {
-    if (DoctorDataConfig.USE_REAL_PATIENTS) {
-      loadRealPatients();
-    } else {
-      bindMockPatients();
-    }
-  }
-
-  private void bindMockPatients() {
-    List<Patient> patients = DataProvider.getPatients();
-    rvPatients.setAdapter(
-        new PatientAdapter(
-            requireContext(),
-            patients,
-            patient -> {
-              Bundle args = new Bundle();
-              args.putString("patient_name", patient.getName());
-              args.putString("patient_phone", patient.getPhone());
-              args.putString("patient_email", patient.getEmail());
-              args.putString("patient_dob", patient.getDateOfBirth());
-              args.putString("patient_gender", patient.getGender());
-              args.putString("patient_blood", patient.getBloodGroup());
-              args.putString("patient_address", patient.getAddress());
-              args.putString("patient_emergency", patient.getEmergencyContact());
-
-              PatientDetailsFragment fragment = new PatientDetailsFragment();
-              fragment.setArguments(args);
-              ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
-            }));
-  }
-
-  private void loadRealPatients() {
     PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
     api.getTreatedPatients()
         .enqueue(
@@ -97,11 +65,7 @@ public class PatientFragment extends Fragment {
                   Response<List<PatientPublicResponse>> response) {
                 if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
-                  List<Patient> patients = new ArrayList<>();
-                  for (PatientPublicResponse r : response.body()) {
-                    patients.add(mapToPatient(r));
-                  }
-                  bindRealPatients(response.body());
+                  bindPatients(response.body());
                 } else {
                   Toast.makeText(requireContext(), "Failed to load patients", Toast.LENGTH_SHORT)
                       .show();
@@ -118,7 +82,7 @@ public class PatientFragment extends Fragment {
             });
   }
 
-  private void bindRealPatients(List<PatientPublicResponse> patients) {
+  private void bindPatients(List<PatientPublicResponse> patients) {
     List<Patient> mapped = new ArrayList<>();
     for (PatientPublicResponse r : patients) {
       mapped.add(mapToPatient(r));

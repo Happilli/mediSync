@@ -13,8 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.R;
-import com.bca.medisync.data.model.DataProvider;
-import com.bca.medisync.data.model.MedicalHistory;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
@@ -91,22 +89,13 @@ public class MedicalHistoryFragment extends Fragment {
 
     tvHeader.setText(patientName != null ? patientName + "\nOverview" : "Patient\nOverview");
 
-    if (DoctorDataConfig.USE_REAL_MEDICAL_HISTORY && patientId != -1) {
-      loadRealHistory();
-    } else {
-      bindMockHistory();
+    if (patientId == -1) {
+      Toast.makeText(requireContext(), "Missing patient reference.", Toast.LENGTH_SHORT).show();
+      requireActivity().getOnBackPressedDispatcher().onBackPressed();
+      return;
     }
-  }
 
-  private void bindMockHistory() {
-    MedicalHistory history = DataProvider.getMedicalHistory(patientName);
-    tvRxName.setText(history.getLatestRxName());
-    tvRxDesc.setText(history.getLatestRxDesc());
-    tvLabTitle.setText(history.getLatestLabTitle());
-    tvLabDesc.setText(history.getLatestLabDesc());
-
-    List<MedicalHistoryEntry> timeline = history.getTimeline();
-    bindTimeline(timeline);
+    loadRealHistory();
   }
 
   private void loadRealHistory() {

@@ -92,6 +92,7 @@ public class PatientDetailsFragment extends Fragment {
     txtEmergency.setText(args.getString("patient_emergency"));
     appointmentId = args.getInt("appointment_id", -1);
     bindProfilePic(args.getString("patient_pic_url"));
+    btnConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
   }
 
   private void bindProfilePic(String url) {
