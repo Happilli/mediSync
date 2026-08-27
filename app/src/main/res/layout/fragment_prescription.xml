@@ -71,7 +71,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="?attr/colorSurfaceContainer"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp">
 
@@ -149,6 +148,13 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number" />
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etInstructions"
+                                android:layout_width="match_parent"
+                                android:layout_height="110dp"
+                                android:gravity="top"
+                                android:inputType="textMultiLine" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -167,6 +173,35 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="20dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:letterSpacing="0.06"
+                                    android:text="INSTRUCTIONS"
+                                    android:textColor="?attr/colorPrimary"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold" />
+
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="14dp"
+                                    android:hint="Special Instructions"
+                                    app:boxCornerRadiusBottomEnd="14dp"
+                                    app:boxCornerRadiusBottomStart="14dp"
+                                    app:boxCornerRadiusTopEnd="14dp"
+                                    app:boxCornerRadiusTopStart="14dp">
+
+                                </com.google.android.material.textfield.TextInputLayout>
+                            </LinearLayout>
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
 
@@ -224,44 +259,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="?attr/colorSurfaceContainer"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:letterSpacing="0.06"
-                        android:text="INSTRUCTIONS"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:hint="Special Instructions"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etInstructions"
-                            android:layout_width="match_parent"
-                            android:layout_height="110dp"
-                            android:gravity="top"
-                            android:inputType="textMultiLine" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
