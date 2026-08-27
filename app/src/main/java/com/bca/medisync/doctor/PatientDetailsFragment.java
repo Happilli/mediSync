@@ -1,6 +1,5 @@
 package com.bca.medisync.doctor;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -121,10 +120,12 @@ public class PatientDetailsFragment extends Fragment {
         });
     btnConsultation.setOnClickListener(
         v -> {
-          Intent intent = new Intent(requireContext(), ConsultationActivity.class);
-          intent.putExtra("patient_name", patientName);
-          intent.putExtra("appointment_id", appointmentId);
-          startActivity(intent);
+          Bundle args = new Bundle();
+          args.putString("patient_name", patientName);
+          args.putInt("appointment_id", appointmentId);
+          ConsultationFragment fragment = new ConsultationFragment();
+          fragment.setArguments(args);
+          ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
         });
   }
 }

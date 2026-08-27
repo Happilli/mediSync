@@ -171,7 +171,7 @@ public class MedicalHistoryFragment extends Fragment {
   private void setupListener() {
     btnStartConsultation.setOnClickListener(
         v -> {
-          Intent intent = new Intent(requireContext(), ConsultationActivity.class);
+          Intent intent = new Intent(requireContext(), ConsultationFragment.class);
           intent.putExtra("patient_name", patientName);
           intent.putExtra("appointment_id", appointmentId);
           startActivity(intent);

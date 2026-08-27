@@ -35,11 +35,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".doctor.ConsultationActivity"
+            android:name=".doctor.ConsultationFragment"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".doctor.PrescriptionActivity"
+            android:name=".doctor.PrescriptionFragment"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

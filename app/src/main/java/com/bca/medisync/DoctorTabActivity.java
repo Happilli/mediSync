@@ -98,4 +98,10 @@ public class DoctorTabActivity extends AppCompatActivity {
         .addToBackStack(null)
         .commit();
   }
+
+  public void popToRoot() {
+    getSupportFragmentManager()
+        .popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    bottomNav.setVisibility(View.VISIBLE);
+  }
 }

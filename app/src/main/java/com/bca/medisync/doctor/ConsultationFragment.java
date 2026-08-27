@@ -1,16 +1,17 @@
 package com.bca.medisync.doctor;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
+import com.bca.medisync.DoctorTabActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.ConsultationApi;
@@ -23,7 +24,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ConsultationActivity extends AppCompatActivity {
+public class ConsultationFragment extends Fragment {
   private TextView tvPatientname;
   private TextInputEditText etComplaint,
       etSymptoms,
@@ -35,44 +36,44 @@ public class ConsultationActivity extends AppCompatActivity {
       etWeight;
   private MaterialButton btnNextPrescription;
 
-  private String patientName, latestDiagnosis, latestDate;
+  private String patientName, latestDiagnosis;
   private int appointmentId = -1;
 
+  @Nullable
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_consultation);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
-        (v, insets) -> {
-          Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-          v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-          return insets;
-        });
-    initViews();
+  public View onCreateView(
+      @NonNull LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.fragment_consultation, container, false);
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    initViews(view);
     loadData();
     setupListeners();
   }
 
-  private void initViews() {
-    tvPatientname = findViewById(R.id.tvPatientName);
-    etComplaint = findViewById(R.id.etComplaint);
-    etSymptoms = findViewById(R.id.etSymptoms);
-    etDiagnosis = findViewById(R.id.etDiagnosis);
-    etNotes = findViewById(R.id.etNotes);
-    etBloodPressure = findViewById(R.id.etBloodPressure);
-    etHeartRate = findViewById(R.id.etHeartRate);
-    etTemperature = findViewById(R.id.etTemperature);
-    etWeight = findViewById(R.id.etWeight);
-    btnNextPrescription = findViewById(R.id.btnNextPrescription);
+  private void initViews(View view) {
+    tvPatientname = view.findViewById(R.id.tvPatientName);
+    etComplaint = view.findViewById(R.id.etComplaint);
+    etSymptoms = view.findViewById(R.id.etSymptoms);
+    etDiagnosis = view.findViewById(R.id.etDiagnosis);
+    etNotes = view.findViewById(R.id.etNotes);
+    etBloodPressure = view.findViewById(R.id.etBloodPressure);
+    etHeartRate = view.findViewById(R.id.etHeartRate);
+    etTemperature = view.findViewById(R.id.etTemperature);
+    etWeight = view.findViewById(R.id.etWeight);
+    btnNextPrescription = view.findViewById(R.id.btnNextPrescription);
   }
 
   private void loadData() {
-    patientName = getIntent().getStringExtra("patient_name");
-    latestDiagnosis = getIntent().getStringExtra("latest_diagnosis");
-    latestDate = getIntent().getStringExtra("latest_date");
-    appointmentId = getIntent().getIntExtra("appointment_id", -1);
+    Bundle args = getArguments();
+    patientName = args != null ? args.getString("patient_name") : null;
+    latestDiagnosis = args != null ? args.getString("latest_diagnosis") : null;
+    appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
 
     if (patientName != null) {
       tvPatientname.setText("Consultation - " + patientName);
@@ -104,7 +105,7 @@ public class ConsultationActivity extends AppCompatActivity {
           }
           if (appointmentId == -1) {
             Toast.makeText(
-                    this,
+                    requireContext(),
                     "Missing appointment reference. Go back and try again.",
                     Toast.LENGTH_LONG)
                 .show();
@@ -122,37 +123,35 @@ public class ConsultationActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(
                         Call<ConsultationResponse> call, Response<ConsultationResponse> response) {
+                      if (!isAdded()) return;
                       btnNextPrescription.setEnabled(true);
                       if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(
-                                ConsultationActivity.this,
-                                "Consultation saved.",
-                                Toast.LENGTH_SHORT)
+                        Toast.makeText(requireContext(), "Consultation saved.", Toast.LENGTH_SHORT)
                             .show();
 
-                        Intent intent =
-                            new Intent(ConsultationActivity.this, PrescriptionActivity.class);
-                        intent.putExtra("patient_name", patientName);
-                        intent.putExtra("appointment_id", appointmentId);
-                        intent.putExtra("diagnosis", diagnosis);
-                        intent.putExtra("complaint", complaint);
-                        intent.putExtra("notes", notes);
-                        startActivity(intent);
+                        Bundle args = new Bundle();
+                        args.putString("patient_name", patientName);
+                        args.putInt("appointment_id", appointmentId);
+                        args.putString("diagnosis", diagnosis);
+                        args.putString("complaint", complaint);
+                        args.putString("notes", notes);
+
+                        PrescriptionFragment fragment = new PrescriptionFragment();
+                        fragment.setArguments(args);
+                        ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
                       } else if (response.code() == 403) {
                         Toast.makeText(
-                                ConsultationActivity.this,
-                                "Not your appointment.",
-                                Toast.LENGTH_SHORT)
+                                requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
                             .show();
                       } else if (response.code() == 400) {
                         Toast.makeText(
-                                ConsultationActivity.this,
+                                requireContext(),
                                 "Appointment must be confirmed, or a consultation already exists for it.",
                                 Toast.LENGTH_LONG)
                             .show();
                       } else {
                         Toast.makeText(
-                                ConsultationActivity.this,
+                                requireContext(),
                                 "Failed to save consultation.",
                                 Toast.LENGTH_SHORT)
                             .show();
@@ -161,9 +160,10 @@ public class ConsultationActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<ConsultationResponse> call, Throwable t) {
+                      if (!isAdded()) return;
                       btnNextPrescription.setEnabled(true);
                       Toast.makeText(
-                              ConsultationActivity.this,
+                              requireContext(),
                               "Network error: " + t.getMessage(),
                               Toast.LENGTH_LONG)
                           .show();
