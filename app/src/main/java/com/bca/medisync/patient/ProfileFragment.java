@@ -1,7 +1,10 @@
 package com.bca.medisync.patient;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,14 +13,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bumptech.glide.Glide;
@@ -60,6 +67,7 @@ public class ProfileFragment extends Fragment {
     sessionManager = new SessionManager(requireContext());
     initViews(view);
     setupSettingsRows();
+    setupNotificationSwitch();
     setupListeners();
   }
 
@@ -87,7 +95,23 @@ public class ProfileFragment extends Fragment {
     txtVerifiedBadge = view.findViewById(R.id.txtVerifiedBadge);
 
     switchNotifications = view.findViewById(R.id.switchNotifications);
+    notifPermLauncher =
+        registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            granted -> {
+              sessionManager.setNotificationsEnabled(granted);
+              switchNotifications.setChecked(granted);
+              if (!granted) {
+                Toast.makeText(
+                        requireContext(),
+                        "Enable notifiation permissions in system settings to get alerts.",
+                        Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
   }
+
+  private ActivityResultLauncher<String> notifPermLauncher;
 
   private void bindStat(View statView, String value, String label) {
     ((TextView) statView.findViewById(R.id.txtStatValue)).setText(value);
@@ -282,6 +306,25 @@ public class ProfileFragment extends Fragment {
             });
   }
 
+  public void setupNotificationSwitch() {
+    switchNotifications.setChecked(sessionManager.isNotificationsEnabled());
+    switchNotifications.setOnCheckedChangeListener(
+        (btn, isChecked) -> {
+          if (!isChecked) {
+            sessionManager.setNotificationsEnabled(false);
+            return;
+          }
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+              && ContextCompat.checkSelfPermission(
+                      requireContext(), Manifest.permission.POST_NOTIFICATIONS)
+                  != PackageManager.PERMISSION_GRANTED) {
+            notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+          } else {
+            sessionManager.setNotificationsEnabled(true);
+          }
+        });
+  }
+
   private void setupListeners() {
     requireView()
         .findViewById(R.id.btnEditProfile)
@@ -298,6 +341,8 @@ public class ProfileFragment extends Fragment {
         .setOnClickListener(
             v -> {
               sessionManager.clearSession();
+              NotificationSocketHolder.get().disconnect();
+              NotificationSocketHolder.reset();
               Intent intent = new Intent(requireContext(), MainActivity.class);
               intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
               startActivity(intent);

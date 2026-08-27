@@ -9,6 +9,7 @@ public class SessionManager {
   private static final String KEY_TOKEN = "access_token";
   private static final String KEY_ROLE = "role";
   private static final String KEY_EMAIL = "email";
+  private static final String KEY_NOTIFS_ENABLED = "notifs_enabled";
 
   private final SharedPreferences prefs;
 
@@ -35,6 +36,14 @@ public class SessionManager {
 
   public String getEmail() {
     return prefs.getString(KEY_EMAIL, null);
+  }
+
+  public boolean isNotificationsEnabled() {
+    return prefs.getBoolean(KEY_NOTIFS_ENABLED, true);
+  }
+
+  public void setNotificationsEnabled(boolean enabled) {
+    prefs.edit().putBoolean(KEY_NOTIFS_ENABLED, enabled).apply();
   }
 
   public boolean isLoggedIn() {

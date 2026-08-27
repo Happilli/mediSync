@@ -17,6 +17,7 @@ import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
@@ -69,6 +70,8 @@ public class DoctorProfileFragment extends Fragment {
         .setOnClickListener(
             v -> {
               sessionManager.clearSession();
+              NotificationSocketHolder.get().disconnect();
+              NotificationSocketHolder.reset();
               Intent intent = new Intent(requireContext(), MainActivity.class);
               intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
               startActivity(intent);

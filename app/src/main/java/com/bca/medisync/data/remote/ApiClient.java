@@ -24,6 +24,8 @@ public class ApiClient {
     sessionManager = new SessionManager(context);
   }
 
+  public static OkHttpClient okHttpClient;
+
   public static Retrofit getRetrofit() {
     if (retrofit == null) {
       HttpLoggingInterceptor loggin = new HttpLoggingInterceptor();
@@ -36,6 +38,7 @@ public class ApiClient {
               .connectTimeout(30, TimeUnit.SECONDS)
               .readTimeout(30, TimeUnit.SECONDS)
               .build();
+      okHttpClient = client;
       retrofit =
           new Retrofit.Builder()
               .baseUrl(BASE_URL)
@@ -44,6 +47,11 @@ public class ApiClient {
               .build();
     }
     return retrofit;
+  }
+
+  public static OkHttpClient getOkHttpClient() {
+    getRetrofit();
+    return okHttpClient;
   }
 
   private static class AuthInterceptor implements Interceptor {

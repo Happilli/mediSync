@@ -13,9 +13,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationSocketHolder;
+import com.bca.medisync.data.remote.NotificationSocketManager;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.login.LoginRequest;
 import com.bca.medisync.data.remote.dto.login.LoginResponse;
+import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
 import com.google.android.material.button.MaterialButton;
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
       } else {
         intent = new Intent(MainActivity.this, MainTabActivity.class);
       }
+      NotificationSocketHolder.get().connect(sessionManager.getToken(), globalNotificationListener);
       startActivity(intent);
       finish();
       return;
@@ -76,6 +80,15 @@ public class MainActivity extends AppCompatActivity {
         .setOnClickListener(
             v -> startActivity(new Intent(MainActivity.this, ForgotPasswordActivity.class)));
   }
+
+  private final NotificationSocketManager.Listener globalNotificationListener =
+      new NotificationSocketManager.Listener() {
+        @Override
+        public void onSocketClosed() {}
+
+        @Override
+        public void onNotification(NotificationResponse notification) {}
+      };
 
   private void updateRegisterLabel() {
     boolean isDoctor = chipGroupRole.getCheckedChipId() == R.id.chipDoctor;
@@ -128,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
                   }
                   sessionManager.saveSession(
                       body.getAccess_token(), body.getRole(), body.getEmail());
+                  NotificationSocketHolder.get()
+                      .connect(sessionManager.getToken(), globalNotificationListener);
 
                   Intent intent;
                   if ("doctor".equalsIgnoreCase(body.getRole())) {
