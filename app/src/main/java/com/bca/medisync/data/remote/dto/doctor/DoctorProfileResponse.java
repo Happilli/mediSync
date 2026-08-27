@@ -1,152 +1,84 @@
 package com.bca.medisync.data.remote.dto.doctor;
 
-import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
-
 public class DoctorProfileResponse {
+  private int id;
+  private int hospital_id;
+  private String name;
+  private String phone;
+  private String department;
+  private String speciality;
+  private String bio;
+  private String address;
+  private Integer years_experience;
+  private boolean is_verified;
+  private String profile_pic_url;
+  private int patients_this_month;
+  private int total_patients;
+  private String positive_feedback;
+  private String rating;
+  private boolean has_security_answer;
 
-    private int id;
+  public int getId() {
+    return id;
+  }
 
-    @SerializedName("hospital_id")
-    private int hospitalId;
+  public int getHospital_id() {
+    return hospital_id;
+  }
 
-    private String name;
+  public String getName() {
+    return name;
+  }
 
-    private String phone;
+  public String getPhone() {
+    return phone;
+  }
 
-    private String department;
+  public String getDepartment() {
+    return department;
+  }
 
-    private String speciality;
+  public String getSpeciality() {
+    return speciality;
+  }
 
-    private String bio;
+  public String getBio() {
+    return bio;
+  }
 
-    private String address;
+  public String getAddress() {
+    return address;
+  }
 
-    @SerializedName("years_experience")
-    private int yearsExperience;
+  public Integer getYears_experience() {
+    return years_experience;
+  }
 
-    @SerializedName("is_verified")
-    private boolean verified;
+  public boolean isIs_verified() {
+    return is_verified;
+  }
 
-    @SerializedName("profile_pic_url")
-    private String profilePicUrl;
+  public String getProfile_pic_url() {
+    return profile_pic_url;
+  }
 
-    private String email;
+  public int getPatients_this_month() {
+    return patients_this_month;
+  }
 
-    @SerializedName("hospital_name")
-    private String hospitalName;
+  public int getTotal_patients() {
+    return total_patients;
+  }
 
-    @SerializedName("license_number")
-    private String licenseNumber;
+  public String getPositive_feedback() {
+    return positive_feedback;
+  }
 
-    @SerializedName("patients_this_month")
-    private int patientsThisMonth;
+  public String getRating() {
+    return rating;
+  }
 
-    @SerializedName("total_patients")
-    private int totalPatients;
-
-    @SerializedName("rating")
-    private double rating;
-
-    @SerializedName("positive_feedback")
-    private int positiveFeedback;
-
-    private List<AvailabilityDayResponse> availability;
-
-    public int getId() {
-        return id;
-    }
-
-    public List<AvailabilityDayResponse> getAvailability() {
-        return availability;
-    }
-
-    public static class AvailabilityDayResponse {
-        private String day;
-        @SerializedName("start_time")
-        private String startTime;
-        @SerializedName("end_time")
-        private String endTime;
-
-        public String getDay() {
-            return day;
-        }
-
-        public String getStartTime() {
-            return startTime;
-        }
-
-        public String getEndTime() {
-            return endTime;
-        }
-    }
-
-    public int getHospitalId() {
-        return hospitalId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getDepartment() {
-        return department;
-    }
-
-    public String getSpeciality() {
-        return speciality;
-    }
-
-    public String getBio() {
-        return bio;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public int getYearsExperience() {
-        return yearsExperience;
-    }
-
-    public boolean isVerified() {
-        return verified;
-    }
-
-    public String getProfilePicUrl() {
-        return profilePicUrl;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getHospitalName() {
-        return hospitalName;
-    }
-
-    public String getLicenseNumber() {
-        return licenseNumber;
-    }
-
-    public int getPatientsThisMonth() {
-        return patientsThisMonth;
-    }
-
-    public int getTotalPatients() {
-        return totalPatients;
-    }
-
-    public double getRating() {
-        return rating;
-    }
-
-    public int getPositiveFeedback() {
-        return positiveFeedback;
-    }
+  public boolean isHas_security_answer() {
+    return has_security_answer;
+  }
 }
