@@ -76,7 +76,6 @@ public class DoctorHomeFragment extends Fragment {
   public void onResume() {
     super.onResume();
     loadDashboardData();
-    loadPatientStats();
     loadTodayAppointments();
   }
 
@@ -94,7 +93,8 @@ public class DoctorHomeFragment extends Fragment {
     txtNoAppointments = view.findViewById(R.id.txtNoAppointments);
 
     rvAppointments.setLayoutManager(new LinearLayoutManager(requireContext()));
-    rvAppointments.setAdapter(new AppointmentAdapter(requireContext(), new ArrayList<>(), true, a -> {}));
+    rvAppointments.setAdapter(
+        new AppointmentAdapter(requireContext(), new ArrayList<>(), true, a -> {}));
 
     ShapeableImageView btnProfile = view.findViewById(R.id.btnProfile);
     btnProfile.setOnClickListener(
@@ -125,58 +125,23 @@ public class DoctorHomeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                   DoctorProfileResponse p = response.body();
                   txtDoctorName.setText("Dr. " + p.getName());
+                  txtPatientsMonth.setText(String.valueOf(p.getPatients_this_month()));
+                  txtTotalPatients.setText(String.valueOf(p.getTotal_patients()));
                 }
               }
 
               @Override
               public void onFailure(Call<DoctorProfileResponse> call, Throwable t) {
                 if (!isAdded()) return;
-                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT)
+                    .show();
               }
-            });
-  }
-
-  private void loadPatientStats() {
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-
-    api.getMyDoctorPatients()
-        .enqueue(
-            new Callback<List<PatientPublicResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<PatientPublicResponse>> call,
-                  Response<List<PatientPublicResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  txtTotalPatients.setText(String.valueOf(response.body().size()));
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<PatientPublicResponse>> call, Throwable t) {}
-            });
-
-    api.getTreatedPatients()
-        .enqueue(
-            new Callback<List<PatientPublicResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<PatientPublicResponse>> call,
-                  Response<List<PatientPublicResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  txtPatientsMonth.setText(String.valueOf(response.body().size()));
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<PatientPublicResponse>> call, Throwable t) {}
             });
   }
 
   private void loadTodayAppointments() {
     AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
-    
+
     // Fetch ALL appointments for the doctor and filter on Android
     // this ensures we don't miss appointments due to backend query param differences
     api.getMyAppointmentsAsDoctor(null, null)
@@ -196,28 +161,50 @@ public class DoctorHomeFragment extends Fragment {
                 }
                 if (response.isSuccessful() && response.body() != null) {
                   List<AppointmentResponse> all = response.body();
-                  Log.d("DoctorHomeFragment", "Received " + all.size() + " total appointments from backend");
-                  
-                  String todayStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                  Log.d(
+                      "DoctorHomeFragment",
+                      "Received " + all.size() + " total appointments from backend");
+
+                  String todayStr =
+                      new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
                   List<AppointmentResponse> todayAppointments = new ArrayList<>();
-                  
+
                   for (AppointmentResponse r : all) {
-                    String apptDate = com.bca.medisync.util.DateTimeUtils.format(r.getAppointment_at(), "yyyy-MM-dd");
-                    Log.d("DoctorHomeFragment", "Appt ID: " + r.getId() + ", Raw: " + r.getAppointment_at() + ", Formatted: " + apptDate + ", Today: " + todayStr + ", Status: " + r.getStatus());
-                    
+                    String apptDate =
+                        com.bca.medisync.util.DateTimeUtils.format(
+                            r.getAppointment_at(), "yyyy-MM-dd");
+                    Log.d(
+                        "DoctorHomeFragment",
+                        "Appt ID: "
+                            + r.getId()
+                            + ", Raw: "
+                            + r.getAppointment_at()
+                            + ", Formatted: "
+                            + apptDate
+                            + ", Today: "
+                            + todayStr
+                            + ", Status: "
+                            + r.getStatus());
+
                     if (todayStr.equals(apptDate)) {
-                        todayAppointments.add(r);
+                      todayAppointments.add(r);
                     }
                   }
 
-                  Log.d("DoctorHomeFragment", "Filtered " + todayAppointments.size() + " appointments for today (" + todayStr + ")");
+                  Log.d(
+                      "DoctorHomeFragment",
+                      "Filtered "
+                          + todayAppointments.size()
+                          + " appointments for today ("
+                          + todayStr
+                          + ")");
 
                   txtScheduledCount.setText(todayAppointments.size() + " appointments scheduled");
-                  updateStats(all); // Use ALL appointments for stats (pending/completed total) 
+                  updateStats(all); // Use ALL appointments for stats (pending/completed total)
                   // or should stats also be for today? Dashboard usually shows today's stats.
-                  // The previous implementation used 'all' for updateStats. 
+                  // The previous implementation used 'all' for updateStats.
                   // I'll update stats based on today's appointments if it's "Today's stats".
-                  updateStats(todayAppointments); 
+                  updateStats(todayAppointments);
 
                   if (todayAppointments.isEmpty()) {
                     txtNoAppointments.setVisibility(View.VISIBLE);
@@ -262,14 +249,18 @@ public class DoctorHomeFragment extends Fragment {
 
     for (AppointmentResponse a : appointments) {
       String status = a.getStatus() != null ? a.getStatus().toLowerCase() : "";
-      Log.d("DoctorHomeFragment", "Processing stat for Appt ID: " + a.getId() + ", Status: " + status);
-      
-      if (status.contains("pending") || status.contains("scheduled") || status.contains("confirmed")) {
-          pendingCount++;
+      Log.d(
+          "DoctorHomeFragment",
+          "Processing stat for Appt ID: " + a.getId() + ", Status: " + status);
+
+      if (status.contains("pending")
+          || status.contains("scheduled")
+          || status.contains("confirmed")) {
+        pendingCount++;
       } else if (status.contains("completed") || status.contains("treated")) {
-          completedCount++;
+        completedCount++;
       } else if (status.contains("follow")) {
-          followUpCount++;
+        followUpCount++;
       }
     }
 
