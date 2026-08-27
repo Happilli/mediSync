@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.patient.AlarmReceiver;
 
 import java.time.LocalDate;
@@ -26,34 +25,67 @@ public class MedicationAlarmScheduler {
     return true;
   }
 
-  public static void schedule(Context context, Medication medication, String rawDosageTime) {
-    if (medication.isTaken()) {
-      cancel(context, medication.getId());
-      return;
-    }
-    if (!canScheduleExactAlarms(context)) {
+  public static void schedule(
+      Context context,
+      int medicationId,
+      String name,
+      String dosage,
+      String rawDosageTime,
+      LocalDate endDate,
+      boolean takenToday) {
+
+    if (!canScheduleExactAlarms(context)) return;
+
+    LocalDate today = LocalDate.now();
+    if (today.isAfter(endDate)) {
+      cancelOsAlarm(context, medicationId);
       return;
     }
 
     LocalTime time = parseTime(rawDosageTime);
     if (time == null) return;
 
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime trigger = LocalDateTime.of(LocalDate.now(), time);
-    if (trigger.isBefore(now)) {
+    LocalDate targetDay = today;
+    if (takenToday) {
+      targetDay = today.plusDays(1);
+      if (targetDay.isAfter(endDate)) {
+        cancelOsAlarm(context, medicationId);
+        return;
+      }
+    }
+
+    LocalDateTime trigger = LocalDateTime.of(targetDay, time);
+    if (trigger.isBefore(LocalDateTime.now())) {
       trigger = trigger.plusDays(1);
+      if (trigger.toLocalDate().isAfter(endDate)) {
+        cancelOsAlarm(context, medicationId);
+        return;
+      }
     }
 
     long triggerMillis = trigger.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    setExactAlarm(context, medicationId, name, dosage, rawDosageTime, triggerMillis, endDate);
+  }
 
+  public static void setExactAlarm(
+      Context context,
+      int medicationId,
+      String name,
+      String dosage,
+      String rawDosageTime,
+      long triggerMillis,
+      LocalDate endDate) {
     Intent intent = new Intent(context, AlarmReceiver.class);
-    intent.putExtra("med_name", medication.getName());
-    intent.putExtra("med_dosage", medication.getDosage());
+    intent.putExtra("medication_id", medicationId);
+    intent.putExtra("med_name", name);
+    intent.putExtra("med_dosage", dosage);
+    intent.putExtra("dosage_time", rawDosageTime);
+    intent.putExtra("end_date", endDate.toString());
 
     PendingIntent pendingIntent =
         PendingIntent.getBroadcast(
             context,
-            medication.getId(),
+            medicationId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
@@ -63,7 +95,7 @@ public class MedicationAlarmScheduler {
     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent);
   }
 
-  public static void cancel(Context context, int medicationId) {
+  public static void cancelOsAlarm(Context context, int medicationId) {
     Intent intent = new Intent(context, AlarmReceiver.class);
     PendingIntent pendingIntent =
         PendingIntent.getBroadcast(
@@ -78,7 +110,7 @@ public class MedicationAlarmScheduler {
     }
   }
 
-  private static LocalTime parseTime(String raw) {
+  public static LocalTime parseTime(String raw) {
     if (raw == null) return null;
     try {
       return LocalTime.parse(raw);

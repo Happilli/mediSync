@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,7 +22,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
-import com.google.android.material.card.MaterialCardView;
+import com.bumptech.glide.Glide;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,8 +30,6 @@ import retrofit2.Response;
 
 public class DoctorProfileFragment extends Fragment {
 
-  private LinearLayout availabilityContainer;
-  private TextView lblAvailability;
   private SessionManager sessionManager;
 
   public DoctorProfileFragment() {}
@@ -49,12 +47,6 @@ public class DoctorProfileFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     sessionManager = new SessionManager(requireContext());
-
-    availabilityContainer = view.findViewById(R.id.availabilityContainer);
-    lblAvailability = view.findViewById(R.id.lblAvailability);
-    lblAvailability.setVisibility(View.GONE);
-    availabilityContainer.setVisibility(View.GONE);
-
     setupListeners(view);
     loadProfile();
   }
@@ -114,45 +106,57 @@ public class DoctorProfileFragment extends Fragment {
 
     int years = p.getYears_experience() != null ? p.getYears_experience() : 0;
 
-    ((TextView) view.findViewById(R.id.txtDoctorName)).setText(p.getName());
+    ((TextView) view.findViewById(R.id.txtDoctorName)).setText("Dr. " + p.getName());
     ((TextView) view.findViewById(R.id.txtRole)).setText(p.getSpeciality());
-    ((TextView) view.findViewById(R.id.txtRegistrationBadge))
-        .setText(p.isIs_verified() ? "Verified" : "Pending");
-    ((TextView) view.findViewById(R.id.txtQualification)).setText(p.getDepartment());
-    ((TextView) view.findViewById(R.id.txtExperience)).setText(years + " Years Experience");
-    ((TextView) view.findViewById(R.id.txtPhoneHeader)).setText(p.getPhone());
-    ((TextView) view.findViewById(R.id.txtEmailHeader)).setText(sessionManager.getEmail());
-    ((TextView) view.findViewById(R.id.txtHospitalRole)).setText(p.getDepartment());
 
-    setInfoCard(view, R.id.cardSpecialization, "SPECIALIZATION", p.getSpeciality());
-    setInfoCard(view, R.id.cardExperience, "EXPERIENCE", years + " yrs");
-    setInfoCard(view, R.id.cardQualification, "BIO", p.getBio() != null ? p.getBio() : "—");
-    setInfoCard(view, R.id.cardRegistration, "ADDRESS", p.getAddress());
-    setInfoCard(view, R.id.cardEmail, "EMAIL", sessionManager.getEmail());
-    setInfoCard(view, R.id.cardPhone, "PHONE", p.getPhone());
+    TextView badge = view.findViewById(R.id.txtRegistrationBadge);
+    if (p.isIs_verified()) {
+      badge.setText("Verified");
+      badge.setTextColor(requireContext().getColor(R.color.on_tertiary_container));
+      badge.setBackgroundColor(requireContext().getColor(R.color.tertiary_container));
+    } else {
+      badge.setText("Pending Verification");
+      badge.setTextColor(requireContext().getColor(R.color.on_error_container));
+      badge.setBackgroundColor(requireContext().getColor(R.color.error_container));
+    }
 
-    bindStatistics(view, p);
+    TextView txtBio = view.findViewById(R.id.txtBio);
+    if (p.getBio() != null && !p.getBio().trim().isEmpty()) {
+      txtBio.setVisibility(View.VISIBLE);
+      txtBio.setText(p.getBio());
+    } else {
+      txtBio.setVisibility(View.GONE);
+    }
+
+    bindProfilePic(p.getProfile_pic_url());
+
+    ((TextView) view.findViewById(R.id.statPatientsMonthValue))
+        .setText(String.valueOf(p.getPatients_this_month()));
+    ((TextView) view.findViewById(R.id.statPatientsTotalValue))
+        .setText(String.valueOf(p.getTotal_patients()));
+
+    ((TextView) view.findViewById(R.id.txtSpecializationValue)).setText(p.getSpeciality());
+    ((TextView) view.findViewById(R.id.txtExperienceValue))
+        .setText(years > 0 ? years + " years" : "Not specified");
+    ((TextView) view.findViewById(R.id.txtPhoneValue)).setText(p.getPhone());
+    ((TextView) view.findViewById(R.id.txtEmailValue)).setText(sessionManager.getEmail());
+    ((TextView) view.findViewById(R.id.txtAddressValue)).setText(p.getAddress());
   }
 
-  private void setInfoCard(View root, int cardId, String title, String value) {
-    MaterialCardView card = root.findViewById(cardId);
-    ((TextView) card.findViewById(R.id.lblTitle)).setText(title);
-    ((TextView) card.findViewById(R.id.lblValue)).setText(value);
-  }
-
-  private void bindStatistics(View view, DoctorProfileResponse p) {
-    setStat(view, R.id.statPatientsMonth, p.getPatients_this_month() + "+", "patients this month");
-    setStat(view, R.id.statPatientsTotal, p.getTotal_patients() + "+", "Patients Total");
-
-    // no feedback %/rating source exists yet — hide rather than fabricate
-    view.findViewById(R.id.statFeedback).setVisibility(View.GONE);
-    view.findViewById(R.id.statRating).setVisibility(View.GONE);
-  }
-
-  private void setStat(View root, int cardId, String value, String label) {
-    MaterialCardView card = root.findViewById(cardId);
-    ((TextView) card.findViewById(R.id.statValue)).setText(value);
-    ((TextView) card.findViewById(R.id.statLabel)).setText(label);
+  private void bindProfilePic(String profilePicUrl) {
+    View view = getView();
+    if (view == null) return;
+    ImageView imgProfile = view.findViewById(R.id.imgDoctorProfile);
+    if (profilePicUrl == null || profilePicUrl.isEmpty()) {
+      imgProfile.setImageResource(R.drawable.ic_nav_profile);
+      return;
+    }
+    Glide.with(this)
+        .load(ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + profilePicUrl)
+        .placeholder(R.drawable.ic_nav_profile)
+        .error(R.drawable.ic_nav_profile)
+        .centerCrop()
+        .into(imgProfile);
   }
 
   private void loadHospitalName(int hospitalId) {
@@ -170,7 +174,7 @@ public class DoctorProfileFragment extends Fragment {
                     response.isSuccessful() && response.body() != null
                         ? response.body().getName()
                         : "Hospital #" + hospitalId;
-                ((TextView) view.findViewById(R.id.txtHospitalName)).setText(name);
+                ((TextView) view.findViewById(R.id.txtHospitalValue)).setText(name);
               }
 
               @Override

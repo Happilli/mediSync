@@ -1,12 +1,20 @@
 package com.bca.medisync;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -90,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onNotification(NotificationResponse notification) {
           NotificationCenter.get().broadcast(notification);
+          showSystemNotification(notification);
         }
       };
 
@@ -105,6 +114,36 @@ public class MainActivity extends AppCompatActivity {
           v -> startActivity(new Intent(MainActivity.this, RegisterActivity.class)));
       goToRegister.setClickable(true);
     }
+  }
+
+  @SuppressLint("MissingPermission")
+  private void showSystemNotification(NotificationResponse n) {
+    if (!sessionManager.isNotificationsEnabled()) return;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED) {
+      return;
+    }
+
+    NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    if (manager == null) return;
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      NotificationChannel channel =
+          new NotificationChannel(
+              "GENERAL_CHANNEL", "General Alerts", NotificationManager.IMPORTANCE_DEFAULT);
+      manager.createNotificationChannel(channel);
+    }
+
+    NotificationCompat.Builder builder =
+        new NotificationCompat.Builder(this, "GENERAL_CHANNEL")
+            .setSmallIcon(R.drawable.ic_nav_medicine)
+            .setContentTitle(n.getTitle())
+            .setContentText(n.getMessage())
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+    manager.notify(n.getId(), builder.build());
   }
 
   public void attemptLogin() {

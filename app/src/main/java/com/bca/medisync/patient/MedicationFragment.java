@@ -25,6 +25,7 @@ import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.google.android.material.button.MaterialButton;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -42,7 +43,6 @@ public class MedicationFragment extends Fragment {
   private MedicationAdapter adapter;
 
   private Medication activeMedication;
-  private final java.util.Map<Integer, String> rawDosageTimes = new java.util.HashMap<>();
 
   public MedicationFragment() {}
 
@@ -124,11 +124,10 @@ public class MedicationFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                   List<Medication> meds = new ArrayList<>();
                   for (MedicationResponse r : response.body()) {
-                    rawDosageTimes.put(r.getId(), r.getDosage_time());
                     meds.add(mapToMedication(r));
                   }
                   bindMedications(meds);
-                  scheduleAllReminders(meds);
+                  scheduleAllReminders(response.body());
                 } else {
                   Toast.makeText(requireContext(), "Failed to load medications", Toast.LENGTH_SHORT)
                       .show();
@@ -145,11 +144,25 @@ public class MedicationFragment extends Fragment {
             });
   }
 
-  private void scheduleAllReminders(List<Medication> meds) {
+  private void scheduleAllReminders(List<MedicationResponse> responses) {
     if (!MedicationAlarmScheduler.canScheduleExactAlarms(requireContext())) return;
-    for (Medication m : meds) {
-      String raw = rawDosageTimes.get(m.getId());
-      MedicationAlarmScheduler.schedule(requireContext(), m, raw);
+    for (MedicationResponse r : responses) {
+      String endDateStr = r.getEnd_date();
+      if (endDateStr == null) continue;
+      LocalDate endDate;
+      try {
+        endDate = LocalDate.parse(endDateStr);
+      } catch (Exception e) {
+        continue;
+      }
+      MedicationAlarmScheduler.schedule(
+          requireContext(),
+          r.getId(),
+          r.getName(),
+          r.getDosage(),
+          r.getDosage_time(),
+          endDate,
+          r.isIs_taken());
     }
   }
 
@@ -189,7 +202,6 @@ public class MedicationFragment extends Fragment {
                   Call<MedicationResponse> call, Response<MedicationResponse> response) {
                 if (!isAdded()) return;
                 if (response.isSuccessful()) {
-                  MedicationAlarmScheduler.cancel(requireContext(), medication.getId());
                   Toast.makeText(requireContext(), "Marked as taken", Toast.LENGTH_SHORT).show();
                   loadMedications();
                 } else if (response.code() == 403) {

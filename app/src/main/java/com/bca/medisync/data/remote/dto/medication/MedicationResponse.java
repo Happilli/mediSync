@@ -9,6 +9,9 @@ public class MedicationResponse {
   private String dosage_time;
   private String instruction;
   private int frequency_per_day;
+  private String start_date;
+  private String end_date;
+  private boolean is_active;
   private int duration_days;
   private boolean is_taken;
   private String taken_at;
@@ -55,5 +58,17 @@ public class MedicationResponse {
 
   public String getTaken_at() {
     return taken_at;
+  }
+
+  public String getStart_date() {
+    return start_date;
+  }
+
+  public String getEnd_date() {
+    return end_date;
+  }
+
+  public boolean isIs_active() {
+    return is_active;
   }
 }
