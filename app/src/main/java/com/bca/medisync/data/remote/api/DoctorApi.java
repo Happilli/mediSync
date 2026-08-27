@@ -3,11 +3,14 @@ package com.bca.medisync.data.remote.api;
 import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
+import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
 
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -28,4 +31,7 @@ public interface DoctorApi {
   @GET("/api/v1/doctors/{doctor_id}/timeslots")
   Call<List<TimeSlotResponse>> getDoctorTimeslots(
       @Path("doctor_id") int doctorId, @Query("available_only") boolean availableOnly);
+
+  @POST("/api/v1/doctors/me/timeslots")
+  Call<TimeSlotResponse> createTimeslot(@Body TimeSlotCreateRequest request);
 }

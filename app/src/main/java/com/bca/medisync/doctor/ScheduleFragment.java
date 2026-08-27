@@ -1,5 +1,6 @@
 package com.bca.medisync.doctor;
 
+import android.app.AlertDialog;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,7 +20,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
-import com.bca.medisync.data.model.DataProvider;
+import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.api.AppointmentApi;
+import com.bca.medisync.data.remote.api.DoctorApi;
+import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
+import com.bca.medisync.data.remote.dto.appointment.AppointmentStatusUpdateRequest;
+import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
+import com.bca.medisync.data.remote.dto.TimeSlotResponse;
+import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,12 +40,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ScheduleFragment extends Fragment {
 
   private RecyclerView rvSchedule;
   private LinearLayout dateStripContainer;
+  private TextView txtNoAppointments;
+  private ExtendedFloatingActionButton fabAddTimeslot;
 
-  private List<Appointment> allAppointments;
+  private List<Appointment> allAppointments = new ArrayList<>();
   private String selectedDate;
 
   public ScheduleFragment() {}
@@ -50,36 +69,268 @@ public class ScheduleFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     initViews(view);
-    setupRecyclerView();
+    rvSchedule.setLayoutManager(new LinearLayoutManager(requireContext()));
     setupDateStrip();
+    setupFab();
+    loadRealSchedule();
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    loadRealSchedule();
   }
 
   private void initViews(View view) {
     rvSchedule = view.findViewById(R.id.rvSchedule);
     dateStripContainer = view.findViewById(R.id.dateStripContainer);
+    txtNoAppointments = view.findViewById(R.id.txtNoAppointments);
+    fabAddTimeslot = view.findViewById(R.id.fabAddTimeslot);
   }
 
-  private void setupRecyclerView() {
-    rvSchedule.setLayoutManager(new LinearLayoutManager(requireContext()));
-    rvSchedule.setAdapter(
-        new AppointmentAdapter(
-            requireContext(), DataProvider.getAppointments(), true, appointment -> {}));
+  private void setupFab() {
+    fabAddTimeslot.setOnClickListener(v -> showAddTimeslotDialog());
+  }
+
+  private void showAddTimeslotDialog() {
+    MaterialDatePicker<Long> datePicker =
+        MaterialDatePicker.Builder.datePicker().setTitleText("Select Date").build();
+
+    datePicker.addOnPositiveButtonClickListener(
+        dateMillis -> {
+          MaterialTimePicker timePicker =
+              new MaterialTimePicker.Builder()
+                  .setTimeFormat(TimeFormat.CLOCK_12H)
+                  .setTitleText("Select Time")
+                  .build();
+
+          timePicker.addOnPositiveButtonClickListener(
+              v -> {
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(dateMillis);
+                cal.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
+                cal.set(Calendar.MINUTE, timePicker.getMinute());
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+
+                if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
+                  Toast.makeText(
+                          requireContext(), "Please select a future time.", Toast.LENGTH_SHORT)
+                      .show();
+                  return;
+                }
+
+                String iso =
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
+                        .format(cal.getTime());
+
+                createTimeslot(iso);
+              });
+          timePicker.show(getChildFragmentManager(), "TIME_PICKER");
+        });
+    datePicker.show(getParentFragmentManager(), "DATE_PICKER");
+  }
+
+  private void createTimeslot(String iso) {
+    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    api.createTimeslot(new TimeSlotCreateRequest(iso))
+        .enqueue(
+            new Callback<TimeSlotResponse>() {
+              @Override
+              public void onResponse(
+                  Call<TimeSlotResponse> call, Response<TimeSlotResponse> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful()) {
+                  Toast.makeText(requireContext(), "Timeslot added.", Toast.LENGTH_SHORT).show();
+                } else if (response.code() == 400) {
+                  Toast.makeText(
+                          requireContext(),
+                          "Timeslot already exists for this time.",
+                          Toast.LENGTH_LONG)
+                      .show();
+                } else {
+                  Toast.makeText(requireContext(), "Failed to add timeslot.", Toast.LENGTH_SHORT)
+                      .show();
+                }
+              }
+
+              @Override
+              public void onFailure(Call<TimeSlotResponse> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
+  }
+
+  private void loadRealSchedule() {
+    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    api.getMyAppointmentsAsDoctor(null, null)
+        .enqueue(
+            new Callback<List<AppointmentResponse>>() {
+              @Override
+              public void onResponse(
+                  Call<List<AppointmentResponse>> call,
+                  Response<List<AppointmentResponse>> response) {
+                if (!isAdded() || !response.isSuccessful() || response.body() == null) return;
+                if (response.body().isEmpty()) {
+                  allAppointments = new ArrayList<>();
+                  filterByDate(selectedDate);
+                  return;
+                }
+                AppointmentEnricher.enrichForDoctor(
+                    response.body(),
+                    enriched -> {
+                      if (!isAdded()) return;
+                      allAppointments = enriched;
+                      filterByDate(selectedDate);
+                    });
+              }
+
+              @Override
+              public void onFailure(Call<List<AppointmentResponse>> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
   }
 
   private void filterByDate(String date) {
     List<Appointment> filtered = new ArrayList<>();
-    for (Appointment a : allAppointments) {
-      if (a.getDate().equals(date)) {
-        filtered.add(a);
+    if (date != null) {
+      for (Appointment a : allAppointments) {
+        if (date.equals(a.getDate())) {
+          filtered.add(a);
+        }
       }
     }
     rvSchedule.setAdapter(
-        new AppointmentAdapter(requireContext(), filtered, true, appointment -> {}));
+        new AppointmentAdapter(requireContext(), filtered, true, this::onAppointmentClicked));
+
+    boolean empty = filtered.isEmpty();
+    txtNoAppointments.setVisibility(empty ? View.VISIBLE : View.GONE);
+    rvSchedule.setVisibility(empty ? View.GONE : View.VISIBLE);
+  }
+
+  private void onAppointmentClicked(Appointment appointment) {
+    String status = appointment.getStatus();
+    int appointmentId = Integer.parseInt(appointment.getId());
+
+    if (status.equalsIgnoreCase("Pending")) {
+      new AlertDialog.Builder(requireContext())
+          .setTitle("Appointment Request")
+          .setMessage(
+              appointment.getPatientName()
+                  + " . "
+                  + appointment.getDate()
+                  + " "
+                  + appointment.getTime())
+          .setPositiveButton("Confirm", (d, w) -> updateStatus(appointmentId, "confirmed"))
+          .setNeutralButton("Reject", (d, w) -> updateStatus(appointmentId, "cancelled"))
+          .setNegativeButton("Cancel", null)
+          .show();
+    } else if (status.equalsIgnoreCase("Confirmed")) {
+      new AlertDialog.Builder(requireContext())
+          .setTitle(appointment.getPatientName())
+          .setItems(
+              new CharSequence[] {"View Patient", "Mark Completed", "Cancel"},
+              (d, which) -> {
+                if (which == 0) {
+                  openPatientDetail(appointment, appointmentId);
+                } else if (which == 1) {
+                  updateStatus(appointmentId, "completed");
+                }
+              })
+          .show();
+    }
+  }
+
+  private void openPatientDetail(Appointment appointment, int appointmentId) {
+    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    api.getPatientDetailForDoctor(appointment.getPatientIdInt()) // see note below
+        .enqueue(
+            new Callback<PatientPublicResponse>() {
+              @Override
+              public void onResponse(
+                  Call<PatientPublicResponse> call, Response<PatientPublicResponse> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful() && response.body() != null) {
+                  PatientPublicResponse p = response.body();
+                  Bundle args = new Bundle();
+                  args.putInt("patient_id", p.getId());
+                  args.putInt("appointment_id", appointmentId);
+                  args.putString("patient_name", p.getName());
+                  args.putString("patient_phone", p.getPhone());
+                  args.putString("patient_gender", p.getGender());
+                  args.putString("patient_blood", p.getBlood_group());
+                  args.putString("patient_emergency", p.getEmergency_contact());
+                  args.putString("patient_email", p.getEmail());
+                  args.putString("patient_address", p.getAddress());
+                  args.putString("patient_dob", p.getDate_of_birth());
+                  args.putString("patient_pic_url", p.getProfile_pic_url());
+
+                  PatientDetailsFragment fragment = new PatientDetailsFragment();
+                  fragment.setArguments(args);
+                  ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
+                } else {
+                  Toast.makeText(requireContext(), "Failed to load patient.", Toast.LENGTH_SHORT)
+                      .show();
+                }
+              }
+
+              @Override
+              public void onFailure(Call<PatientPublicResponse> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
+  }
+
+  private void updateStatus(int appointmentId, String newStatus) {
+    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    api.updateAppointmentStatus(appointmentId, new AppointmentStatusUpdateRequest(newStatus))
+        .enqueue(
+            new Callback<AppointmentResponse>() {
+              @Override
+              public void onResponse(
+                  Call<AppointmentResponse> call, Response<AppointmentResponse> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful()) {
+                  Toast.makeText(requireContext(), "Appointment " + newStatus, Toast.LENGTH_SHORT)
+                      .show();
+                  loadRealSchedule();
+                } else if (response.code() == 400) {
+                  Toast.makeText(
+                          requireContext(),
+                          "Appointment can no longer be modified.",
+                          Toast.LENGTH_LONG)
+                      .show();
+                  loadRealSchedule();
+                } else if (response.code() == 403) {
+                  Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
+                      .show();
+                } else {
+                  Toast.makeText(requireContext(), "Failed to update status.", Toast.LENGTH_SHORT)
+                      .show();
+                }
+              }
+
+              @Override
+              public void onFailure(Call<AppointmentResponse> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(
+                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
+                    .show();
+              }
+            });
   }
 
   private void setupDateStrip() {
-    allAppointments = DataProvider.getDoctorSchedule();
-
     Calendar cal = Calendar.getInstance();
     cal.setFirstDayOfWeek(Calendar.MONDAY);
     cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
@@ -144,8 +395,6 @@ public class ScheduleFragment extends Fragment {
       dateStripContainer.addView(item);
       cal.add(Calendar.DAY_OF_MONTH, 1);
     }
-
-    filterByDate(selectedDate);
   }
 
   private void refreshDateStripSelection(LinearLayout selected) {

@@ -112,14 +112,15 @@ public class AppointmentEnricher {
 
     for (AppointmentResponse r : responses) {
       patientApi
-          .getPatientDetail(r.getPatient_id())
+          .getPatientDetailForDoctor(r.getPatient_id())
           .enqueue(
               new Callback<PatientPublicResponse>() {
                 @Override
                 public void onResponse(
                     Call<PatientPublicResponse> call, Response<PatientPublicResponse> patientResp) {
                   Appointment appointment =
-                      mapToAppointmentForDoctor(r, patientResp.isSuccessful() ? patientResp.body() : null);
+                      mapToAppointmentForDoctor(
+                          r, patientResp.isSuccessful() ? patientResp.body() : null);
                   synchronized (result) {
                     result.add(appointment);
                   }
@@ -163,7 +164,8 @@ public class AppointmentEnricher {
         dateStr,
         timeStr,
         status,
-        r.getNotes());
+        r.getNotes(),
+        r.getPatient_id());
   }
 
   public static Appointment mapToAppointmentForDoctor(
@@ -189,7 +191,8 @@ public class AppointmentEnricher {
         dateStr,
         timeStr,
         status,
-        r.getNotes());
+        r.getNotes(),
+        r.getPatient_id());
   }
 
   public static Date parseIso(String iso) {

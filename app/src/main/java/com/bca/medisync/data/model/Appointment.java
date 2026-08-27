@@ -12,6 +12,8 @@ public class Appointment {
   private final String status;
   private final String notes;
 
+  private final int patientId;
+
   public Appointment(
       String id,
       String patientName,
@@ -21,7 +23,8 @@ public class Appointment {
       String date,
       String time,
       String status,
-      String notes) {
+      String notes,
+      int patientId) {
     this.id = id;
     this.doctorName = doctorName;
     this.patientName = patientName;
@@ -31,6 +34,11 @@ public class Appointment {
     this.time = time;
     this.status = status;
     this.notes = notes;
+    this.patientId = patientId;
+  }
+
+  public int getPatientId() {
+    return patientId;
   }
 
   public String getId() {

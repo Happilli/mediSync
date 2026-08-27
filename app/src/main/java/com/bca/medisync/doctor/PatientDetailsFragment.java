@@ -36,6 +36,8 @@ public class PatientDetailsFragment extends Fragment {
 
   private String patientName;
 
+  private int appointmentId = -1;
+
   @Nullable
   @Override
   public View onCreateView(
@@ -89,6 +91,7 @@ public class PatientDetailsFragment extends Fragment {
     txtDob.setText(args.getString("patient_dob"));
     txtAddress.setText(args.getString("patient_address"));
     txtEmergency.setText(args.getString("patient_emergency"));
+    appointmentId = args.getInt("appointment_id", -1);
     bindProfilePic(args.getString("patient_pic_url"));
   }
 
@@ -111,6 +114,7 @@ public class PatientDetailsFragment extends Fragment {
           Bundle args = new Bundle();
           args.putString("patient_name", patientName);
           args.putInt("patient_id", patientId);
+          args.putInt("appointment_id", appointmentId);
           MedicalHistoryFragment fragment = new MedicalHistoryFragment();
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
@@ -119,6 +123,7 @@ public class PatientDetailsFragment extends Fragment {
         v -> {
           Intent intent = new Intent(requireContext(), ConsultationActivity.class);
           intent.putExtra("patient_name", patientName);
+          intent.putExtra("appointment_id", appointmentId);
           startActivity(intent);
         });
   }

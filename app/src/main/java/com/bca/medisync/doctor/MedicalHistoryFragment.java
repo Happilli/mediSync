@@ -34,6 +34,7 @@ public class MedicalHistoryFragment extends Fragment {
   private ExtendedFloatingActionButton btnStartConsultation;
   private String patientName;
   private int patientId = -1;
+  private int appointmentId = -1;
   private TextView tvHeader,
       tvRxName,
       tvRxDesc,
@@ -86,6 +87,7 @@ public class MedicalHistoryFragment extends Fragment {
     Bundle args = getArguments();
     patientName = args != null ? args.getString("patient_name") : null;
     patientId = args != null ? args.getInt("patient_id", -1) : -1;
+    appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
 
     tvHeader.setText(patientName != null ? patientName + "\nOverview" : "Patient\nOverview");
 
@@ -171,6 +173,7 @@ public class MedicalHistoryFragment extends Fragment {
         v -> {
           Intent intent = new Intent(requireContext(), ConsultationActivity.class);
           intent.putExtra("patient_name", patientName);
+          intent.putExtra("appointment_id", appointmentId);
           startActivity(intent);
         });
   }

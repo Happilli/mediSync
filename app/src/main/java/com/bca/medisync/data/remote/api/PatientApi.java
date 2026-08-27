@@ -44,6 +44,6 @@ public interface PatientApi {
   @GET("/api/v1/patients/doctor")
   Call<List<PatientPublicResponse>> getMyDoctorPatients();
 
-  @GET("/api/v1/patients/{patient_id}")
-  Call<PatientPublicResponse> getPatientDetail(@Path("patient_id") int patientId);
+  @GET("/api/v1/patients/doctor/{patient_id}")
+  Call<PatientPublicResponse> getPatientDetailForDoctor(@Path("patient_id") int patientId);
 }
