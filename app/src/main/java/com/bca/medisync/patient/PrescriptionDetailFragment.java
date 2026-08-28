@@ -15,18 +15,13 @@ import androidx.fragment.app.Fragment;
 import com.bca.medisync.R;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.model.Prescription;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
-import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
-import com.bca.medisync.data.remote.dto.prescription.PrescriptionResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class PrescriptionDetailFragment extends Fragment {
   private MaterialToolbar toolbar;
@@ -72,50 +67,30 @@ public class PrescriptionDetailFragment extends Fragment {
 
   private void loadDetail() {
     PrescriptionApi api = ApiClient.getRetrofit().create(PrescriptionApi.class);
-    api.getPrescriptionDetail(prescriptionId)
-        .enqueue(
-            new Callback<PrescriptionResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PrescriptionResponse> call, Response<PrescriptionResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  bind(PrescriptionEnricher.mapToPrescription(response.body(), null));
-                  fetchDoctorName(response.body().getDoctor_id());
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to load prescription", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PrescriptionResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.getPrescriptionDetail(prescriptionId),
+        this,
+        body -> {
+          bind(PrescriptionEnricher.mapToPrescription(body, null));
+          fetchDoctorName(body.getDoctor_id());
+        },
+        (code, msg) -> {
+          if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to load prescription", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
   }
 
   private void fetchDoctorName(int doctorId) {
     DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
-    doctorApi
-        .getDoctorDetail(doctorId)
-        .enqueue(
-            new Callback<DoctorResponse>() {
-              @Override
-              public void onResponse(Call<DoctorResponse> call, Response<DoctorResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  txtDoctorName.setText(response.body().getName());
-                }
-              }
-
-              @Override
-              public void onFailure(Call<DoctorResponse> call, Throwable t) {}
-            });
+    ApiCallback.handle(
+        doctorApi.getDoctorDetail(doctorId),
+        this,
+        d -> txtDoctorName.setText(d.getName()),
+        (code, msg) -> {});
   }
 
   private void bind(Prescription p) {

@@ -13,16 +13,12 @@ import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.DoctorTabActivity;
 import com.bca.medisync.R;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.ConsultationApi;
 import com.bca.medisync.data.remote.dto.consultation.ConsultationCreateRequest;
-import com.bca.medisync.data.remote.dto.consultation.ConsultationResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ConsultationFragment extends Fragment {
   private TextView tvPatientname;
@@ -115,60 +111,46 @@ public class ConsultationFragment extends Fragment {
           btnNextPrescription.setEnabled(false);
 
           ConsultationApi api = ApiClient.getRetrofit().create(ConsultationApi.class);
-          api.createConsultation(
+          ApiCallback.handle(
+              api.createConsultation(
                   new ConsultationCreateRequest(
-                      appointmentId, complaint, symptoms, diagnosis, notes, bp, hr, temp, weight))
-              .enqueue(
-                  new Callback<ConsultationResponse>() {
-                    @Override
-                    public void onResponse(
-                        Call<ConsultationResponse> call, Response<ConsultationResponse> response) {
-                      if (!isAdded()) return;
-                      btnNextPrescription.setEnabled(true);
-                      if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(requireContext(), "Consultation saved.", Toast.LENGTH_SHORT)
-                            .show();
+                      appointmentId, complaint, symptoms, diagnosis, notes, bp, hr, temp, weight)),
+              this,
+              body -> {
+                btnNextPrescription.setEnabled(true);
+                Toast.makeText(requireContext(), "Consultation saved.", Toast.LENGTH_SHORT).show();
 
-                        Bundle args = new Bundle();
-                        args.putString("patient_name", patientName);
-                        args.putInt("appointment_id", appointmentId);
-                        args.putString("diagnosis", diagnosis);
-                        args.putString("complaint", complaint);
-                        args.putString("notes", notes);
+                Bundle args = new Bundle();
+                args.putString("patient_name", patientName);
+                args.putInt("appointment_id", appointmentId);
+                args.putString("diagnosis", diagnosis);
+                args.putString("complaint", complaint);
+                args.putString("notes", notes);
 
-                        PrescriptionFragment fragment = new PrescriptionFragment();
-                        fragment.setArguments(args);
-                        ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
-                      } else if (response.code() == 403) {
-                        Toast.makeText(
-                                requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
-                            .show();
-                      } else if (response.code() == 400) {
-                        Toast.makeText(
-                                requireContext(),
-                                "Appointment must be confirmed, or a consultation already exists for it.",
-                                Toast.LENGTH_LONG)
-                            .show();
-                      } else {
-                        Toast.makeText(
-                                requireContext(),
-                                "Failed to save consultation.",
-                                Toast.LENGTH_SHORT)
-                            .show();
-                      }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ConsultationResponse> call, Throwable t) {
-                      if (!isAdded()) return;
-                      btnNextPrescription.setEnabled(true);
-                      Toast.makeText(
-                              requireContext(),
-                              "Network error: " + t.getMessage(),
-                              Toast.LENGTH_LONG)
-                          .show();
-                    }
-                  });
+                PrescriptionFragment fragment = new PrescriptionFragment();
+                fragment.setArguments(args);
+                ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
+              },
+              (code, msg) -> {
+                btnNextPrescription.setEnabled(true);
+                if (code == 403) {
+                  Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
+                      .show();
+                } else if (code == 400) {
+                  Toast.makeText(
+                          requireContext(),
+                          "Appointment must be confirmed, or a consultation already exists for it.",
+                          Toast.LENGTH_LONG)
+                      .show();
+                } else if (code == -1) {
+                  Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG)
+                      .show();
+                } else {
+                  Toast.makeText(
+                          requireContext(), "Failed to save consultation.", Toast.LENGTH_SHORT)
+                      .show();
+                }
+              });
         });
   }
 }

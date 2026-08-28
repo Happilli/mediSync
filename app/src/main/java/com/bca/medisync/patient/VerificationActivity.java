@@ -17,9 +17,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bca.medisync.R;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
-import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -31,9 +31,6 @@ import java.io.InputStream;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class VerificationActivity extends AppCompatActivity {
   private MaterialToolbar toolbar;
@@ -117,46 +114,34 @@ public class VerificationActivity extends AppCompatActivity {
         MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
 
     PatientApi patientApi = ApiClient.getRetrofit().create(PatientApi.class);
-    patientApi
-        .requestVerification(citizenshipBody, filePart)
-        .enqueue(
-            new Callback<PatientResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PatientResponse> call, Response<PatientResponse> response) {
-                btnSubmit.setEnabled(true);
-                if (response.isSuccessful()) {
-                  Toast.makeText(
-                          VerificationActivity.this,
-                          "Verification request submitted, Wait for approval..",
-                          Toast.LENGTH_LONG)
-                      .show();
-                  finish();
-                } else if (response.code() == 400) {
-                  Toast.makeText(
-                          VerificationActivity.this,
-                          "Verification already requested...",
-                          Toast.LENGTH_SHORT)
-                      .show();
-                } else {
-                  Toast.makeText(
-                          VerificationActivity.this,
-                          "Submission failed, try again..",
-                          Toast.LENGTH_LONG)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PatientResponse> call, Throwable t) {
-                btnSubmit.setEnabled(true);
-                Toast.makeText(
-                        VerificationActivity.this,
-                        "Network erros: " + t.getMessage(),
-                        Toast.LENGTH_SHORT)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        patientApi.requestVerification(citizenshipBody, filePart),
+        body -> {
+          btnSubmit.setEnabled(true);
+          Toast.makeText(
+                  VerificationActivity.this,
+                  "Verification request submitted, Wait for approval..",
+                  Toast.LENGTH_LONG)
+              .show();
+          finish();
+        },
+        (code, msg) -> {
+          btnSubmit.setEnabled(true);
+          if (code == 400) {
+            Toast.makeText(
+                    VerificationActivity.this,
+                    "Verification already requested...",
+                    Toast.LENGTH_SHORT)
+                .show();
+          } else if (code == -1) {
+            Toast.makeText(VerificationActivity.this, "Network erros: " + msg, Toast.LENGTH_SHORT)
+                .show();
+          } else {
+            Toast.makeText(
+                    VerificationActivity.this, "Submission failed, try again..", Toast.LENGTH_LONG)
+                .show();
+          }
+        });
   }
 
   private File copyUriToCache(Uri uri) throws Exception {

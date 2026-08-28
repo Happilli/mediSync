@@ -21,15 +21,13 @@ import com.bca.medisync.DoctorTabActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PatientApi;
-import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentStatusUpdateRequest;
 import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
-import com.bca.medisync.data.remote.dto.TimeSlotResponse;
-import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -42,10 +40,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ScheduleFragment extends Fragment {
 
@@ -134,73 +128,6 @@ public class ScheduleFragment extends Fragment {
     datePicker.show(getParentFragmentManager(), "DATE_PICKER");
   }
 
-  private void createTimeslot(String iso) {
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
-    api.createTimeslot(new TimeSlotCreateRequest(iso))
-        .enqueue(
-            new Callback<TimeSlotResponse>() {
-              @Override
-              public void onResponse(
-                  Call<TimeSlotResponse> call, Response<TimeSlotResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful()) {
-                  Toast.makeText(requireContext(), "Timeslot added.", Toast.LENGTH_SHORT).show();
-                } else if (response.code() == 400) {
-                  Toast.makeText(
-                          requireContext(),
-                          "Timeslot already exists for this time.",
-                          Toast.LENGTH_LONG)
-                      .show();
-                } else {
-                  Toast.makeText(requireContext(), "Failed to add timeslot.", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<TimeSlotResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
-  }
-
-  private void loadRealSchedule() {
-    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
-    api.getMyAppointmentsAsDoctor(null, null)
-        .enqueue(
-            new Callback<List<AppointmentResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<AppointmentResponse>> call,
-                  Response<List<AppointmentResponse>> response) {
-                if (!isAdded() || !response.isSuccessful() || response.body() == null) return;
-                if (response.body().isEmpty()) {
-                  allAppointments = new ArrayList<>();
-                  filterByDate(selectedDate);
-                  return;
-                }
-                AppointmentEnricher.enrichForDoctor(
-                    response.body(),
-                    enriched -> {
-                      if (!isAdded()) return;
-                      allAppointments = enriched;
-                      filterByDate(selectedDate);
-                    });
-              }
-
-              @Override
-              public void onFailure(Call<List<AppointmentResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
-  }
-
   private void filterByDate(String date) {
     List<Appointment> filtered = new ArrayList<>();
     if (date != null) {
@@ -251,86 +178,99 @@ public class ScheduleFragment extends Fragment {
     }
   }
 
+  private void createTimeslot(String iso) {
+    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    ApiCallback.handle(
+        api.createTimeslot(new TimeSlotCreateRequest(iso)),
+        this,
+        body -> Toast.makeText(requireContext(), "Timeslot added.", Toast.LENGTH_SHORT).show(),
+        (code, msg) -> {
+          if (code == 400) {
+            Toast.makeText(
+                    requireContext(), "Timeslot already exists for this time.", Toast.LENGTH_LONG)
+                .show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to add timeslot.", Toast.LENGTH_SHORT).show();
+          }
+        });
+  }
+
+  private void loadRealSchedule() {
+    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    ApiCallback.handle(
+        api.getMyAppointmentsAsDoctor(null, null),
+        this,
+        body -> {
+          if (body.isEmpty()) {
+            allAppointments = new ArrayList<>();
+            filterByDate(selectedDate);
+            return;
+          }
+          AppointmentEnricher.enrichForDoctor(
+              body,
+              enriched -> {
+                if (!isAdded()) return;
+                allAppointments = enriched;
+                filterByDate(selectedDate);
+              });
+        },
+        (code, msg) ->
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show());
+  }
+
   private void openPatientDetail(Appointment appointment, int appointmentId) {
     PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    api.getPatientDetailForDoctor(appointment.getPatientId()) // see note below
-        .enqueue(
-            new Callback<PatientPublicResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PatientPublicResponse> call, Response<PatientPublicResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  PatientPublicResponse p = response.body();
-                  Bundle args = new Bundle();
-                  args.putInt("patient_id", p.getId());
-                  args.putInt("appointment_id", appointmentId);
-                  args.putString("patient_name", p.getName());
-                  args.putString("patient_phone", p.getPhone());
-                  args.putString("patient_gender", p.getGender());
-                  args.putString("patient_blood", p.getBlood_group());
-                  args.putString("patient_emergency", p.getEmergency_contact());
-                  args.putString("patient_email", p.getEmail());
-                  args.putString("patient_address", p.getAddress());
-                  args.putString("patient_dob", p.getDate_of_birth());
-                  args.putString("patient_pic_url", p.getProfile_pic_url());
+    ApiCallback.handle(
+        api.getPatientDetailForDoctor(appointment.getPatientId()),
+        this,
+        p -> {
+          Bundle args = new Bundle();
+          args.putInt("patient_id", p.getId());
+          args.putInt("appointment_id", appointmentId);
+          args.putString("patient_name", p.getName());
+          args.putString("patient_phone", p.getPhone());
+          args.putString("patient_gender", p.getGender());
+          args.putString("patient_blood", p.getBlood_group());
+          args.putString("patient_emergency", p.getEmergency_contact());
+          args.putString("patient_email", p.getEmail());
+          args.putString("patient_address", p.getAddress());
+          args.putString("patient_dob", p.getDate_of_birth());
+          args.putString("patient_pic_url", p.getProfile_pic_url());
 
-                  PatientDetailsFragment fragment = new PatientDetailsFragment();
-                  fragment.setArguments(args);
-                  ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
-                } else {
-                  Toast.makeText(requireContext(), "Failed to load patient.", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PatientPublicResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+          PatientDetailsFragment fragment = new PatientDetailsFragment();
+          fragment.setArguments(args);
+          ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
+        },
+        (code, msg) -> {
+          if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to load patient.", Toast.LENGTH_SHORT).show();
+          }
+        });
   }
 
   private void updateStatus(int appointmentId, String newStatus) {
     AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
-    api.updateAppointmentStatus(appointmentId, new AppointmentStatusUpdateRequest(newStatus))
-        .enqueue(
-            new Callback<AppointmentResponse>() {
-              @Override
-              public void onResponse(
-                  Call<AppointmentResponse> call, Response<AppointmentResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful()) {
-                  Toast.makeText(requireContext(), "Appointment " + newStatus, Toast.LENGTH_SHORT)
-                      .show();
-                  loadRealSchedule();
-                } else if (response.code() == 400) {
-                  Toast.makeText(
-                          requireContext(),
-                          "Appointment can no longer be modified.",
-                          Toast.LENGTH_LONG)
-                      .show();
-                  loadRealSchedule();
-                } else if (response.code() == 403) {
-                  Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
-                      .show();
-                } else {
-                  Toast.makeText(requireContext(), "Failed to update status.", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<AppointmentResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.updateAppointmentStatus(appointmentId, new AppointmentStatusUpdateRequest(newStatus)),
+        this,
+        body -> {
+          Toast.makeText(requireContext(), "Appointment " + newStatus, Toast.LENGTH_SHORT).show();
+          loadRealSchedule();
+        },
+        (code, msg) -> {
+          if (code == 400) {
+            Toast.makeText(
+                    requireContext(), "Appointment can no longer be modified.", Toast.LENGTH_LONG)
+                .show();
+            loadRealSchedule();
+          } else if (code == 403) {
+            Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to update status.", Toast.LENGTH_SHORT).show();
+          }
+        });
   }
 
   private void setupDateStrip() {

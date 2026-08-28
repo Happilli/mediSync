@@ -20,23 +20,19 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bca.medisync.data.local.SessionManager;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.NotificationSocketManager;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.login.LoginRequest;
-import com.bca.medisync.data.remote.dto.login.LoginResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
   private MaterialButton btnLogin;
@@ -163,53 +159,40 @@ public class MainActivity extends AppCompatActivity {
     btnLogin.setEnabled(false);
 
     AuthApi authApi = ApiClient.getRetrofit().create(AuthApi.class);
-    authApi
-        .login(new LoginRequest(email, password))
-        .enqueue(
-            new Callback<LoginResponse>() {
-              @Override
-              public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                btnLogin.setEnabled(true);
-                if (response.isSuccessful() && response.body() != null) {
-                  LoginResponse body = response.body();
+    ApiCallback.handle(
+        authApi.login(new LoginRequest(email, password)),
+        body -> {
+          btnLogin.setEnabled(true);
+          if (!selectedRole.equalsIgnoreCase(body.getRole())) {
+            Toast.makeText(
+                    MainActivity.this,
+                    "This account is not registered as " + selectedRole,
+                    Toast.LENGTH_LONG)
+                .show();
+            return;
+          }
+          sessionManager.saveSession(body.getAccess_token(), body.getRole(), body.getEmail());
+          NotificationSocketHolder.get()
+              .connect(sessionManager.getToken(), globalNotificationListener);
 
-                  if (!selectedRole.equalsIgnoreCase(body.getRole())) {
-                    Toast.makeText(
-                            MainActivity.this,
-                            "This account is not registered as " + selectedRole,
-                            Toast.LENGTH_LONG)
-                        .show();
-                    return;
-                  }
-                  sessionManager.saveSession(
-                      body.getAccess_token(), body.getRole(), body.getEmail());
-                  NotificationSocketHolder.get()
-                      .connect(sessionManager.getToken(), globalNotificationListener);
-
-                  Intent intent;
-                  if ("doctor".equalsIgnoreCase(body.getRole())) {
-                    intent = new Intent(MainActivity.this, DoctorTabActivity.class);
-                  } else {
-                    intent = new Intent(MainActivity.this, MainTabActivity.class);
-                  }
-                  startActivity(intent);
-                  finish();
-                } else {
-                  Toast.makeText(
-                          MainActivity.this,
-                          "login failed: invalid credentials",
-                          Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<LoginResponse> call, Throwable t) {
-                btnLogin.setEnabled(true);
-                Toast.makeText(
-                        MainActivity.this, "network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+          Intent intent;
+          if ("doctor".equalsIgnoreCase(body.getRole())) {
+            intent = new Intent(MainActivity.this, DoctorTabActivity.class);
+          } else {
+            intent = new Intent(MainActivity.this, MainTabActivity.class);
+          }
+          startActivity(intent);
+          finish();
+        },
+        (code, msg) -> {
+          btnLogin.setEnabled(true);
+          if (code == -1) {
+            Toast.makeText(MainActivity.this, "network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(
+                    MainActivity.this, "login failed: invalid credentials", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
   }
 }

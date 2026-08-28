@@ -19,13 +19,13 @@ import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.local.SessionManager;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
-import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.patient.NotificationsActivity;
@@ -36,11 +36,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class DoctorHomeFragment extends Fragment implements NotificationCenter.Listener {
 
@@ -123,122 +118,88 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
 
   private void loadUnreadCount() {
     NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
-    api.getUnreadCount()
-        .enqueue(
-            new Callback<Map<String, Integer>>() {
-              @Override
-              public void onResponse(
-                  Call<Map<String, Integer>> call, Response<Map<String, Integer>> response) {
-                if (!isAdded()) return;
-                boolean hasUnread = false;
-                if (response.isSuccessful() && response.body() != null) {
-                  Integer count = response.body().get("unread_count");
-                  hasUnread = count != null && count > 0;
-                }
-                if (hasUnread) showUnreadIcon();
-                else showReadIcon();
-              }
+    ApiCallback.handle(
+        api.getUnreadCount(),
+        this,
+        body -> {
+          Integer count = body.get("unread_count");
+          if (count != null && count > 0) showUnreadIcon();
+          else showReadIcon();
+        },
+        (code, msg) -> {});
+  }
 
-              @Override
-              public void onFailure(Call<Map<String, Integer>> call, Throwable t) {}
-            });
+  private void loadDashboardData() {
+    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    ApiCallback.handle(
+        api.getMyProfile(),
+        this,
+        p -> {
+          txtDoctorName.setText("Dr. " + p.getName());
+          txtPatientsMonth.setText(String.valueOf(p.getPatients_this_month()));
+          txtTotalPatients.setText(String.valueOf(p.getTotal_patients()));
+        },
+        (code, msg) -> {
+          if (code == 401) {
+            handleUnauthorized();
+          } else if (code == -1) {
+            Toast.makeText(requireContext(), "Error: " + msg, Toast.LENGTH_SHORT).show();
+          }
+        });
+  }
+
+  private void loadTodayAppointments() {
+    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    ApiCallback.handle(
+        api.getMyAppointmentsAsDoctor(null, null),
+        this,
+        all -> {
+          String todayStr =
+              new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+          List<AppointmentResponse> todayAppointments = new ArrayList<>();
+
+          for (AppointmentResponse r : all) {
+            String apptDate =
+                com.bca.medisync.util.DateTimeUtils.format(r.getAppointment_at(), "yyyy-MM-dd");
+            if (todayStr.equals(apptDate)) {
+              todayAppointments.add(r);
+            }
+          }
+
+          txtScheduledCount.setText(
+              todayAppointments.size()
+                  + (todayAppointments.size() == 1 ? " appointment" : " appointments"));
+          updateStats(todayAppointments);
+
+          if (todayAppointments.isEmpty()) {
+            txtNoAppointments.setVisibility(View.VISIBLE);
+            rvAppointments.setVisibility(View.GONE);
+          } else {
+            txtNoAppointments.setVisibility(View.GONE);
+            rvAppointments.setVisibility(View.VISIBLE);
+            AppointmentEnricher.enrichForDoctor(
+                todayAppointments,
+                appointments -> {
+                  if (!isAdded()) return;
+                  rvAppointments.setAdapter(
+                      new AppointmentAdapter(
+                          requireContext(), appointments, true, appointment -> {}));
+                });
+          }
+        },
+        (code, msg) -> {
+          if (code == 401) {
+            handleUnauthorized();
+          } else if (code == -1) {
+            Toast.makeText(requireContext(), "Failed to load schedule", Toast.LENGTH_SHORT).show();
+          }
+        });
   }
 
   private void BottomNavGoTo(int navItemId) {
     com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
         requireActivity().findViewById(R.id.bottomNavDoctor);
     bottomNav.setSelectedItemId(navItemId);
-  }
-
-  private void loadDashboardData() {
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
-    api.getMyProfile()
-        .enqueue(
-            new Callback<DoctorProfileResponse>() {
-              @Override
-              public void onResponse(
-                  Call<DoctorProfileResponse> call, Response<DoctorProfileResponse> response) {
-                if (!isAdded()) return;
-                if (response.code() == 401) {
-                  handleUnauthorized();
-                  return;
-                }
-                if (response.isSuccessful() && response.body() != null) {
-                  DoctorProfileResponse p = response.body();
-                  txtDoctorName.setText("Dr. " + p.getName());
-                  txtPatientsMonth.setText(String.valueOf(p.getPatients_this_month()));
-                  txtTotalPatients.setText(String.valueOf(p.getTotal_patients()));
-                }
-              }
-
-              @Override
-              public void onFailure(Call<DoctorProfileResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT)
-                    .show();
-              }
-            });
-  }
-
-  private void loadTodayAppointments() {
-    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
-    api.getMyAppointmentsAsDoctor(null, null)
-        .enqueue(
-            new Callback<List<AppointmentResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<AppointmentResponse>> call,
-                  Response<List<AppointmentResponse>> response) {
-                if (!isAdded()) return;
-                if (response.code() == 401) {
-                  handleUnauthorized();
-                  return;
-                }
-                if (response.isSuccessful() && response.body() != null) {
-                  List<AppointmentResponse> all = response.body();
-                  String todayStr =
-                      new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-                  List<AppointmentResponse> todayAppointments = new ArrayList<>();
-
-                  for (AppointmentResponse r : all) {
-                    String apptDate =
-                        com.bca.medisync.util.DateTimeUtils.format(
-                            r.getAppointment_at(), "yyyy-MM-dd");
-                    if (todayStr.equals(apptDate)) {
-                      todayAppointments.add(r);
-                    }
-                  }
-
-                  txtScheduledCount.setText(
-                      todayAppointments.size()
-                          + (todayAppointments.size() == 1 ? " appointment" : " appointments"));
-                  updateStats(todayAppointments);
-
-                  if (todayAppointments.isEmpty()) {
-                    txtNoAppointments.setVisibility(View.VISIBLE);
-                    rvAppointments.setVisibility(View.GONE);
-                  } else {
-                    txtNoAppointments.setVisibility(View.GONE);
-                    rvAppointments.setVisibility(View.VISIBLE);
-                    AppointmentEnricher.enrichForDoctor(
-                        todayAppointments,
-                        appointments -> {
-                          if (!isAdded()) return;
-                          rvAppointments.setAdapter(
-                              new AppointmentAdapter(
-                                  requireContext(), appointments, true, appointment -> {}));
-                        });
-                  }
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<AppointmentResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(requireContext(), "Failed to load schedule", Toast.LENGTH_SHORT)
-                    .show();
-              }
-            });
   }
 
   private void handleUnauthorized() {

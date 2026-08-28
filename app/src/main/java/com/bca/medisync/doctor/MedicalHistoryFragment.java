@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.R;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
@@ -22,10 +23,6 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MedicalHistoryFragment extends Fragment {
 
@@ -100,48 +97,37 @@ public class MedicalHistoryFragment extends Fragment {
 
   private void loadRealHistory() {
     MedicalHistoryApi api = ApiClient.getRetrofit().create(MedicalHistoryApi.class);
-    api.getPatientHistory(patientId)
-        .enqueue(
-            new Callback<List<MedicalHistoryResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<MedicalHistoryResponse>> call,
-                  Response<List<MedicalHistoryResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  List<MedicalHistoryEntry> entries = new ArrayList<>();
-                  for (MedicalHistoryResponse r : response.body()) {
-                    entries.add(
-                        new MedicalHistoryEntry(
-                            PrescriptionEnricher.formatDate(r.getDate()),
-                            r.getTitle(),
-                            r.getDescription()));
-                  }
-                  tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
-                  tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
-                  tvLabTitle.setText("");
-                  tvLabDesc.setText("");
-                  bindTimeline(entries);
-                } else if (response.code() == 403) {
-                  Toast.makeText(
-                          requireContext(),
-                          "You can only view history for patients you've treated.",
-                          Toast.LENGTH_LONG)
-                      .show();
-                } else {
-                  Toast.makeText(requireContext(), "Failed to load history", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<MedicalHistoryResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.getPatientHistory(patientId),
+        this,
+        body -> {
+          List<MedicalHistoryEntry> entries = new ArrayList<>();
+          for (MedicalHistoryResponse r : body) {
+            entries.add(
+                new MedicalHistoryEntry(
+                    PrescriptionEnricher.formatDate(r.getDate()),
+                    r.getTitle(),
+                    r.getDescription()));
+          }
+          tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
+          tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
+          tvLabTitle.setText("");
+          tvLabDesc.setText("");
+          bindTimeline(entries);
+        },
+        (code, msg) -> {
+          if (code == 403) {
+            Toast.makeText(
+                    requireContext(),
+                    "You can only view history for patients you've treated.",
+                    Toast.LENGTH_LONG)
+                .show();
+          } else if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to load history", Toast.LENGTH_SHORT).show();
+          }
+        });
   }
 
   private void bindTimeline(List<MedicalHistoryEntry> timeline) {

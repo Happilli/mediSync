@@ -12,10 +12,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bca.medisync.R;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.register.PatientRegisterRequest;
-import com.bca.medisync.data.remote.dto.register.RegisterResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
@@ -23,9 +23,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -173,42 +170,31 @@ public class RegisterActivity extends AppCompatActivity {
             securityAnswer,
             bloodGroup.toUpperCase(Locale.ROOT),
             emergencyContact);
-
     AuthApi authApi = ApiClient.getRetrofit().create(AuthApi.class);
-    authApi
-        .registerPatient(request)
-        .enqueue(
-            new Callback<RegisterResponse>() {
-              @Override
-              public void onResponse(
-                  Call<RegisterResponse> call, Response<RegisterResponse> response) {
-                btnRegister.setEnabled(true);
-                if (response.isSuccessful() && response.body() != null) {
-                  Toast.makeText(
-                          RegisterActivity.this,
-                          response.body().getMessage() + "\n" + response.body().getRemarks(),
-                          Toast.LENGTH_LONG)
-                      .show();
-                  finish();
-                } else {
-                  Toast.makeText(
-                          RegisterActivity.this,
-                          "Registration failed. Email may already be in use.",
-                          Toast.LENGTH_LONG)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<RegisterResponse> call, Throwable t) {
-                btnRegister.setEnabled(true);
-                Toast.makeText(
-                        RegisterActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        authApi.registerPatient(request),
+        body -> {
+          btnRegister.setEnabled(true);
+          Toast.makeText(
+                  RegisterActivity.this,
+                  body.getMessage() + "\n" + body.getRemarks(),
+                  Toast.LENGTH_LONG)
+              .show();
+          finish();
+        },
+        (code, msg) -> {
+          btnRegister.setEnabled(true);
+          if (code == -1) {
+            Toast.makeText(RegisterActivity.this, "Network error: " + msg, Toast.LENGTH_LONG)
+                .show();
+          } else {
+            Toast.makeText(
+                    RegisterActivity.this,
+                    "Registration failed. Email may already be in use.",
+                    Toast.LENGTH_LONG)
+                .show();
+          }
+        });
   }
 
   private String textOf(TextInputEditText et) {

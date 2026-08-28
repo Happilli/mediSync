@@ -13,11 +13,11 @@ import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.DoctorTabActivity;
 import com.bca.medisync.R;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationCreateRequest;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionCreateRequest;
-import com.bca.medisync.data.remote.dto.prescription.PrescriptionResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
@@ -29,10 +29,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class PrescriptionFragment extends Fragment {
 
@@ -211,45 +207,32 @@ public class PrescriptionFragment extends Fragment {
     btnSavePrescription.setEnabled(false);
 
     PrescriptionApi api = ApiClient.getRetrofit().create(PrescriptionApi.class);
-    api.createPrescription(request)
-        .enqueue(
-            new Callback<PrescriptionResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PrescriptionResponse> call, Response<PrescriptionResponse> response) {
-                if (!isAdded()) return;
-                btnSavePrescription.setEnabled(true);
-                if (response.isSuccessful() && response.body() != null) {
-                  Toast.makeText(requireContext(), "Prescription saved.", Toast.LENGTH_SHORT)
-                      .show();
-                  ((DoctorTabActivity) requireActivity()).popToRoot();
-                } else if (response.code() == 403) {
-                  Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
-                      .show();
-                } else if (response.code() == 400) {
-                  Toast.makeText(
-                          requireContext(),
-                          "Appointment must be confirmed with a consultation recorded, and can't already have a prescription.",
-                          Toast.LENGTH_LONG)
-                      .show();
-                } else if (response.code() == 404) {
-                  Toast.makeText(requireContext(), "Appointment not found.", Toast.LENGTH_SHORT)
-                      .show();
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to save prescription.", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PrescriptionResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                btnSavePrescription.setEnabled(true);
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.createPrescription(request),
+        this,
+        body -> {
+          btnSavePrescription.setEnabled(true);
+          Toast.makeText(requireContext(), "Prescription saved.", Toast.LENGTH_SHORT).show();
+          ((DoctorTabActivity) requireActivity()).popToRoot();
+        },
+        (code, msg) -> {
+          btnSavePrescription.setEnabled(true);
+          if (code == 403) {
+            Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT).show();
+          } else if (code == 400) {
+            Toast.makeText(
+                    requireContext(),
+                    "Appointment must be confirmed with a consultation recorded, and can't already have a prescription.",
+                    Toast.LENGTH_LONG)
+                .show();
+          } else if (code == 404) {
+            Toast.makeText(requireContext(), "Appointment not found.", Toast.LENGTH_SHORT).show();
+          } else if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to save prescription.", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
   }
 }

@@ -16,9 +16,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bca.medisync.R;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
-import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
 import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -32,9 +32,6 @@ import java.io.InputStream;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -91,41 +88,6 @@ public class EditProfileActivity extends AppCompatActivity {
     toolbar.setNavigationOnClickListener(v -> finish());
   }
 
-  private void loadCurrentProfile() {
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    api.getMyProfile()
-        .enqueue(
-            new Callback<PatientResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PatientResponse> call, Response<PatientResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                  PatientResponse p = response.body();
-                  etName.setText(p.getName());
-                  etPhone.setText(p.getPhone());
-                  etAddress.setText(p.getAddress());
-                  etEmergencyContact.setText(p.getEmergency_contact());
-                  bindProfilePic(p.getProfile_pic_url());
-                } else {
-                  Toast.makeText(
-                          EditProfileActivity.this,
-                          "Failed to load current profile.",
-                          Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PatientResponse> call, Throwable t) {
-                Toast.makeText(
-                        EditProfileActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
-  }
-
   private void bindProfilePic(String profilePicUrl) {
     if (profilePicUrl == null || profilePicUrl.isEmpty()) {
       imgProfilePreview.setImageResource(R.drawable.ic_nav_profile);
@@ -137,51 +99,6 @@ public class EditProfileActivity extends AppCompatActivity {
         .error(R.drawable.ic_nav_profile)
         .centerCrop()
         .into(imgProfilePreview);
-  }
-
-  private void uploadProfilePic(Uri uri) {
-    File cachedFile;
-    try {
-      cachedFile = copyUriToCache(uri);
-    } catch (Exception e) {
-      Toast.makeText(this, "Couldn't read the selected photo!", Toast.LENGTH_SHORT).show();
-      return;
-    }
-
-    RequestBody fileBody = RequestBody.create(cachedFile, MediaType.parse("image/*"));
-    MultipartBody.Part filePart =
-        MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
-
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    api.updateProfilePic(filePart)
-        .enqueue(
-            new Callback<PatientResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PatientResponse> call, Response<PatientResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                  Toast.makeText(
-                          EditProfileActivity.this, "Profile picture updated.", Toast.LENGTH_SHORT)
-                      .show();
-                  bindProfilePic(response.body().getProfile_pic_url());
-                } else {
-                  Toast.makeText(
-                          EditProfileActivity.this,
-                          "Failed to update profile picture.",
-                          Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PatientResponse> call, Throwable t) {
-                Toast.makeText(
-                        EditProfileActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
   }
 
   private File copyUriToCache(Uri uri) throws Exception {
@@ -203,6 +120,55 @@ public class EditProfileActivity extends AppCompatActivity {
 
   private void setupListeners() {
     btnSave.setOnClickListener(v -> attemptSave());
+  }
+
+  private void loadCurrentProfile() {
+    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    ApiCallback.handle(
+        api.getMyProfile(),
+        p -> {
+          etName.setText(p.getName());
+          etPhone.setText(p.getPhone());
+          etAddress.setText(p.getAddress());
+          etEmergencyContact.setText(p.getEmergency_contact());
+          bindProfilePic(p.getProfile_pic_url());
+        },
+        (code, msg) -> {
+          if (code == -1) {
+            Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(this, "Failed to load current profile.", Toast.LENGTH_SHORT).show();
+          }
+        });
+  }
+
+  private void uploadProfilePic(Uri uri) {
+    File cachedFile;
+    try {
+      cachedFile = copyUriToCache(uri);
+    } catch (Exception e) {
+      Toast.makeText(this, "Couldn't read the selected photo!", Toast.LENGTH_SHORT).show();
+      return;
+    }
+
+    RequestBody fileBody = RequestBody.create(cachedFile, MediaType.parse("image/*"));
+    MultipartBody.Part filePart =
+        MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
+
+    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    ApiCallback.handle(
+        api.updateProfilePic(filePart),
+        p -> {
+          Toast.makeText(this, "Profile picture updated.", Toast.LENGTH_SHORT).show();
+          bindProfilePic(p.getProfile_pic_url());
+        },
+        (code, msg) -> {
+          if (code == -1) {
+            Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(this, "Failed to update profile picture.", Toast.LENGTH_SHORT).show();
+          }
+        });
   }
 
   private void attemptSave() {
@@ -231,34 +197,21 @@ public class EditProfileActivity extends AppCompatActivity {
     btnSave.setEnabled(false);
 
     PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    api.updateMyProfile(new PatientUpdateRequest(name, phone, address, emergencyContact))
-        .enqueue(
-            new Callback<PatientResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PatientResponse> call, Response<PatientResponse> response) {
-                btnSave.setEnabled(true);
-                if (response.isSuccessful()) {
-                  Toast.makeText(EditProfileActivity.this, "Profile updated.", Toast.LENGTH_SHORT)
-                      .show();
-                  finish();
-                } else {
-                  Toast.makeText(
-                          EditProfileActivity.this, "Failed to update profile.", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PatientResponse> call, Throwable t) {
-                btnSave.setEnabled(true);
-                Toast.makeText(
-                        EditProfileActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.updateMyProfile(new PatientUpdateRequest(name, phone, address, emergencyContact)),
+        body -> {
+          btnSave.setEnabled(true);
+          Toast.makeText(this, "Profile updated.", Toast.LENGTH_SHORT).show();
+          finish();
+        },
+        (code, msg) -> {
+          btnSave.setEnabled(true);
+          if (code == -1) {
+            Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(this, "Failed to update profile.", Toast.LENGTH_SHORT).show();
+          }
+        });
   }
 
   private String textOf(TextInputEditText et) {

@@ -16,26 +16,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.TimeSlotAdapter;
 import com.bca.medisync.data.model.TimeSlot;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
-import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.util.DateTimeUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class BookAppointmentFragment extends Fragment {
   private MaterialToolbar toolbar;
@@ -118,39 +111,6 @@ public class BookAppointmentFragment extends Fragment {
     if (doctorInfo != null) txtDoctorInfo.setText(doctorInfo);
   }
 
-  private void setupTimeSlots() {
-    if (doctorId == -1) return;
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
-    api.getDoctorTimeslots(doctorId, true)
-        .enqueue(
-            new Callback<List<TimeSlotResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<TimeSlotResponse>> call, Response<List<TimeSlotResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  List<TimeSlot> slots = new ArrayList<>();
-                  for (TimeSlotResponse r : response.body()) {
-                    slots.add(mapToTimeSlot(r));
-                  }
-                  bindTimeSlots(slots);
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to load available slots", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<TimeSlotResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
-  }
-
   private void bindTimeSlots(List<TimeSlot> slots) {
     if (slots.isEmpty()) {
       rvTimeSlots.setVisibility(View.GONE);
@@ -173,6 +133,24 @@ public class BookAppointmentFragment extends Fragment {
     return new TimeSlot(r.getId(), r.getAppointment_at(), displayTime, r.isIs_available());
   }
 
+  private void setupTimeSlots() {
+    if (doctorId == -1) return;
+    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    ApiCallback.handle(
+        api.getDoctorTimeslots(doctorId, true),
+        this,
+        body -> {
+          List<TimeSlot> slots = new ArrayList<>();
+          for (TimeSlotResponse r : body) {
+            slots.add(mapToTimeSlot(r));
+          }
+          bindTimeSlots(slots);
+        },
+        (code, msg) ->
+            Toast.makeText(requireContext(), "Failed to load available slots", Toast.LENGTH_SHORT)
+                .show());
+  }
+
   private void setupConfirmButton() {
     btnConfirm.setOnClickListener(
         v -> {
@@ -185,48 +163,34 @@ public class BookAppointmentFragment extends Fragment {
           btnConfirm.setEnabled(false);
 
           AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
-          api.createAppointment(new AppointmentCreateRequest(selectedTimeSlot.getId(), notes))
-              .enqueue(
-                  new Callback<AppointmentResponse>() {
-                    @Override
-                    public void onResponse(
-                        Call<AppointmentResponse> call, Response<AppointmentResponse> response) {
-                      if (!isAdded()) return;
-                      btnConfirm.setEnabled(true);
-                      if (response.isSuccessful()) {
-                        Toast.makeText(requireContext(), "Appointment booked!", Toast.LENGTH_LONG)
-                            .show();
-                        ((MainTabActivity) requireActivity()).popToRootAndRefreshAppointments();
-                      } else if (response.code() == 403) {
-                        Toast.makeText(
-                                requireContext(),
-                                "You need to be verified before booking appointments.",
-                                Toast.LENGTH_LONG)
-                            .show();
-                      } else if (response.code() == 400) {
-                        Toast.makeText(
-                                requireContext(),
-                                "This slot is no longer available.",
-                                Toast.LENGTH_LONG)
-                            .show();
-                        setupTimeSlots();
-                      } else {
-                        Toast.makeText(requireContext(), "Booking failed.", Toast.LENGTH_SHORT)
-                            .show();
-                      }
-                    }
-
-                    @Override
-                    public void onFailure(Call<AppointmentResponse> call, Throwable t) {
-                      if (!isAdded()) return;
-                      btnConfirm.setEnabled(true);
-                      Toast.makeText(
-                              requireContext(),
-                              "Network error: " + t.getMessage(),
-                              Toast.LENGTH_LONG)
-                          .show();
-                    }
-                  });
+          ApiCallback.handle(
+              api.createAppointment(new AppointmentCreateRequest(selectedTimeSlot.getId(), notes)),
+              this,
+              body -> {
+                btnConfirm.setEnabled(true);
+                Toast.makeText(requireContext(), "Appointment booked!", Toast.LENGTH_LONG).show();
+                ((MainTabActivity) requireActivity()).popToRootAndRefreshAppointments();
+              },
+              (code, msg) -> {
+                btnConfirm.setEnabled(true);
+                if (code == 403) {
+                  Toast.makeText(
+                          requireContext(),
+                          "You need to be verified before booking appointments.",
+                          Toast.LENGTH_LONG)
+                      .show();
+                } else if (code == 400) {
+                  Toast.makeText(
+                          requireContext(), "This slot is no longer available.", Toast.LENGTH_LONG)
+                      .show();
+                  setupTimeSlots();
+                } else if (code == -1) {
+                  Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG)
+                      .show();
+                } else {
+                  Toast.makeText(requireContext(), "Booking failed.", Toast.LENGTH_SHORT).show();
+                }
+              });
         });
   }
 }

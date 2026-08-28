@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.AppointmentApi;
@@ -25,7 +26,6 @@ import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
-import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
@@ -34,11 +34,6 @@ import com.google.android.material.card.MaterialCardView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class HomeFragment extends Fragment implements NotificationCenter.Listener {
 
@@ -115,56 +110,6 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
     bottomNav.setSelectedItemId(navItemId);
   }
 
-  private void loadPatientName() {
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    api.getMyProfile()
-        .enqueue(
-            new Callback<PatientResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PatientResponse> call, Response<PatientResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  txtPatientName.setText(response.body().getName());
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PatientResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT)
-                    .show();
-              }
-            });
-  }
-
-  private void loadUnreadCount() {
-    NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
-    api.getUnreadCount()
-        .enqueue(
-            new Callback<Map<String, Integer>>() {
-              @Override
-              public void onResponse(
-                  Call<Map<String, Integer>> call, Response<Map<String, Integer>> response) {
-                if (!isAdded()) return;
-                boolean hasUnread = false;
-                if (response.isSuccessful() && response.body() != null) {
-                  Integer count = response.body().get("unread_count");
-                  hasUnread = count != null && count > 0;
-                }
-                if (hasUnread) {
-                  showUnreadIcon();
-                } else {
-                  showReadIcon();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<Map<String, Integer>> call, Throwable t) {}
-            });
-  }
-
   private void showUnreadIcon() {
     btnNotification.setIcon(
         ContextCompat.getDrawable(requireContext(), R.drawable.notification_dot));
@@ -174,38 +119,52 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
     btnNotification.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.notification));
   }
 
+  private void loadPatientName() {
+    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    ApiCallback.handle(
+        api.getMyProfile(),
+        this,
+        body -> txtPatientName.setText(body.getName()),
+        (code, msg) ->
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_SHORT).show());
+  }
+
+  private void loadUnreadCount() {
+    NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
+    ApiCallback.handle(
+        api.getUnreadCount(),
+        this,
+        body -> {
+          Integer count = body.get("unread_count");
+          if (count != null && count > 0) showUnreadIcon();
+          else showReadIcon();
+        },
+        (code, msg) -> {});
+  }
+
   private void loadUpcomingAppointment() {
     AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
-    api.getMyAppointments(null, null)
-        .enqueue(
-            new Callback<List<AppointmentResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<AppointmentResponse>> call,
-                  Response<List<AppointmentResponse>> response) {
+    ApiCallback.handle(
+        api.getMyAppointments(null, null),
+        this,
+        body -> {
+          AppointmentResponse next = AppointmentEnricher.findNextUpcoming(body);
+          if (next == null) {
+            cardAppointment.setVisibility(View.GONE);
+            return;
+          }
+          AppointmentEnricher.enrichOne(
+              next,
+              appointment -> {
                 if (!isAdded()) return;
-                if (!response.isSuccessful() || response.body() == null) return;
-
-                AppointmentResponse next = AppointmentEnricher.findNextUpcoming(response.body());
-                if (next == null) {
-                  cardAppointment.setVisibility(View.GONE);
-                  return;
-                }
-                AppointmentEnricher.enrichOne(
-                    next,
-                    appointment -> {
-                      if (!isAdded()) return;
-                      txtAppointmentDoctor.setText(appointment.getDoctorName());
-                      txtAppointmentSpeciality.setText(appointment.getSpeciality());
-                      txtAppointmentDate.setText(appointment.getDate());
-                      txtAppointmentTime.setText(appointment.getTime());
-                      cardAppointment.setVisibility(View.VISIBLE);
-                    });
-              }
-
-              @Override
-              public void onFailure(Call<List<AppointmentResponse>> call, Throwable t) {}
-            });
+                txtAppointmentDoctor.setText(appointment.getDoctorName());
+                txtAppointmentSpeciality.setText(appointment.getSpeciality());
+                txtAppointmentDate.setText(appointment.getDate());
+                txtAppointmentTime.setText(appointment.getTime());
+                cardAppointment.setVisibility(View.VISIBLE);
+              });
+        },
+        (code, msg) -> {});
   }
 
   private void setupDashboard() {

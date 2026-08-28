@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment;
 import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.PatientApi;
@@ -34,11 +35,6 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
-import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ProfileFragment extends Fragment {
 
@@ -134,41 +130,6 @@ public class ProfileFragment extends Fragment {
   private void setRowLabel(int rowId, String label) {
     ((TextView) requireView().findViewById(rowId).findViewById(R.id.txtSettingsLabel))
         .setText(label);
-  }
-
-  private void loadPatientData() {
-    PatientApi patientApi = ApiClient.getRetrofit().create(PatientApi.class);
-    patientApi
-        .getMyProfile()
-        .enqueue(
-            new Callback<PatientResponse>() {
-              @Override
-              public void onResponse(
-                  Call<PatientResponse> call, Response<PatientResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  bindPatient(response.body());
-                } else if (response.code() == 403) {
-                  Toast.makeText(
-                          requireContext(),
-                          "Your account is pending verification",
-                          Toast.LENGTH_LONG)
-                      .show();
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to load  your profile", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<PatientResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
   }
 
   private void bindPatient(PatientResponse patient) {
@@ -272,38 +233,47 @@ public class ProfileFragment extends Fragment {
     dialog.show();
   }
 
+  private void loadPatientData() {
+    PatientApi patientApi = ApiClient.getRetrofit().create(PatientApi.class);
+    ApiCallback.handle(
+        patientApi.getMyProfile(),
+        this,
+        this::bindPatient,
+        (code, msg) -> {
+          if (code == 403) {
+            Toast.makeText(
+                    requireContext(), "Your account is pending verification", Toast.LENGTH_LONG)
+                .show();
+          } else if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to load  your profile", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
+  }
+
   private void submitSecurityAnswer(String answer, String password, AlertDialog dialog) {
     PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    api.updateSecurityAnswer(new PatientSecurityAnswerUpdateRequest(password, answer))
-        .enqueue(
-            new Callback<Map<String, String>>() {
-              @Override
-              public void onResponse(
-                  Call<Map<String, String>> call, Response<Map<String, String>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful()) {
-                  Toast.makeText(requireContext(), "Security answer updated.", Toast.LENGTH_SHORT)
-                      .show();
-                  dialog.dismiss();
-                } else if (response.code() == 401) {
-                  Toast.makeText(
-                          requireContext(), "Current password is incorrect.", Toast.LENGTH_SHORT)
-                      .show();
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to update security answer.", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<Map<String, String>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.updateSecurityAnswer(new PatientSecurityAnswerUpdateRequest(password, answer)),
+        this,
+        body -> {
+          Toast.makeText(requireContext(), "Security answer updated.", Toast.LENGTH_SHORT).show();
+          dialog.dismiss();
+        },
+        (code, msg) -> {
+          if (code == 401) {
+            Toast.makeText(requireContext(), "Current password is incorrect.", Toast.LENGTH_SHORT)
+                .show();
+          } else if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(
+                    requireContext(), "Failed to update security answer.", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
   }
 
   public void setupNotificationSwitch() {

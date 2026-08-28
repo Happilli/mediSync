@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
-import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -26,10 +26,6 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 import com.bca.medisync.R;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class AppointmentFragment extends Fragment {
   private RecyclerView rvUpcoming, rvHistory;
@@ -115,36 +111,6 @@ public class AppointmentFragment extends Fragment {
         v -> ((MainTabActivity) requireActivity()).pushFragment(new HospitalFragment()));
   }
 
-  private void loadAppointments() {
-    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
-    api.getMyAppointments(null, null)
-        .enqueue(
-            new Callback<List<AppointmentResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<AppointmentResponse>> call,
-                  Response<List<AppointmentResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  AppointmentEnricher.enrichAll(
-                      response.body(), AppointmentFragment.this::bindLists);
-                } else {
-                  Toast.makeText(
-                          requireContext(), "failed to load appointments", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<AppointmentResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network err: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
-  }
-
   private void bindLists(List<Appointment> all) {
     if (!isAdded()) return;
     List<Appointment> upcoming = new ArrayList<>();
@@ -188,6 +154,17 @@ public class AppointmentFragment extends Fragment {
         .show();
   }
 
+  private void loadAppointments() {
+    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    ApiCallback.handle(
+        api.getMyAppointments(null, null),
+        this,
+        body -> AppointmentEnricher.enrichAll(body, AppointmentFragment.this::bindLists),
+        (code, msg) ->
+            Toast.makeText(requireContext(), "failed to load appointments", Toast.LENGTH_SHORT)
+                .show());
+  }
+
   private void cancelAppointment(Appointment appointment) {
     int appointmentId;
     try {
@@ -198,41 +175,29 @@ public class AppointmentFragment extends Fragment {
     }
 
     AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
-    api.cancelAppointment(appointmentId)
-        .enqueue(
-            new Callback<AppointmentResponse>() {
-              @Override
-              public void onResponse(
-                  Call<AppointmentResponse> call, Response<AppointmentResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful()) {
-                  Toast.makeText(requireContext(), "Appointment cancelled.", Toast.LENGTH_SHORT)
-                      .show();
-                  loadAppointments();
-                } else if (response.code() == 400) {
-                  Toast.makeText(
-                          requireContext(),
-                          "This appointment can no longer be cancelled.",
-                          Toast.LENGTH_LONG)
-                      .show();
-                  loadAppointments();
-                } else if (response.code() == 403) {
-                  Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
-                      .show();
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to cancel appointment.", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<AppointmentResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.cancelAppointment(appointmentId),
+        this,
+        body -> {
+          Toast.makeText(requireContext(), "Appointment cancelled.", Toast.LENGTH_SHORT).show();
+          loadAppointments();
+        },
+        (code, msg) -> {
+          if (code == 400) {
+            Toast.makeText(
+                    requireContext(),
+                    "This appointment can no longer be cancelled.",
+                    Toast.LENGTH_LONG)
+                .show();
+            loadAppointments();
+          } else if (code == 403) {
+            Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT).show();
+          } else if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to cancel appointment.", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
   }
 }

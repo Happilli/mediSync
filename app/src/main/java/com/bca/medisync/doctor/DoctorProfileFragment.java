@@ -16,17 +16,13 @@ import androidx.fragment.app.Fragment;
 import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
-import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
 import com.bumptech.glide.Glide;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class DoctorProfileFragment extends Fragment {
 
@@ -73,31 +69,37 @@ public class DoctorProfileFragment extends Fragment {
 
   private void loadProfile() {
     DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
-    api.getMyProfile()
-        .enqueue(
-            new Callback<DoctorProfileResponse>() {
-              @Override
-              public void onResponse(
-                  Call<DoctorProfileResponse> call, Response<DoctorProfileResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  DoctorProfileResponse profile = response.body();
-                  bindProfile(profile);
-                  loadHospitalName(profile.getHospital_id());
-                } else {
-                  Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
+    ApiCallback.handle(
+        api.getMyProfile(),
+        this,
+        profile -> {
+          bindProfile(profile);
+          loadHospitalName(profile.getHospital_id());
+        },
+        (code, msg) -> {
+          if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show();
+          }
+        });
+  }
 
-              @Override
-              public void onFailure(Call<DoctorProfileResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+  private void loadHospitalName(int hospitalId) {
+    HospitalApi api = ApiClient.getRetrofit().create(HospitalApi.class);
+    ApiCallback.handle(
+        api.getHospitalDetail(hospitalId),
+        this,
+        h -> {
+          View view = getView();
+          if (view == null) return;
+          ((TextView) view.findViewById(R.id.txtHospitalValue)).setText(h.getName());
+        },
+        (code, msg) -> {
+          View view = getView();
+          if (view == null) return;
+          ((TextView) view.findViewById(R.id.txtHospitalValue)).setText("Hospital #" + hospitalId);
+        });
   }
 
   private void bindProfile(DoctorProfileResponse p) {
@@ -157,28 +159,5 @@ public class DoctorProfileFragment extends Fragment {
         .error(R.drawable.ic_nav_profile)
         .centerCrop()
         .into(imgProfile);
-  }
-
-  private void loadHospitalName(int hospitalId) {
-    HospitalApi api = ApiClient.getRetrofit().create(HospitalApi.class);
-    api.getHospitalDetail(hospitalId)
-        .enqueue(
-            new Callback<HospitalResponse>() {
-              @Override
-              public void onResponse(
-                  Call<HospitalResponse> call, Response<HospitalResponse> response) {
-                if (!isAdded()) return;
-                View view = getView();
-                if (view == null) return;
-                String name =
-                    response.isSuccessful() && response.body() != null
-                        ? response.body().getName()
-                        : "Hospital #" + hospitalId;
-                ((TextView) view.findViewById(R.id.txtHospitalValue)).setText(name);
-              }
-
-              @Override
-              public void onFailure(Call<HospitalResponse> call, Throwable t) {}
-            });
   }
 }
