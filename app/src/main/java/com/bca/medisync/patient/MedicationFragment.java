@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.MedicationAdapter;
+import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicationApi;
@@ -40,7 +40,7 @@ public class MedicationFragment extends Fragment {
   private RecyclerView rvMedications;
   private TextView tvActiveTime, tvActiveName, tvActiveDosage;
   private MaterialButton btnMarkTaken;
-  private MedicationAdapter adapter;
+  private SimpleListAdapter<Medication> adapter;
 
   private Medication activeMedication;
 
@@ -100,13 +100,34 @@ public class MedicationFragment extends Fragment {
 
   private void setUpRecyclerView() {
     adapter =
-        new MedicationAdapter(
-            requireContext(),
+        new SimpleListAdapter<>(
+            R.layout.item_medication,
             new ArrayList<>(),
-            medication ->
-                Toast.makeText(requireContext(), medication.getInstruction(), Toast.LENGTH_SHORT)
-                    .show(),
-            this::markTaken);
+            (itemView, med, pos) -> {
+              ((TextView) itemView.findViewById(R.id.tvMedName))
+                  .setText(med.getName() + " " + med.getDosage());
+              ((TextView) itemView.findViewById(R.id.tvMedFrequency)).setText(med.getFrequency());
+              TextView tvTime = itemView.findViewById(R.id.tvMedTime);
+
+              if (med.isTaken()) {
+                tvTime.setText("Taken");
+                itemView.setAlpha(0.6f);
+              } else {
+                tvTime.setText(med.getTime());
+                itemView.setAlpha(1f);
+              }
+
+              itemView.setOnClickListener(
+                  v -> {
+                    if (!med.isTaken()) {
+                      markTaken(med);
+                    } else {
+                      Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT)
+                          .show();
+                    }
+                  });
+            },
+            null);
     rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvMedications.setAdapter(adapter);
   }
