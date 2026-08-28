@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Medication;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicationApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
@@ -31,10 +32,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MedicationFragment extends Fragment {
   private RecyclerView rvMedications;
@@ -134,35 +131,20 @@ public class MedicationFragment extends Fragment {
 
   private void loadMedications() {
     MedicationApi api = ApiClient.getRetrofit().create(MedicationApi.class);
-    api.getMyMedications()
-        .enqueue(
-            new Callback<List<MedicationResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<MedicationResponse>> call,
-                  Response<List<MedicationResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  List<Medication> meds = new ArrayList<>();
-                  for (MedicationResponse r : response.body()) {
-                    meds.add(mapToMedication(r));
-                  }
-                  bindMedications(meds);
-                  scheduleAllReminders(response.body());
-                } else {
-                  Toast.makeText(requireContext(), "Failed to load medications", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<MedicationResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.getMyMedications(),
+        this,
+        body -> {
+          List<Medication> meds = new ArrayList<>();
+          for (MedicationResponse r : body) {
+            meds.add(mapToMedication(r));
+          }
+          bindMedications(meds);
+          scheduleAllReminders(body);
+        },
+        (code, msg) ->
+            Toast.makeText(requireContext(), "Failed to load medications", Toast.LENGTH_SHORT)
+                .show());
   }
 
   private void scheduleAllReminders(List<MedicationResponse> responses) {
@@ -185,6 +167,25 @@ public class MedicationFragment extends Fragment {
           endDate,
           r.isIs_taken());
     }
+  }
+
+  private void markTaken(Medication medication) {
+    MedicationApi api = ApiClient.getRetrofit().create(MedicationApi.class);
+    ApiCallback.handle(
+        api.markTaken(medication.getId()),
+        this,
+        body -> {
+          Toast.makeText(requireContext(), "Marked as taken", Toast.LENGTH_SHORT).show();
+          loadMedications();
+        },
+        (code, msg) -> {
+          if (code == 403) {
+            Toast.makeText(requireContext(), "Not your medication.", Toast.LENGTH_SHORT).show();
+          } else {
+            Toast.makeText(requireContext(), "Failed to update medication.", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
   }
 
   private void bindMedications(List<Medication> meds) {
@@ -211,38 +212,6 @@ public class MedicationFragment extends Fragment {
       btnMarkTaken.setEnabled(false);
       btnMarkTaken.setText("Nothing Pending");
     }
-  }
-
-  private void markTaken(Medication medication) {
-    MedicationApi api = ApiClient.getRetrofit().create(MedicationApi.class);
-    api.markTaken(medication.getId())
-        .enqueue(
-            new Callback<MedicationResponse>() {
-              @Override
-              public void onResponse(
-                  Call<MedicationResponse> call, Response<MedicationResponse> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful()) {
-                  Toast.makeText(requireContext(), "Marked as taken", Toast.LENGTH_SHORT).show();
-                  loadMedications();
-                } else if (response.code() == 403) {
-                  Toast.makeText(requireContext(), "Not your medication.", Toast.LENGTH_SHORT)
-                      .show();
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to update medication.", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<MedicationResponse> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
   }
 
   private Medication mapToMedication(MedicationResponse r) {

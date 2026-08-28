@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Notification;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.NotificationApi;
@@ -25,11 +26,6 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class NotificationsActivity extends AppCompatActivity
     implements NotificationCenter.Listener {
@@ -126,77 +122,35 @@ public class NotificationsActivity extends AppCompatActivity
 
   private void loadNotifications() {
     NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
-    api.getMyNotifications(false)
-        .enqueue(
-            new Callback<List<NotificationResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<NotificationResponse>> call,
-                  Response<List<NotificationResponse>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                  List<Notification> list = new ArrayList<>();
-                  for (NotificationResponse r : response.body()) {
-                    list.add(mapToNotification(r));
-                  }
-                  adapter.updateData(list);
-                  txtEmpty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
-                  rvNotifications.setVisibility(list.isEmpty() ? View.GONE : View.VISIBLE);
-                } else {
-                  Toast.makeText(
-                          NotificationsActivity.this,
-                          "Failed to load notifications",
-                          Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<NotificationResponse>> call, Throwable t) {
-                Toast.makeText(
-                        NotificationsActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.getMyNotifications(false),
+        body -> {
+          List<Notification> list = new ArrayList<>();
+          for (NotificationResponse r : body) {
+            list.add(mapToNotification(r));
+          }
+          adapter.updateData(list);
+          txtEmpty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+          rvNotifications.setVisibility(list.isEmpty() ? View.GONE : View.VISIBLE);
+        },
+        (code, msg) ->
+            Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show());
   }
 
   private void markAsRead(int notificationId) {
     NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
-    api.markAsRead(notificationId)
-        .enqueue(
-            new Callback<NotificationResponse>() {
-              @Override
-              public void onResponse(
-                  Call<NotificationResponse> call, Response<NotificationResponse> response) {
-                loadNotifications();
-              }
-
-              @Override
-              public void onFailure(Call<NotificationResponse> call, Throwable t) {}
-            });
+    ApiCallback.handle(
+        api.markAsRead(notificationId),
+        body -> loadNotifications(),
+        (code, msg) -> loadNotifications());
   }
 
   private void markAllRead() {
     NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
-    api.markAllRead()
-        .enqueue(
-            new Callback<Map<String, String>>() {
-              @Override
-              public void onResponse(
-                  Call<Map<String, String>> call, Response<Map<String, String>> response) {
-                loadNotifications();
-              }
-
-              @Override
-              public void onFailure(Call<Map<String, String>> call, Throwable t) {
-                Toast.makeText(
-                        NotificationsActivity.this,
-                        "Network error: " + t.getMessage(),
-                        Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.markAllRead(),
+        body -> loadNotifications(),
+        (code, msg) -> Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show());
   }
 
   private Notification mapToNotification(NotificationResponse r) {

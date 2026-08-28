@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Doctor;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
@@ -28,10 +29,6 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class DoctorFragment extends Fragment {
   private RecyclerView rvDoctors;
@@ -127,33 +124,18 @@ public class DoctorFragment extends Fragment {
 
   private void loadDoctors(String search) {
     DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
-    api.getDoctors(filterHospitalId, null, null, search)
-        .enqueue(
-            new Callback<List<DoctorResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<DoctorResponse>> call, Response<List<DoctorResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  List<Doctor> doctors = new ArrayList<>();
-                  for (DoctorResponse r : response.body()) {
-                    doctors.add(mapToDoctor(r));
-                  }
-                  adapter.updateData(doctors);
-                } else {
-                  Toast.makeText(requireContext(), "failed to load doctors", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<DoctorResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.getDoctors(filterHospitalId, null, null, search),
+        this,
+        body -> {
+          List<Doctor> doctors = new ArrayList<>();
+          for (DoctorResponse r : body) {
+            doctors.add(mapToDoctor(r));
+          }
+          adapter.updateData(doctors);
+        },
+        (code, msg) ->
+            Toast.makeText(requireContext(), "failed to load doctors", Toast.LENGTH_SHORT).show());
   }
 
   private Doctor mapToDoctor(DoctorResponse r) {

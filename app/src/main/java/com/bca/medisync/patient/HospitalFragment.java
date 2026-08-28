@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Hospital;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
@@ -27,10 +28,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class HospitalFragment extends Fragment {
   private RecyclerView rvHospitals;
@@ -112,33 +109,19 @@ public class HospitalFragment extends Fragment {
 
   private void loadHospitals(String search) {
     HospitalApi api = ApiClient.getRetrofit().create(HospitalApi.class);
-    api.getHospitals(search)
-        .enqueue(
-            new Callback<List<HospitalResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<HospitalResponse>> call, Response<List<HospitalResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  List<Hospital> hospitals = new ArrayList<>();
-                  for (HospitalResponse r : response.body()) {
-                    hospitals.add(mapToHospital(r));
-                  }
-                  adapter.updateData(hospitals);
-                } else {
-                  Toast.makeText(requireContext(), "Failed to load hospitals..", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<HospitalResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.getHospitals(search),
+        this,
+        body -> {
+          List<Hospital> hospitals = new ArrayList<>();
+          for (HospitalResponse r : body) {
+            hospitals.add(mapToHospital(r));
+          }
+          adapter.updateData(hospitals);
+        },
+        (code, msg) ->
+            Toast.makeText(requireContext(), "Failed to load hospitals..", Toast.LENGTH_SHORT)
+                .show());
   }
 
   private Hospital mapToHospital(HospitalResponse r) {
