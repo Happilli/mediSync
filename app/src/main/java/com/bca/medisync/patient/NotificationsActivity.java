@@ -13,12 +13,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.NotificationAdapter;
+import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Notification;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
+import com.bca.medisync.util.DateTimeUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
@@ -37,7 +38,7 @@ public class NotificationsActivity extends AppCompatActivity
   private RecyclerView rvNotifications;
   private android.widget.TextView txtEmpty;
   private MaterialButton btnMarkAllRead;
-  private NotificationAdapter adapter;
+  private SimpleListAdapter<Notification> adapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -90,9 +91,26 @@ public class NotificationsActivity extends AppCompatActivity
 
   private void setupRecyclerView() {
     adapter =
-        new NotificationAdapter(
-            this,
+        new SimpleListAdapter<>(
+            R.layout.item_notification,
             new ArrayList<>(),
+            (itemView, notification, pos) -> {
+              ((android.widget.TextView) itemView.findViewById(R.id.txtNotifTitle))
+                  .setText(notification.getTitle());
+              ((android.widget.TextView) itemView.findViewById(R.id.txtNotifMessage))
+                  .setText(notification.getMessage());
+              ((android.widget.TextView) itemView.findViewById(R.id.txtNotifTime))
+                  .setText(DateTimeUtils.format(notification.getCreatedAt(), "dd MMM, hh:mm a"));
+
+              View unreadDot = itemView.findViewById(R.id.unreadDot);
+              if (notification.isRead()) {
+                unreadDot.setVisibility(View.INVISIBLE);
+                itemView.setAlpha(0.6f);
+              } else {
+                unreadDot.setVisibility(View.VISIBLE);
+                itemView.setAlpha(1f);
+              }
+            },
             notification -> {
               if (!notification.isRead()) {
                 markAsRead(notification.getId());

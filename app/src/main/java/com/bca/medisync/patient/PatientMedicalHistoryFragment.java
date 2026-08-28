@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.MedicalHistoryAdapter;
+import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
@@ -32,7 +33,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
   private MaterialToolbar toolbar;
   private RecyclerView rvHistory;
   private android.widget.TextView txtEmpty;
-  private MedicalHistoryAdapter adapter;
+  private SimpleListAdapter<MedicalHistoryEntry> adapter;
 
   @Nullable
   @Override
@@ -57,7 +58,18 @@ public class PatientMedicalHistoryFragment extends Fragment {
     rvHistory = view.findViewById(R.id.rvHistory);
     txtEmpty = view.findViewById(R.id.txtEmpty);
     rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
-    adapter = new MedicalHistoryAdapter(requireContext(), new ArrayList<>());
+
+    adapter =
+        new SimpleListAdapter<>(
+            R.layout.item_medical_history,
+            new ArrayList<>(),
+            (itemView, entry, pos) -> {
+              ((TextView) itemView.findViewById(R.id.txtDate)).setText(entry.getDate());
+              ((TextView) itemView.findViewById(R.id.txtTitle)).setText(entry.getTitle());
+              ((TextView) itemView.findViewById(R.id.txtDescription))
+                  .setText(entry.getDescription());
+            },
+            null);
     rvHistory.setAdapter(adapter);
   }
 

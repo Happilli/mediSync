@@ -6,6 +6,8 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,11 +17,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.DoctorAdapter;
+import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Doctor;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
+import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -34,7 +37,7 @@ public class DoctorFragment extends Fragment {
   private RecyclerView rvDoctors;
   private MaterialToolbar toolbar;
   private TextInputEditText etSearch;
-  private DoctorAdapter adapter;
+  private SimpleListAdapter<Doctor> adapter;
 
   private Integer filterHospitalId;
 
@@ -80,23 +83,46 @@ public class DoctorFragment extends Fragment {
 
   private void setupRecyclerView() {
     adapter =
-        new DoctorAdapter(
-            requireContext(),
+        new SimpleListAdapter<>(
+            R.layout.item_doctor,
             new ArrayList<>(),
-            doctor -> {
-              Bundle args = new Bundle();
-              args.putString("doctor_id", doctor.getId());
-              args.putString("doctor_name", doctor.getName());
-              args.putString("doctor_speciality", doctor.getSpeciality());
-              args.putString("doctor_info", doctor.getInfo());
-              args.putString("doctor_department", doctor.getDepartment());
+            (itemView, doctor, pos) -> {
+              ((TextView) itemView.findViewById(R.id.txtDoctorName)).setText(doctor.getName());
+              ((TextView) itemView.findViewById(R.id.txtSpeciality))
+                  .setText(doctor.getSpeciality());
+              ((TextView) itemView.findViewById(R.id.txtInfo)).setText(doctor.getInfo());
+              ImageView img = itemView.findViewById(R.id.imgDoctor);
+              if (doctor.getImageUrl() != null && !doctor.getImageUrl().isEmpty()) {
+                Glide.with(requireContext())
+                    .load(doctor.getImageUrl())
+                    .placeholder(R.drawable.stethoscope)
+                    .error(R.drawable.stethoscope)
+                    .into(img);
+              } else {
+                img.setImageResource(R.drawable.stethoscope);
+              }
+              itemView.findViewById(R.id.btnBook).setOnClickListener(v -> onBookClicked(doctor));
+            },
+            null,
+            (doctor, q) ->
+                doctor.getName().toLowerCase().contains(q)
+                    || doctor.getSpeciality().toLowerCase().contains(q));
 
-              BookAppointmentFragment fragment = new BookAppointmentFragment();
-              fragment.setArguments(args);
-              ((MainTabActivity) requireActivity()).pushFragment(fragment);
-            });
     rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvDoctors.setAdapter(adapter);
+  }
+
+  private void onBookClicked(Doctor doctor) {
+    Bundle args = new Bundle();
+    args.putString("doctor_id", doctor.getId());
+    args.putString("doctor_name", doctor.getName());
+    args.putString("doctor_speciality", doctor.getSpeciality());
+    args.putString("doctor_info", doctor.getInfo());
+    args.putString("doctor_department", doctor.getDepartment());
+
+    BookAppointmentFragment fragment = new BookAppointmentFragment();
+    fragment.setArguments(args);
+    ((MainTabActivity) requireActivity()).pushFragment(fragment);
   }
 
   private void loadDoctors(String search) {

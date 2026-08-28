@@ -1,6 +1,5 @@
 package com.bca.medisync.patient;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.PrescriptionAdapter;
+import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Prescription;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
@@ -34,7 +33,7 @@ public class PrescriptionListFragment extends Fragment {
   private MaterialToolbar toolbar;
   private RecyclerView rvPrescriptions;
   private TextView txtEmpty;
-  private PrescriptionAdapter adapter;
+  private SimpleListAdapter<Prescription> adapter;
 
   @Nullable
   @Override
@@ -60,10 +59,18 @@ public class PrescriptionListFragment extends Fragment {
     rvPrescriptions = view.findViewById(R.id.rvPrescriptions);
     txtEmpty = view.findViewById(R.id.txtEmpty);
     rvPrescriptions.setLayoutManager(new LinearLayoutManager(requireContext()));
+
     adapter =
-        new PrescriptionAdapter(
-            requireContext(),
+        new SimpleListAdapter<>(
+            R.layout.item_prescription,
             new ArrayList<>(),
+            (itemView, prescription, pos) -> {
+              ((TextView) itemView.findViewById(R.id.txtDiagnosis))
+                  .setText(prescription.getDiagnosis());
+              ((TextView) itemView.findViewById(R.id.txtDoctorName))
+                  .setText(prescription.getDoctor_name());
+              ((TextView) itemView.findViewById(R.id.txtDate)).setText(prescription.getCreatedAt());
+            },
             prescription -> {
               Bundle args = new Bundle();
               args.putInt("prescription_id", prescription.getId());

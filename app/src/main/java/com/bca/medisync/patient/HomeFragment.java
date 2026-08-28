@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,7 +17,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.DashboardAdapter;
+import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.AppointmentApi;
@@ -30,6 +31,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -224,11 +226,18 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
             R.drawable.record,
             R.drawable.hospital);
 
-    DashboardAdapter adapter =
-        new DashboardAdapter(
-            requireContext(),
-            titles,
-            icons,
+    List<Integer> positions = new ArrayList<>();
+    for (int i = 0; i < titles.size(); i++) positions.add(i);
+
+    SimpleListAdapter<Integer> adapter =
+        new SimpleListAdapter<>(
+            R.layout.item_dashboard,
+            positions,
+            (itemView, position, pos) -> {
+              ((TextView) itemView.findViewById(R.id.txtFeature)).setText(titles.get(position));
+              ((ImageView) itemView.findViewById(R.id.imgFeature))
+                  .setImageResource(icons.get(position));
+            },
             position -> {
               switch (position) {
                 case 0:
