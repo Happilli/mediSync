@@ -225,6 +225,14 @@ public class ScheduleFragment extends Fragment {
     helper.attachToRecyclerView(rvSchedule);
   }
 
+  @Override
+  public void onHiddenChanged(boolean hidden) {
+    super.onHiddenChanged(hidden);
+    if (!hidden) {
+      loadRealSchedule();
+    }
+  }
+
   private void showAddTimeslotDialog() {
     MaterialDatePicker<Long> datePicker =
         MaterialDatePicker.Builder.datePicker().setTitleText("Select Date").build();

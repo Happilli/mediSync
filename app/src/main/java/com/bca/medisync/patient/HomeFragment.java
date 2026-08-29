@@ -125,6 +125,15 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
             Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_SHORT).show());
   }
 
+  @Override
+  public void onHiddenChanged(boolean hidden) {
+    super.onHiddenChanged(hidden);
+    if (!hidden && isAdded()) {
+      loadUpcomingAppointment();
+      loadUnreadCount();
+    }
+  }
+
   private void loadUnreadCount() {
     NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
     ApiCallback.handle(

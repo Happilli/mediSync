@@ -35,6 +35,7 @@ import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +44,8 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
 
   private RecyclerView rvAppointments;
   private MaterialButton btnNotification;
-  private TextView txtDoctorName,
+  private TextView txtGreeting,
+      txtDoctorName,
       txtPending,
       txtCompleted,
       txtFollowUps,
@@ -67,6 +69,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
     super.onViewCreated(view, savedInstanceState);
     sessionManager = new SessionManager(requireContext());
     initViews(view);
+    setGreeting();
     setupListeners();
   }
 
@@ -98,6 +101,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   private void initViews(View view) {
     rvAppointments = view.findViewById(R.id.rvAppointments);
     btnNotification = view.findViewById(R.id.btnNotification);
+    txtGreeting = view.findViewById(R.id.txtGreeting);
     txtDoctorName = view.findViewById(R.id.txtDoctorName);
     txtPending = view.findViewById(R.id.txtPending);
     txtCompleted = view.findViewById(R.id.txtCompleted);
@@ -114,6 +118,15 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
             new ArrayList<>(),
             true,
             a -> BottomNavGoTo(R.id.nav_doctor_schedule)));
+  }
+
+  private void setGreeting() {
+    int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+    String greeting;
+    if (hour < 12) greeting = "Good morning";
+    else if (hour < 17) greeting = "Good afternoon";
+    else greeting = "Good evening";
+    txtGreeting.setText(greeting);
   }
 
   private void showUnreadIcon() {
@@ -173,7 +186,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
 
           txtScheduledCount.setText(
               todayAppointments.size()
-                  + (todayAppointments.size() == 1 ? " appointment" : " appointments"));
+                  + (todayAppointments.size() == 1 ? " appointment today" : " appointments today"));
           updateStats(todayAppointments);
           EmptyState.bind(rvAppointments, txtNoAppointments, todayAppointments.isEmpty());
 
@@ -209,6 +222,14 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
     startActivity(intent);
     requireActivity().finish();
+  }
+
+  @Override
+  public void onHiddenChanged(boolean hidden) {
+    super.onHiddenChanged(hidden);
+    if (!hidden) {
+      refresh();
+    }
   }
 
   private void updateStats(List<AppointmentResponse> appointments) {
