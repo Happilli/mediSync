@@ -9,68 +9,30 @@ import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionResponse;
 import com.bca.medisync.util.DateTimeUtils;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class PrescriptionEnricher {
 
-  public interface Callback1<T> {
-    void onResult(T result);
-  }
-
   public static void enrichAll(
-      List<PrescriptionResponse> responses, Callback1<List<Prescription>> callback) {
-    if (responses.isEmpty()) {
-      callback.onResult(new ArrayList<>());
-      return;
-    }
-    List<Prescription> result = new ArrayList<>();
-    AtomicInteger remaining = new AtomicInteger(responses.size());
+      List<PrescriptionResponse> responses,
+      ParallelEnricher.Callback1<List<Prescription>> callback) {
     DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
-
-    for (PrescriptionResponse r : responses) {
-      doctorApi
-          .getDoctorDetail(r.getDoctor_id())
-          .enqueue(
-              new Callback<DoctorResponse>() {
-                @Override
-                public void onResponse(Call<DoctorResponse> call, Response<DoctorResponse> resp) {
-                  Prescription p = mapToPrescription(r, resp.isSuccessful() ? resp.body() : null);
-                  synchronized (result) {
-                    result.add(p);
-                  }
-                  if (remaining.decrementAndGet() == 0) callback.onResult(result);
-                }
-
-                @Override
-                public void onFailure(Call<DoctorResponse> call, Throwable t) {
-                  Prescription p = mapToPrescription(r, null);
-                  synchronized (result) {
-                    result.add(p);
-                  }
-                  if (remaining.decrementAndGet() == 0) callback.onResult(result);
-                }
-              });
-    }
+    ParallelEnricher.run(
+        responses,
+        r -> doctorApi.getDoctorDetail(r.getDoctor_id()),
+        PrescriptionEnricher::mapToPrescription,
+        callback);
   }
 
   public static Prescription mapToPrescription(PrescriptionResponse r, DoctorResponse d) {
     String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctor_id();
     List<Medication> meds = new ArrayList<>();
     if (r.getMedications() != null) {
-      for (MedicationResponse m : r.getMedications()) {
-        meds.add(mapMedication(m));
-      }
+      for (MedicationResponse m : r.getMedications()) meds.add(mapMedication(m));
     }
     return new Prescription(
         r.getId(),
