@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
@@ -26,6 +25,7 @@ import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.util.ImageLoader;
+import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.RoundedListStyler;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -111,12 +111,6 @@ public class ProfileFragment extends Fragment {
 
   private ActivityResultLauncher<String> notifPermLauncher;
 
-  private void bindRow(View rowView, int iconRes, String label, String value) {
-    ((ImageView) rowView.findViewById(R.id.imgRowIcon)).setImageResource(iconRes);
-    ((TextView) rowView.findViewById(R.id.txtRowLabel)).setText(label);
-    ((TextView) rowView.findViewById(R.id.txtRowValue)).setText(value);
-  }
-
   private void setupSettingsRows() {
     setRowLabel(R.id.rowSecurityAnswer, "Security Answer");
   }
@@ -137,15 +131,28 @@ public class ProfileFragment extends Fragment {
     txtName.setText(patient.getName());
     txtEmergencyContact.setText(patient.getEmergency_contact());
 
-    bindRow(rowAge, R.drawable.birthdate, "Age", calculateAge(patient.getDate_of_birth()));
-    bindRow(rowGender, R.drawable.stethoscope, "Gender", patient.getGender());
-    bindRow(rowBloodGroup, R.drawable.stethoscope, "Blood Group", patient.getBlood_group());
-    bindRow(rowEmail, R.drawable.email, "Email", sessionManager.getEmail());
-    bindRow(rowPhone, R.drawable.phone, "Phone", patient.getPhone());
-    bindRow(rowDob, R.drawable.birthdate, "Date of Birth", patient.getDate_of_birth());
-    bindRow(rowAddress, R.drawable.location, "Address", patient.getAddress());
+    InfoRowBinder.bind(
+        new View[] {rowAge, rowGender, rowBloodGroup, rowEmail, rowPhone, rowDob, rowAddress},
+        new int[] {
+          R.drawable.birthdate,
+          R.drawable.stethoscope,
+          R.drawable.stethoscope,
+          R.drawable.email,
+          R.drawable.phone,
+          R.drawable.birthdate,
+          R.drawable.location
+        },
+        new String[] {"Age", "Gender", "Blood Group", "Email", "Phone", "Date of Birth", "Address"},
+        new String[] {
+          calculateAge(patient.getDate_of_birth()),
+          patient.getGender(),
+          patient.getBlood_group(),
+          sessionManager.getEmail(),
+          patient.getPhone(),
+          patient.getDate_of_birth(),
+          patient.getAddress()
+        });
 
-    applyRoundedRows();
     bindVerificationBadge(patient.isIs_verified());
     bindProfilePic(patient.getProfile_pic_url());
   }

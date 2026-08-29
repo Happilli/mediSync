@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.bca.medisync.R;
 import com.bca.medisync.util.ImageLoader;
-import com.bca.medisync.util.RoundedListStyler;
+import com.bca.medisync.util.InfoRowBinder;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -67,12 +67,6 @@ public class PatientDetailsFragment extends Fragment {
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
   }
 
-  private void bindRow(View rowView, int iconRes, String label, String value) {
-    ((ImageView) rowView.findViewById(R.id.imgRowIcon)).setImageResource(iconRes);
-    ((TextView) rowView.findViewById(R.id.txtRowLabel)).setText(label);
-    ((TextView) rowView.findViewById(R.id.txtRowValue)).setText(value);
-  }
-
   private void loadData() {
     Bundle args = getArguments();
     if (args == null) return;
@@ -83,31 +77,32 @@ public class PatientDetailsFragment extends Fragment {
     txtName.setText(patientName);
     appointmentId = args.getInt("appointment_id", -1);
 
-    String gender = args.getString("patient_gender");
-    String blood = args.getString("patient_blood");
+    InfoRowBinder.bind(
+        new View[] {rowGender, rowBlood, rowPhone, rowEmail, rowDob, rowAddress, rowEmergency},
+        new int[] {
+          R.drawable.stethoscope,
+          R.drawable.stethoscope,
+          R.drawable.phone,
+          R.drawable.email,
+          R.drawable.birthdate,
+          R.drawable.location,
+          R.drawable.emergency
+        },
+        new String[] {
+          "Gender", "Blood Group", "Phone", "Email", "Date of Birth", "Address", "Emergency Contact"
+        },
+        new String[] {
+          args.getString("patient_gender"),
+          args.getString("patient_blood"),
+          args.getString("patient_phone"),
+          args.getString("patient_email"),
+          args.getString("patient_dob"),
+          args.getString("patient_address"),
+          args.getString("patient_emergency")
+        });
 
-    bindRow(rowGender, R.drawable.stethoscope, "Gender", gender);
-    bindRow(rowBlood, R.drawable.stethoscope, "Blood Group", blood);
-    bindRow(rowPhone, R.drawable.phone, "Phone", args.getString("patient_phone"));
-    bindRow(rowEmail, R.drawable.email, "Email", args.getString("patient_email"));
-    bindRow(rowDob, R.drawable.birthdate, "Date of Birth", args.getString("patient_dob"));
-    bindRow(rowAddress, R.drawable.location, "Address", args.getString("patient_address"));
-    bindRow(
-        rowEmergency,
-        R.drawable.emergency,
-        "Emergency Contact",
-        args.getString("patient_emergency"));
-
-    applyRoundedRows();
     bindProfilePic(args.getString("patient_pic_url"));
     btnConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
-  }
-
-  private void applyRoundedRows() {
-    View[] rows = {rowGender, rowBlood, rowPhone, rowEmail, rowDob, rowAddress, rowEmergency};
-    for (int i = 0; i < rows.length; i++) {
-      RoundedListStyler.apply(rows[i], i, rows.length);
-    }
   }
 
   private void bindProfilePic(String url) {

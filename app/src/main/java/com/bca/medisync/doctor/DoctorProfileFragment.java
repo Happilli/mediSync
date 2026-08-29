@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
@@ -26,7 +25,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.util.ImageLoader;
-import com.bca.medisync.util.RoundedListStyler;
+import com.bca.medisync.util.InfoRowBinder;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -169,23 +168,13 @@ public class DoctorProfileFragment extends Fragment {
         h -> {
           View view = getView();
           if (view == null) return;
-          setRowValue(view.findViewById(R.id.rowHospital), h.getName());
+          InfoRowBinder.setValue(view.findViewById(R.id.rowHospital), h.getName());
         },
         (code, msg) -> {
           View view = getView();
           if (view == null) return;
-          setRowValue(view.findViewById(R.id.rowHospital), "Hospital #" + hospitalId);
+          InfoRowBinder.setValue(view.findViewById(R.id.rowHospital), "Hospital #" + hospitalId);
         });
-  }
-
-  private void bindRow(View rowView, int iconRes, String label, String value) {
-    ((ImageView) rowView.findViewById(R.id.imgRowIcon)).setImageResource(iconRes);
-    ((TextView) rowView.findViewById(R.id.txtRowLabel)).setText(label);
-    ((TextView) rowView.findViewById(R.id.txtRowValue)).setText(value);
-  }
-
-  private void setRowValue(View rowView, String value) {
-    ((TextView) rowView.findViewById(R.id.txtRowValue)).setText(value);
   }
 
   private void bindProfile(DoctorProfileResponse p) {
@@ -230,21 +219,25 @@ public class DoctorProfileFragment extends Fragment {
     View rowEmail = view.findViewById(R.id.rowEmail);
     View rowAddress = view.findViewById(R.id.rowAddress);
 
-    bindRow(rowSpecialization, R.drawable.stethoscope, "Specialization", p.getSpeciality());
-    bindRow(rowHospital, R.drawable.hospital, "Hospital", "Hospital #" + p.getHospital_id());
-    bindRow(
-        rowExperience,
-        R.drawable.ic_nav_calendar,
-        "Experience",
-        years > 0 ? years + " years" : "Not specified");
-    bindRow(rowPhone, R.drawable.phone, "Phone", p.getPhone());
-    bindRow(rowEmail, R.drawable.email, "Email", sessionManager.getEmail());
-    bindRow(rowAddress, R.drawable.location, "Address", p.getAddress());
-
-    View[] rows = {rowSpecialization, rowHospital, rowExperience, rowPhone, rowEmail, rowAddress};
-    for (int i = 0; i < rows.length; i++) {
-      RoundedListStyler.apply(rows[i], i, rows.length);
-    }
+    InfoRowBinder.bind(
+        new View[] {rowSpecialization, rowHospital, rowExperience, rowPhone, rowEmail, rowAddress},
+        new int[] {
+          R.drawable.stethoscope,
+          R.drawable.hospital,
+          R.drawable.ic_nav_calendar,
+          R.drawable.phone,
+          R.drawable.email,
+          R.drawable.location
+        },
+        new String[] {"Specialization", "Hospital", "Experience", "Phone", "Email", "Address"},
+        new String[] {
+          p.getSpeciality(),
+          "Hospital #" + p.getHospital_id(),
+          years > 0 ? years + " years" : "Not specified",
+          p.getPhone(),
+          sessionManager.getEmail(),
+          p.getAddress()
+        });
   }
 
   private void bindProfilePic(String profilePicUrl) {

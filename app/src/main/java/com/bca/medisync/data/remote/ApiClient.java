@@ -4,6 +4,8 @@ import android.content.Context;
 import com.bca.medisync.data.local.SessionManager;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
@@ -18,6 +20,7 @@ public class ApiClient {
   public static final String BASE_URL = "http://192.168.240.1:8000/";
   private static Retrofit retrofit;
   private static SessionManager sessionManager;
+  private static final Map<Class<?>, Object> apiCache = new ConcurrentHashMap<>();
 
   public static void init(Context context) {
     sessionManager = new SessionManager(context);
@@ -28,6 +31,11 @@ public class ApiClient {
   public static String mediaUrl(String path) {
     if (path == null || path.isEmpty()) return null;
     return BASE_URL.replaceAll("/$", "") + "/api/v1" + path;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> T api(Class<T> clazz) {
+    return (T) apiCache.computeIfAbsent(clazz, c -> getRetrofit().create(c));
   }
 
   public static Retrofit getRetrofit() {
