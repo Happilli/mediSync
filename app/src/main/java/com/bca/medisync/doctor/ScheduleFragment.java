@@ -1,8 +1,5 @@
 package com.bca.medisync.doctor;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -15,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,6 +29,7 @@ import com.bca.medisync.data.remote.dto.appointment.AppointmentStatusUpdateReque
 import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.util.EmptyState;
+import com.bca.medisync.util.SwipeActionHelper;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.timepicker.MaterialTimePicker;
@@ -93,136 +90,28 @@ public class ScheduleFragment extends Fragment {
   }
 
   private void setupSwipe() {
-    ItemTouchHelper helper =
-        new ItemTouchHelper(
-            new ItemTouchHelper.SimpleCallback(0, 0) {
-              @Override
-              public int getMovementFlags(
-                  @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                AppointmentAdapter adapter = (AppointmentAdapter) recyclerView.getAdapter();
-                if (adapter == null) return 0;
-                Appointment a = adapter.getItemAt(viewHolder.getAbsoluteAdapterPosition());
-                if (a == null) return 0;
-                if (a.getStatus().equalsIgnoreCase("Pending"))
-                  return makeMovementFlags(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-                if (a.getStatus().equalsIgnoreCase("Confirmed"))
-                  return makeMovementFlags(0, ItemTouchHelper.LEFT);
-                return 0;
-              }
-
-              @Override
-              public boolean onMove(
-                  @NonNull RecyclerView recyclerView,
-                  @NonNull RecyclerView.ViewHolder viewHolder,
-                  @NonNull RecyclerView.ViewHolder target) {
-                return false;
-              }
-
-              private float spToPx(float sp) {
-                return sp * getResources().getDisplayMetrics().scaledDensity;
-              }
-
-              @Override
-              public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                AppointmentAdapter adapter = (AppointmentAdapter) rvSchedule.getAdapter();
-                if (adapter == null) return;
-                Appointment a = adapter.getItemAt(viewHolder.getAbsoluteAdapterPosition());
-                if (a == null) return;
-                int appointmentId = Integer.parseInt(a.getId());
-                updateStatus(
-                    appointmentId, direction == ItemTouchHelper.RIGHT ? "confirmed" : "cancelled");
-              }
-
-              @Override
-              public void onChildDraw(
-                  @NonNull Canvas c,
-                  @NonNull RecyclerView recyclerView,
-                  @NonNull RecyclerView.ViewHolder viewHolder,
-                  float dX,
-                  float dY,
-                  int actionState,
-                  boolean isCurrentlyActive) {
-                View item = viewHolder.itemView;
-                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE && Math.abs(dX) > 4) {
-                  boolean swipingRight = dX > 0;
-                  float gapWidth = Math.abs(dX);
-                  float gapMargin = dpToPx(6);
-                  float top = item.getTop() + gapMargin;
-                  float bottom = item.getBottom() - gapMargin;
-                  float bubbleHeight = bottom - top;
-
-                  RectF bubbleRect;
-                  if (swipingRight) {
-                    bubbleRect =
-                        new RectF(
-                            item.getLeft() + gapMargin,
-                            top,
-                            item.getLeft() + gapWidth - gapMargin,
-                            bottom);
-                  } else {
-                    bubbleRect =
-                        new RectF(
-                            item.getRight() - gapWidth + gapMargin,
-                            top,
-                            item.getRight() - gapMargin,
-                            bottom);
-                  }
-
-                  float radius = Math.min(bubbleHeight / 2f, bubbleRect.width() / 2f);
-
-                  Paint bubblePaint = new Paint();
-                  bubblePaint.setAntiAlias(true);
-                  bubblePaint.setColor(
-                      ContextCompat.getColor(
-                          requireContext(),
-                          swipingRight ? R.color.tertiary_container : R.color.error_container));
-                  c.drawRoundRect(bubbleRect, radius, radius, bubblePaint);
-
-                  float maxSwipe = item.getWidth() * 0.5f;
-                  float progress = Math.min(gapWidth / maxSwipe, 1f);
-                  float cx = bubbleRect.centerX();
-                  float cy = bubbleRect.centerY();
-
-                  if (bubbleRect.width() > dpToPx(40)) {
-                    Paint iconPaint = new Paint();
-                    iconPaint.setAntiAlias(true);
-                    iconPaint.setColor(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            swipingRight
-                                ? R.color.on_tertiary_container
-                                : R.color.on_error_container));
-                    iconPaint.setStrokeWidth(2.5f * getResources().getDisplayMetrics().density);
-                    iconPaint.setStrokeCap(Paint.Cap.ROUND);
-                    iconPaint.setStyle(Paint.Style.STROKE);
-
-                    float iconSize = dpToPx(9) + dpToPx(3) * progress;
-
-                    if (swipingRight) {
-                      c.drawLine(
-                          cx - iconSize,
-                          cy,
-                          cx - iconSize * 0.25f,
-                          cy + iconSize * 0.8f,
-                          iconPaint);
-                      c.drawLine(
-                          cx - iconSize * 0.25f,
-                          cy + iconSize * 0.8f,
-                          cx + iconSize,
-                          cy - iconSize * 0.7f,
-                          iconPaint);
-                    } else {
-                      float s = iconSize * 0.85f;
-                      c.drawLine(cx - s, cy - s, cx + s, cy + s, iconPaint);
-                      c.drawLine(cx + s, cy - s, cx - s, cy + s, iconPaint);
-                    }
-                  }
-                }
-                super.onChildDraw(
-                    c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-              }
-            });
-    helper.attachToRecyclerView(rvSchedule);
+    new SwipeActionHelper(
+            this,
+            position -> {
+              AppointmentAdapter adapter = (AppointmentAdapter) rvSchedule.getAdapter();
+              if (adapter == null) return 0;
+              Appointment a = adapter.getItemAt(position);
+              if (a == null) return 0;
+              if (a.getStatus().equalsIgnoreCase("Pending"))
+                return ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+              if (a.getStatus().equalsIgnoreCase("Confirmed")) return ItemTouchHelper.LEFT;
+              return 0;
+            },
+            (position, direction) -> {
+              AppointmentAdapter adapter = (AppointmentAdapter) rvSchedule.getAdapter();
+              if (adapter == null) return;
+              Appointment a = adapter.getItemAt(position);
+              if (a == null) return;
+              int appointmentId = Integer.parseInt(a.getId());
+              updateStatus(
+                  appointmentId, direction == ItemTouchHelper.RIGHT ? "confirmed" : "cancelled");
+            })
+        .attachTo(rvSchedule);
   }
 
   @Override

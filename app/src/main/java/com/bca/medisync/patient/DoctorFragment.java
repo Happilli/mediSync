@@ -90,6 +90,7 @@ public class DoctorFragment extends Fragment {
               ((TextView) itemView.findViewById(R.id.txtInfo)).setText(doctor.getInfo());
               ImageView img = itemView.findViewById(R.id.imgDoctor);
               if (doctor.getImageUrl() != null && !doctor.getImageUrl().isEmpty()) {
+                img.setImageTintList(null);
                 Glide.with(requireContext())
                     .load(doctor.getImageUrl())
                     .placeholder(R.drawable.stethoscope)
@@ -116,6 +117,7 @@ public class DoctorFragment extends Fragment {
     args.putString("doctor_speciality", doctor.getSpeciality());
     args.putString("doctor_info", doctor.getInfo());
     args.putString("doctor_department", doctor.getDepartment());
+    args.putString("doctor_image_url", doctor.getImageUrl());
 
     BookAppointmentFragment fragment = new BookAppointmentFragment();
     fragment.setArguments(args);

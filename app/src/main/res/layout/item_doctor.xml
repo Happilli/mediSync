@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="?attr/colorSurfaceContainer"
+    app:cardBackgroundColor="?attr/colorSurface"
     app:cardCornerRadius="20dp"
     app:cardElevation="0dp">
 
@@ -26,11 +26,11 @@
                 android:id="@+id/imgDoctor"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="something"
-                android:padding="14dp"
-                android:scaleType="fitCenter"
+                android:contentDescription="doctor photo"
+                android:scaleType="centerCrop"
                 android:src="@drawable/stethoscope"
                 app:tint="?attr/colorOnPrimaryContainer" />
+
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout

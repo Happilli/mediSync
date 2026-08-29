@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
 import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
+import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -35,6 +37,7 @@ public class BookAppointmentFragment extends Fragment {
   private MaterialToolbar toolbar;
   private TextView txtDoctorName, txtDoctorSpeciality, txtDoctorInfo;
   private MaterialButton btnConfirm;
+  private ImageView imgDoctor;
   private TextInputEditText etNotes;
   private RecyclerView rvTimeSlots;
   private TextView txtNoSlots;
@@ -72,6 +75,7 @@ public class BookAppointmentFragment extends Fragment {
     etNotes = view.findViewById(R.id.etNotes);
     rvTimeSlots = view.findViewById(R.id.rvTimeSlots);
     txtNoSlots = view.findViewById(R.id.txtNoSlots);
+    imgDoctor = view.findViewById(R.id.imgDoctor);
   }
 
   private void setupToolbar() {
@@ -110,6 +114,19 @@ public class BookAppointmentFragment extends Fragment {
     if (doctorName != null) txtDoctorName.setText(doctorName);
     if (doctorSpeciality != null) txtDoctorSpeciality.setText(doctorSpeciality);
     if (doctorInfo != null) txtDoctorInfo.setText(doctorInfo);
+    String doctorImageUrl = args.getString("doctor_image_url");
+    if (imgDoctor != null) {
+      if (doctorImageUrl != null && !doctorImageUrl.isEmpty()) {
+        imgDoctor.setImageTintList(null);
+        Glide.with(this)
+            .load(doctorImageUrl)
+            .placeholder(R.drawable.stethoscope)
+            .error(R.drawable.stethoscope)
+            .into(imgDoctor);
+      } else {
+        imgDoctor.setImageResource(R.drawable.stethoscope);
+      }
+    }
   }
 
   private void bindTimeSlots(List<TimeSlot> slots) {
