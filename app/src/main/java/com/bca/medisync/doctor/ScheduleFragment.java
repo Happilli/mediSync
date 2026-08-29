@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bca.medisync.DoctorTabActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
@@ -29,6 +28,7 @@ import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentStatusUpdateRequest;
 import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.util.EmptyState;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.timepicker.MaterialTimePicker;
@@ -140,9 +140,7 @@ public class ScheduleFragment extends Fragment {
     rvSchedule.setAdapter(
         new AppointmentAdapter(requireContext(), filtered, true, this::onAppointmentClicked));
 
-    boolean empty = filtered.isEmpty();
-    txtNoAppointments.setVisibility(empty ? View.VISIBLE : View.GONE);
-    rvSchedule.setVisibility(empty ? View.GONE : View.VISIBLE);
+    EmptyState.bind(rvSchedule, txtNoAppointments, filtered.isEmpty());
   }
 
   private void onAppointmentClicked(Appointment appointment) {

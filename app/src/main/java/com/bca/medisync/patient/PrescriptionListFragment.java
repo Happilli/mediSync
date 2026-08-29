@@ -20,6 +20,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
+import com.bca.medisync.util.EmptyState;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
@@ -123,7 +124,6 @@ public class PrescriptionListFragment extends Fragment {
   }
 
   private void showEmpty(boolean empty) {
-    txtEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
-    rvPrescriptions.setVisibility(empty ? View.GONE : View.VISIBLE);
+    EmptyState.bind(rvPrescriptions, txtEmpty, empty);
   }
 }

@@ -29,6 +29,7 @@ import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.patient.NotificationsActivity;
+import com.bca.medisync.util.EmptyState;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
@@ -171,10 +172,8 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
                   + (todayAppointments.size() == 1 ? " appointment" : " appointments"));
           updateStats(todayAppointments);
 
-          if (todayAppointments.isEmpty()) {
-            txtNoAppointments.setVisibility(View.VISIBLE);
-            rvAppointments.setVisibility(View.GONE);
-          } else {
+          EmptyState.bind(rvAppointments, txtNoAppointments, todayAppointments.isEmpty());
+          if (!todayAppointments.isEmpty()) {
             txtNoAppointments.setVisibility(View.GONE);
             rvAppointments.setVisibility(View.VISIBLE);
             AppointmentEnricher.enrichForDoctor(

@@ -21,6 +21,7 @@ import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.util.DateTimeUtils;
+import com.bca.medisync.util.EmptyState;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
@@ -70,8 +71,7 @@ public class NotificationsActivity extends AppCompatActivity
   @Override
   public void onNotificationReceived(NotificationResponse notification) {
     adapter.prependItem(mapToNotification(notification));
-    txtEmpty.setVisibility(View.GONE);
-    rvNotifications.setVisibility(View.VISIBLE);
+    EmptyState.bind(rvNotifications, txtEmpty, false);
   }
 
   private void initViews() {
@@ -130,8 +130,7 @@ public class NotificationsActivity extends AppCompatActivity
             list.add(mapToNotification(r));
           }
           adapter.updateData(list);
-          txtEmpty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
-          rvNotifications.setVisibility(list.isEmpty() ? View.GONE : View.VISIBLE);
+          EmptyState.bind(rvNotifications, txtEmpty, list.isEmpty());
         },
         (code, msg) ->
             Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show());

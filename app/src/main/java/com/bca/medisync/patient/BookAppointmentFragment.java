@@ -23,6 +23,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
 import com.bca.medisync.util.DateTimeUtils;
+import com.bca.medisync.util.EmptyState;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -112,16 +113,9 @@ public class BookAppointmentFragment extends Fragment {
   }
 
   private void bindTimeSlots(List<TimeSlot> slots) {
-    if (slots.isEmpty()) {
-      rvTimeSlots.setVisibility(View.GONE);
-      txtNoSlots.setVisibility(View.VISIBLE);
-      btnConfirm.setEnabled(false);
-      return;
-    }
-    rvTimeSlots.setVisibility(View.VISIBLE);
-    txtNoSlots.setVisibility(View.GONE);
-    btnConfirm.setEnabled(true);
-
+    EmptyState.bind(rvTimeSlots, txtNoSlots, slots.isEmpty());
+    btnConfirm.setEnabled(!slots.isEmpty());
+    if (slots.isEmpty()) return;
     TimeSlotAdapter adapter =
         new TimeSlotAdapter(requireContext(), slots, slot -> selectedTimeSlot = slot);
     rvTimeSlots.setLayoutManager(new GridLayoutManager(requireContext(), 3));

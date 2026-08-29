@@ -20,6 +20,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
+import com.bca.medisync.util.EmptyState;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
@@ -93,9 +94,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
                             r.getDescription()));
                   }
                   adapter.updateData(entries);
-                  boolean empty = entries.isEmpty();
-                  txtEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
-                  rvHistory.setVisibility(empty ? View.GONE : View.VISIBLE);
+                  EmptyState.bind(rvHistory, txtEmpty, entries.isEmpty());
                 } else {
                   Toast.makeText(requireContext(), "Failed to load history", Toast.LENGTH_SHORT)
                       .show();

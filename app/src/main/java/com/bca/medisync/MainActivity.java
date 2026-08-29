@@ -28,6 +28,7 @@ import com.bca.medisync.data.remote.NotificationSocketManager;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.login.LoginRequest;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
+import com.bca.medisync.doctor.DoctorTabActivity;
 import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
 import com.google.android.material.button.MaterialButton;
