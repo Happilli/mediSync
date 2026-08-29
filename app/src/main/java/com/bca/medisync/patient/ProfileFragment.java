@@ -38,9 +38,8 @@ import java.util.Calendar;
 
 public class ProfileFragment extends Fragment {
 
-  private TextView txtName, txtAddress, txtEmergencyContact;
-  private View statAge, statBloodGroup, statGender;
-  private View rowEmail, rowPhone, rowDob, rowAddress;
+  private TextView txtName, txtEmergencyContact;
+  private View rowAge, rowGender, rowBloodGroup, rowEmail, rowPhone, rowDob, rowAddress;
   private MaterialCardView cardVerifiedBadge;
   private TextView txtVerifiedBadge;
   private MaterialSwitch switchNotifications;
@@ -78,13 +77,11 @@ public class ProfileFragment extends Fragment {
 
   private void initViews(View view) {
     txtName = view.findViewById(R.id.txtName);
-    txtAddress = view.findViewById(R.id.txtAddress);
     txtEmergencyContact = view.findViewById(R.id.txtEmergencyContact);
 
-    statAge = view.findViewById(R.id.statAge);
-    statBloodGroup = view.findViewById(R.id.statBloodGroup);
-    statGender = view.findViewById(R.id.statGender);
-
+    rowAge = view.findViewById(R.id.rowAge);
+    rowGender = view.findViewById(R.id.rowGender);
+    rowBloodGroup = view.findViewById(R.id.rowBloodGroup);
     rowEmail = view.findViewById(R.id.rowEmail);
     rowPhone = view.findViewById(R.id.rowPhone);
     rowDob = view.findViewById(R.id.rowDob);
@@ -117,11 +114,6 @@ public class ProfileFragment extends Fragment {
 
   private ActivityResultLauncher<String> notifPermLauncher;
 
-  private void bindStat(View statView, String value, String label) {
-    ((TextView) statView.findViewById(R.id.txtStatValue)).setText(value);
-    ((TextView) statView.findViewById(R.id.txtStatLabel)).setText(label);
-  }
-
   private void bindRow(View rowView, int iconRes, String label, String value) {
     ((ImageView) rowView.findViewById(R.id.imgRowIcon)).setImageResource(iconRes);
     ((TextView) rowView.findViewById(R.id.txtRowLabel)).setText(label);
@@ -130,11 +122,10 @@ public class ProfileFragment extends Fragment {
 
   private void setupSettingsRows() {
     setRowLabel(R.id.rowSecurityAnswer, "Security Answer");
-    applyRoundedInfoRows();
   }
 
-  private void applyRoundedInfoRows() {
-    View[] rows = {rowEmail, rowPhone, rowDob, rowAddress};
+  private void applyRoundedRows() {
+    View[] rows = {rowAge, rowGender, rowBloodGroup, rowEmail, rowPhone, rowDob, rowAddress};
     for (int i = 0; i < rows.length; i++) {
       RoundedListStyler.apply(rows[i], i, rows.length);
     }
@@ -147,18 +138,17 @@ public class ProfileFragment extends Fragment {
 
   private void bindPatient(PatientResponse patient) {
     txtName.setText(patient.getName());
-    txtAddress.setText(patient.getAddress());
     txtEmergencyContact.setText(patient.getEmergency_contact());
 
-    bindStat(statAge, calculateAge(patient.getDate_of_birth()), "Age");
-    bindStat(statBloodGroup, patient.getBlood_group(), "Blood");
-    bindStat(statGender, patient.getGender(), "Gender");
-
+    bindRow(rowAge, R.drawable.birthdate, "Age", calculateAge(patient.getDate_of_birth()));
+    bindRow(rowGender, R.drawable.stethoscope, "Gender", patient.getGender());
+    bindRow(rowBloodGroup, R.drawable.stethoscope, "Blood Group", patient.getBlood_group());
     bindRow(rowEmail, R.drawable.email, "Email", sessionManager.getEmail());
     bindRow(rowPhone, R.drawable.phone, "Phone", patient.getPhone());
     bindRow(rowDob, R.drawable.birthdate, "Date of Birth", patient.getDate_of_birth());
     bindRow(rowAddress, R.drawable.location, "Address", patient.getAddress());
 
+    applyRoundedRows();
     bindVerificationBadge(patient.isIs_verified());
     bindProfilePic(patient.getProfile_pic_url());
   }
@@ -186,7 +176,7 @@ public class ProfileFragment extends Fragment {
           requireContext().getColor(R.color.tertiary_container));
       cardVerifiedBadge.setOnClickListener(null);
     } else {
-      txtVerifiedBadge.setText("Not Verified - Tap to verify");
+      txtVerifiedBadge.setText("Not Verified");
       txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_error_container));
       cardVerifiedBadge.setCardBackgroundColor(requireContext().getColor(R.color.error_container));
       cardVerifiedBadge.setOnClickListener(

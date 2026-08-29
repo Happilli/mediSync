@@ -21,130 +21,77 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
-                app:cardCornerRadius="36dp"
+                app:cardBackgroundColor="?attr/colorPrimaryContainer"
+                app:cardCornerRadius="28dp"
                 app:cardElevation="0dp">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingBottom="28dp">
+                    android:padding="16dp">
 
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="140dp"
-                            android:background="?attr/colorPrimaryContainer" />
-
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:id="@+id/imgProfile"
-                            android:layout_width="135dp"
-                            android:layout_height="135dp"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginTop="80dp"
-                            android:background="?attr/colorSecondaryContainer"
-                            android:contentDescription="something something"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/ic_nav_profile"
-                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Tile" />
-                    </FrameLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/txtName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAlignment="center"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="26sp"
-                            android:textStyle="bold" />
-
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/cardVerifiedBadge"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            app:cardCornerRadius="14dp"
-                            app:cardElevation="0dp">
-
-                            <TextView
-                                android:id="@+id/txtVerifiedBadge"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:paddingHorizontal="14dp"
-                                android:paddingVertical="6dp"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                        </com.google.android.material.card.MaterialCardView>
-
-                    </LinearLayout>
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgProfile"
+                        android:layout_width="88dp"
+                        android:layout_height="88dp"
+                        android:background="?attr/colorSecondaryContainer"
+                        android:contentDescription="profile photo"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_nav_profile"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Tile" />
 
                     <TextView
-                        android:id="@+id/txtAddress"
-                        android:layout_width="match_parent"
+                        android:id="@+id/txtName"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textAlignment="center"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="14sp" />
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:textColor="?attr/colorOnPrimaryContainer"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/imgProfile"
+                        app:layout_constraintTop_toTopOf="@id/imgProfile" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardVerifiedBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:layout_constraintStart_toStartOf="@id/txtName"
+                        app:layout_constraintTop_toBottomOf="@id/txtName">
+
+                        <TextView
+                            android:id="@+id/txtVerifiedBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="14dp"
+                            android:paddingVertical="6dp"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnEditProfile"
                         android:layout_width="wrap_content"
-                        android:layout_height="56dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="20dp"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="12dp"
                         android:text="Edit Profile"
+                        android:textAllCaps="false"
                         android:textColor="?attr/colorOnSecondaryContainer"
-                        android:textSize="16sp"
+                        android:textSize="13sp"
                         android:textStyle="bold"
                         app:backgroundTint="?attr/colorSecondaryContainer"
-                        app:cornerRadius="20dp"
-                        app:elevation="0dp" />
-                </LinearLayout>
+                        app:cornerRadius="16dp"
+                        app:elevation="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/imgProfile" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="24dp"
-                android:orientation="horizontal"
-                android:weightSum="3">
-
-                <include
-                    android:id="@+id/statAge"
-                    layout="@layout/item_profile_stat"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1" />
-
-                <include
-                    android:id="@+id/statBloodGroup"
-                    layout="@layout/item_profile_stat"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="6dp"
-                    android:layout_weight="1" />
-
-                <include
-                    android:id="@+id/statGender"
-                    layout="@layout/item_profile_stat"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1" />
-            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -162,6 +109,18 @@
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="24dp"
                 android:orientation="vertical">
+
+                <include
+                    android:id="@+id/rowAge"
+                    layout="@layout/item_profile_info_row" />
+
+                <include
+                    android:id="@+id/rowGender"
+                    layout="@layout/item_profile_info_row" />
+
+                <include
+                    android:id="@+id/rowBloodGroup"
+                    layout="@layout/item_profile_info_row" />
 
                 <include
                     android:id="@+id/rowEmail"
@@ -207,7 +166,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_gravity="center"
-                            android:contentDescription="something something"
+                            android:contentDescription="emergency contact"
                             android:src="@drawable/emergency"
                             app:tint="?attr/colorOnError" />
 
