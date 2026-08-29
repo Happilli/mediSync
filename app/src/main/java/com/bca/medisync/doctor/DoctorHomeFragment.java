@@ -139,7 +139,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   }
 
   private void loadUnreadCount() {
-    NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
+    NotificationApi api = ApiClient.api(NotificationApi.class);
     ApiCallback.handle(
         api.getUnreadCount(),
         this,
@@ -152,7 +152,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   }
 
   private void loadDashboardData() {
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.getMyProfile(),
         this,
@@ -169,7 +169,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   }
 
   private void loadTodayAppointments() {
-    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    AppointmentApi api = ApiClient.api(AppointmentApi.class);
     ApiCallback.handle(
         api.getMyAppointmentsAsDoctor(null, null),
         this,

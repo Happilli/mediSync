@@ -109,7 +109,7 @@ public class ConsultationFragment extends Fragment {
 
           btnNextPrescription.setEnabled(false);
 
-          ConsultationApi api = ApiClient.getRetrofit().create(ConsultationApi.class);
+          ConsultationApi api = ApiClient.api(ConsultationApi.class);
           ApiCallback.handle(
               api.createConsultation(
                   new ConsultationCreateRequest(

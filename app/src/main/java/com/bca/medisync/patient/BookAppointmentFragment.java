@@ -133,7 +133,7 @@ public class BookAppointmentFragment extends Fragment {
 
   private void setupTimeSlots() {
     if (doctorId == -1) return;
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.getDoctorTimeslots(doctorId, true),
         this,
@@ -158,7 +158,7 @@ public class BookAppointmentFragment extends Fragment {
           String notes = etNotes.getText() != null ? etNotes.getText().toString() : "";
           btnConfirm.setEnabled(false);
 
-          AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+          AppointmentApi api = ApiClient.api(AppointmentApi.class);
           ApiCallback.handle(
               api.createAppointment(new AppointmentCreateRequest(selectedTimeSlot.getId(), notes)),
               this,

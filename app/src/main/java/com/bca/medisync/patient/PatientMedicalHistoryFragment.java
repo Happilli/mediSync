@@ -69,7 +69,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
   }
 
   private void loadHistory() {
-    MedicalHistoryApi api = ApiClient.getRetrofit().create(MedicalHistoryApi.class);
+    MedicalHistoryApi api = ApiClient.api(MedicalHistoryApi.class);
     ApiCallback.handle(
         api.getMyMedicalHistory(),
         this,

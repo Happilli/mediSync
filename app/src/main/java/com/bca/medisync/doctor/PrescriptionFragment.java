@@ -205,7 +205,7 @@ public class PrescriptionFragment extends Fragment {
 
     btnSavePrescription.setEnabled(false);
 
-    PrescriptionApi api = ApiClient.getRetrofit().create(PrescriptionApi.class);
+    PrescriptionApi api = ApiClient.api(PrescriptionApi.class);
     ApiCallback.handle(
         api.createPrescription(request),
         this,

@@ -111,7 +111,7 @@ public class NotificationsActivity extends AppCompatActivity
   }
 
   private void loadNotifications() {
-    NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
+    NotificationApi api = ApiClient.api(NotificationApi.class);
     ApiCallback.handle(
         api.getMyNotifications(false),
         body -> {
@@ -136,7 +136,7 @@ public class NotificationsActivity extends AppCompatActivity
   }
 
   private void markAsRead(int notificationId) {
-    NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
+    NotificationApi api = ApiClient.api(NotificationApi.class);
     ApiCallback.handle(
         api.markAsRead(notificationId),
         body -> loadNotifications(),
@@ -144,7 +144,7 @@ public class NotificationsActivity extends AppCompatActivity
   }
 
   private void markAllRead() {
-    NotificationApi api = ApiClient.getRetrofit().create(NotificationApi.class);
+    NotificationApi api = ApiClient.api(NotificationApi.class);
     ApiCallback.handle(
         api.markAllRead(),
         body -> loadNotifications(),

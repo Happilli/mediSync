@@ -129,7 +129,7 @@ public class DoctorProfileFragment extends Fragment {
     MultipartBody.Part filePart =
         MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
 
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.updateProfilePic(filePart),
         this,
@@ -149,7 +149,7 @@ public class DoctorProfileFragment extends Fragment {
   }
 
   private void loadProfile() {
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.getMyProfile(),
         this,
@@ -161,7 +161,7 @@ public class DoctorProfileFragment extends Fragment {
   }
 
   private void loadHospitalName(int hospitalId) {
-    HospitalApi api = ApiClient.getRetrofit().create(HospitalApi.class);
+    HospitalApi api = ApiClient.api(HospitalApi.class);
     ApiCallback.handle(
         api.getHospitalDetail(hospitalId),
         this,

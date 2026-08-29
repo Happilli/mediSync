@@ -19,7 +19,7 @@ public class PrescriptionEnricher {
   public static void enrichAll(
       List<PrescriptionResponse> responses,
       ParallelEnricher.Callback1<List<Prescription>> callback) {
-    DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi doctorApi = ApiClient.api(DoctorApi.class);
     ParallelEnricher.run(
         responses,
         r -> doctorApi.getDoctorDetail(r.getDoctor_id()),

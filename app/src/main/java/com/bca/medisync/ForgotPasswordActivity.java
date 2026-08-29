@@ -73,7 +73,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     btnCheckEmail.setEnabled(false);
-    AuthApi api = ApiClient.getRetrofit().create(AuthApi.class);
+    AuthApi api = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
         api.checkForgotPassword(new ForgotPasswordCheckRequest(email)),
         body -> {
@@ -125,7 +125,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     btnResetPassword.setEnabled(false);
-    AuthApi api = ApiClient.getRetrofit().create(AuthApi.class);
+    AuthApi api = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
         api.verifyForgotPassword(
             new ForgotPasswordVerifyRequest(verifiedEmail, answer, newPassword)),

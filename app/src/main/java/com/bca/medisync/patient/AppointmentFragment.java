@@ -185,7 +185,7 @@ public class AppointmentFragment extends Fragment {
       return;
     }
 
-    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    AppointmentApi api = ApiClient.api(AppointmentApi.class);
     ApiCallback.handle(
         api.cancelAppointment(appointmentId),
         this,

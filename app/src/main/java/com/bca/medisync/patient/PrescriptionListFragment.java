@@ -77,7 +77,7 @@ public class PrescriptionListFragment extends Fragment {
   }
 
   private void loadPrescriptions() {
-    PrescriptionApi api = ApiClient.getRetrofit().create(PrescriptionApi.class);
+    PrescriptionApi api = ApiClient.api(PrescriptionApi.class);
     ApiCallback.handle(
         api.getMyPrescriptions(),
         this,

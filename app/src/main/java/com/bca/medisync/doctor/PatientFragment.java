@@ -70,7 +70,7 @@ public class PatientFragment extends Fragment {
   }
 
   private void loadPatients() {
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         api.getTreatedPatients(),
         this,

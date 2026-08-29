@@ -25,7 +25,7 @@ public class AppointmentEnricher {
 
   public static void enrichAll(
       List<AppointmentResponse> responses, ParallelEnricher.Callback1<List<Appointment>> callback) {
-    DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi doctorApi = ApiClient.api(DoctorApi.class);
     ParallelEnricher.run(
         responses,
         r -> doctorApi.getDoctorDetail(r.getDoctor_id()),
@@ -35,7 +35,7 @@ public class AppointmentEnricher {
 
   public static void enrichOne(
       AppointmentResponse r, ParallelEnricher.Callback1<Appointment> callback) {
-    DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi doctorApi = ApiClient.api(DoctorApi.class);
     ParallelEnricher.run(
         Collections.singletonList(r),
         rr -> doctorApi.getDoctorDetail(rr.getDoctor_id()),
@@ -55,7 +55,7 @@ public class AppointmentEnricher {
       callback.onResult(result);
       return;
     }
-    PatientApi patientApi = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi patientApi = ApiClient.api(PatientApi.class);
     ParallelEnricher.run(
         responses,
         r -> patientApi.getPatientDetailForDoctor(r.getPatient_id()),

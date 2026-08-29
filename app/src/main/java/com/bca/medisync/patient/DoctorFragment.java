@@ -114,7 +114,7 @@ public class DoctorFragment extends Fragment {
   }
 
   private void loadDoctors(String search) {
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.getDoctors(filterHospitalId, null, null, search),
         this,

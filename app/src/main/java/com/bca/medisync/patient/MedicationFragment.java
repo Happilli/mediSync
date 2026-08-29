@@ -107,7 +107,7 @@ public class MedicationFragment extends Fragment {
   }
 
   private void loadMedications() {
-    MedicationApi api = ApiClient.getRetrofit().create(MedicationApi.class);
+    MedicationApi api = ApiClient.api(MedicationApi.class);
     ApiCallback.handle(
         api.getMyMedications(),
         this,
@@ -145,7 +145,7 @@ public class MedicationFragment extends Fragment {
   }
 
   private void markTaken(Medication medication) {
-    MedicationApi api = ApiClient.getRetrofit().create(MedicationApi.class);
+    MedicationApi api = ApiClient.api(MedicationApi.class);
     ApiCallback.handle(
         api.markTaken(medication.getId()),
         this,

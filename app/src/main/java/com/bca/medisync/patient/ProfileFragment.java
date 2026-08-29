@@ -213,7 +213,7 @@ public class ProfileFragment extends Fragment {
       return;
     }
 
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         api.updateSecurityAnswer(new PatientSecurityAnswerUpdateRequest(password, answer)),
         this,
@@ -236,7 +236,7 @@ public class ProfileFragment extends Fragment {
   }
 
   private void loadPatientData() {
-    PatientApi patientApi = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi patientApi = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         patientApi.getMyProfile(),
         this,

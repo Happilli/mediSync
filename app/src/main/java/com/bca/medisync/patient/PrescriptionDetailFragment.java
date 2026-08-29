@@ -68,7 +68,7 @@ public class PrescriptionDetailFragment extends Fragment {
   }
 
   private void loadDetail() {
-    PrescriptionApi api = ApiClient.getRetrofit().create(PrescriptionApi.class);
+    PrescriptionApi api = ApiClient.api(PrescriptionApi.class);
     ApiCallback.handle(
         api.getPrescriptionDetail(prescriptionId),
         this,
@@ -87,7 +87,7 @@ public class PrescriptionDetailFragment extends Fragment {
   }
 
   private void fetchDoctorName(int doctorId) {
-    DoctorApi doctorApi = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi doctorApi = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         doctorApi.getDoctorDetail(doctorId),
         this,

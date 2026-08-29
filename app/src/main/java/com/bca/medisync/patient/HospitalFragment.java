@@ -104,7 +104,7 @@ public class HospitalFragment extends Fragment {
   }
 
   private void loadHospitals(String search) {
-    HospitalApi api = ApiClient.getRetrofit().create(HospitalApi.class);
+    HospitalApi api = ApiClient.api(HospitalApi.class);
     ApiCallback.handle(
         api.getHospitals(search),
         this,

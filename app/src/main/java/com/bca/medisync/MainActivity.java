@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     }
     btnLogin.setEnabled(false);
 
-    AuthApi authApi = ApiClient.getRetrofit().create(AuthApi.class);
+    AuthApi authApi = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
         authApi.login(new LoginRequest(email, password)),
         body -> {

@@ -113,7 +113,7 @@ public class VerificationActivity extends AppCompatActivity {
     MultipartBody.Part filePart =
         MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
 
-    PatientApi patientApi = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi patientApi = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         patientApi.requestVerification(citizenshipBody, filePart),
         body -> {

@@ -170,7 +170,7 @@ public class RegisterActivity extends AppCompatActivity {
             securityAnswer,
             bloodGroup.toUpperCase(Locale.ROOT),
             emergencyContact);
-    AuthApi authApi = ApiClient.getRetrofit().create(AuthApi.class);
+    AuthApi authApi = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
         authApi.registerPatient(request),
         body -> {

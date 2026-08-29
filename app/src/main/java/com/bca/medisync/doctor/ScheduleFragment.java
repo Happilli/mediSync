@@ -176,7 +176,7 @@ public class ScheduleFragment extends Fragment {
   }
 
   private void createTimeslot(String iso) {
-    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.createTimeslot(new TimeSlotCreateRequest(iso)),
         this,
@@ -192,7 +192,7 @@ public class ScheduleFragment extends Fragment {
   }
 
   private void loadRealSchedule() {
-    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    AppointmentApi api = ApiClient.api(AppointmentApi.class);
     ApiCallback.handle(
         api.getMyAppointmentsAsDoctor(null, null),
         this,
@@ -214,7 +214,7 @@ public class ScheduleFragment extends Fragment {
   }
 
   private void openPatientDetail(Appointment appointment, int appointmentId) {
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         api.getPatientDetailForDoctor(appointment.getPatientId()),
         this,
@@ -245,7 +245,7 @@ public class ScheduleFragment extends Fragment {
   }
 
   private void updateStatus(int appointmentId, String newStatus) {
-    AppointmentApi api = ApiClient.getRetrofit().create(AppointmentApi.class);
+    AppointmentApi api = ApiClient.api(AppointmentApi.class);
     ApiCallback.handle(
         api.updateAppointmentStatus(appointmentId, new AppointmentStatusUpdateRequest(newStatus)),
         this,

@@ -96,7 +96,7 @@ public class MedicalHistoryFragment extends Fragment {
   }
 
   private void loadRealHistory() {
-    MedicalHistoryApi api = ApiClient.getRetrofit().create(MedicalHistoryApi.class);
+    MedicalHistoryApi api = ApiClient.api(MedicalHistoryApi.class);
     ApiCallback.handle(
         api.getPatientHistory(patientId),
         this,

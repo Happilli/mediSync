@@ -110,7 +110,7 @@ public class EditProfileActivity extends AppCompatActivity {
   }
 
   private void loadCurrentProfile() {
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         api.getMyProfile(),
         p -> {
@@ -136,7 +136,7 @@ public class EditProfileActivity extends AppCompatActivity {
     MultipartBody.Part filePart =
         MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
 
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         api.updateProfilePic(filePart),
         p -> {
@@ -172,7 +172,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     btnSave.setEnabled(false);
 
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    PatientApi api = ApiClient.api(PatientApi.class);
     ;
     ApiCallback.handle(
         api.updateMyProfile(new PatientUpdateRequest(name, phone, address, emergencyContact)),
