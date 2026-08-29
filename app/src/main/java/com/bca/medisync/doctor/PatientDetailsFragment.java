@@ -6,15 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import com.bca.medisync.R;
-import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.RoundedListStyler;
-import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -114,16 +111,7 @@ public class PatientDetailsFragment extends Fragment {
   }
 
   private void bindProfilePic(String url) {
-    if (url == null || url.isEmpty()) {
-      imgProfile.setImageResource(R.drawable.ic_nav_profile);
-      return;
-    }
-    Glide.with(this)
-        .load(ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + url)
-        .placeholder(R.drawable.ic_nav_profile)
-        .error(R.drawable.ic_nav_profile)
-        .centerCrop()
-        .into(imgProfile);
+    ImageLoader.loadProfilePic(this, imgProfile, url);
   }
 
   private void setupListener() {

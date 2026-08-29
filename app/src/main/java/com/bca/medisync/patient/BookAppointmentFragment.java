@@ -23,7 +23,7 @@ import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
 import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
-import com.bumptech.glide.Glide;
+import com.bca.medisync.util.ImageLoader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -82,48 +82,38 @@ public class BookAppointmentFragment extends Fragment {
 
   private void loadDoctorData() {
     Bundle args = getArguments();
-    if (args == null) {
-      Toast.makeText(requireContext(), "Doctor not specified", Toast.LENGTH_SHORT).show();
-      requireActivity().getOnBackPressedDispatcher().onBackPressed();
+    String doctorIdStr = args != null ? args.getString("doctor_id") : null;
+
+    if (args == null || doctorIdStr == null) {
+      bailNoDoctor("Doctor not specified");
       return;
     }
 
-    String doctorIdStr = args.getString("doctor_id");
+    try {
+      doctorId = Integer.parseInt(doctorIdStr);
+    } catch (NumberFormatException e) {
+      bailNoDoctor("Invalid doctor reference");
+      return;
+    }
+
     doctorName = args.getString("doctor_name");
     doctorSpeciality = args.getString("doctor_speciality");
     doctorInfo = args.getString("doctor_info");
     doctorDepartment = args.getString("doctor_department");
 
-    if (doctorIdStr != null) {
-      try {
-        doctorId = Integer.parseInt(doctorIdStr);
-      } catch (NumberFormatException e) {
-        Toast.makeText(requireContext(), "Invalid doctor reference", Toast.LENGTH_SHORT).show();
-        requireActivity().getOnBackPressedDispatcher().onBackPressed();
-        return;
-      }
-    } else {
-      Toast.makeText(requireContext(), "Doctor not specified", Toast.LENGTH_SHORT).show();
-      requireActivity().getOnBackPressedDispatcher().onBackPressed();
-      return;
-    }
-
     if (doctorName != null) txtDoctorName.setText(doctorName);
     if (doctorSpeciality != null) txtDoctorSpeciality.setText(doctorSpeciality);
     if (doctorInfo != null) txtDoctorInfo.setText(doctorInfo);
-    String doctorImageUrl = args.getString("doctor_image_url");
+
     if (imgDoctor != null) {
-      if (doctorImageUrl != null && !doctorImageUrl.isEmpty()) {
-        imgDoctor.setImageTintList(null);
-        Glide.with(this)
-            .load(doctorImageUrl)
-            .placeholder(R.drawable.stethoscope)
-            .error(R.drawable.stethoscope)
-            .into(imgDoctor);
-      } else {
-        imgDoctor.setImageResource(R.drawable.stethoscope);
-      }
+      ImageLoader.loadTinted(
+          this, imgDoctor, args.getString("doctor_image_url"), R.drawable.stethoscope);
     }
+  }
+
+  private void bailNoDoctor(String message) {
+    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+    requireActivity().getOnBackPressedDispatcher().onBackPressed();
   }
 
   private void bindTimeSlots(List<TimeSlot> slots) {

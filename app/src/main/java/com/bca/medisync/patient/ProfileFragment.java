@@ -25,8 +25,8 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
+import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.RoundedListStyler;
-import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -152,17 +152,7 @@ public class ProfileFragment extends Fragment {
 
   private void bindProfilePic(String profilePicUrl) {
     ShapeableImageView imgProfile = requireView().findViewById(R.id.imgProfile);
-    if (profilePicUrl == null || profilePicUrl.isEmpty()) {
-      imgProfile.setImageResource(R.drawable.ic_nav_profile);
-      return;
-    }
-
-    Glide.with(this)
-        .load(ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + profilePicUrl)
-        .placeholder(R.drawable.ic_nav_profile)
-        .error(R.drawable.ic_nav_profile)
-        .centerCrop()
-        .into(imgProfile);
+    ImageLoader.loadProfilePic(this, imgProfile, profilePicUrl);
   }
 
   private void bindVerificationBadge(boolean isVerified) {

@@ -25,8 +25,8 @@ import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
+import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.RoundedListStyler;
-import com.bumptech.glide.Glide;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -250,16 +250,6 @@ public class DoctorProfileFragment extends Fragment {
   private void bindProfilePic(String profilePicUrl) {
     View view = getView();
     if (view == null) return;
-    ImageView imgProfile = view.findViewById(R.id.imgDoctorProfile);
-    if (profilePicUrl == null || profilePicUrl.isEmpty()) {
-      imgProfile.setImageResource(R.drawable.ic_nav_profile);
-      return;
-    }
-    Glide.with(this)
-        .load(ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + profilePicUrl)
-        .placeholder(R.drawable.ic_nav_profile)
-        .error(R.drawable.ic_nav_profile)
-        .centerCrop()
-        .into(imgProfile);
+    ImageLoader.loadProfilePic(this, view.findViewById(R.id.imgDoctorProfile), profilePicUrl);
   }
 }

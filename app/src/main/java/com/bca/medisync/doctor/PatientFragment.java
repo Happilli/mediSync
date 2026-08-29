@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,7 +17,7 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
-import com.bumptech.glide.Glide;
+import com.bca.medisync.util.ImageLoader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,23 +58,13 @@ public class PatientFragment extends Fragment {
               ((TextView) itemView.findViewById(R.id.txtBloodGroup))
                   .setText(patient.getBloodGroup());
               ((TextView) itemView.findViewById(R.id.txtPhone)).setText(patient.getPhone());
-
-              ImageView img = itemView.findViewById(R.id.imgPatientPic);
-              String url = patient.getProfilePicUrl();
-              if (url != null && !url.isEmpty()) {
-                Glide.with(requireContext())
-                    .load(ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + url)
-                    .placeholder(R.drawable.ic_nav_profile)
-                    .error(R.drawable.ic_nav_profile)
-                    .centerCrop()
-                    .into(img);
-              } else {
-                img.setImageResource(R.drawable.ic_nav_profile);
-              }
+              ImageLoader.loadProfilePic(
+                  PatientFragment.this,
+                  itemView.findViewById(R.id.imgPatientPic),
+                  patient.getProfilePicUrl());
             },
             this::onPatientClicked);
 
-    rvPatients.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvPatients.setAdapter(adapter);
     adapter.setRoundedList(true);
   }

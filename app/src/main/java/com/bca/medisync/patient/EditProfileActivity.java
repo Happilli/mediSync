@@ -18,7 +18,7 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
-import com.bumptech.glide.Glide;
+import com.bca.medisync.util.ImageLoader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -85,16 +85,7 @@ public class EditProfileActivity extends AppCompatActivity {
   }
 
   private void bindProfilePic(String profilePicUrl) {
-    if (profilePicUrl == null || profilePicUrl.isEmpty()) {
-      imgProfilePreview.setImageResource(R.drawable.ic_nav_profile);
-      return;
-    }
-    Glide.with(this)
-        .load(ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + profilePicUrl)
-        .placeholder(R.drawable.ic_nav_profile)
-        .error(R.drawable.ic_nav_profile)
-        .centerCrop()
-        .into(imgProfilePreview);
+    ImageLoader.loadProfilePic(this, imgProfilePreview, profilePicUrl);
   }
 
   private File copyUriToCache(Uri uri) throws Exception {

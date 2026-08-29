@@ -6,7 +6,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +19,7 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
-import com.bumptech.glide.Glide;
+import com.bca.medisync.util.ImageLoader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
@@ -84,17 +83,11 @@ public class DoctorFragment extends Fragment {
               ((TextView) itemView.findViewById(R.id.txtSpeciality))
                   .setText(doctor.getSpeciality());
               ((TextView) itemView.findViewById(R.id.txtInfo)).setText(doctor.getInfo());
-              ImageView img = itemView.findViewById(R.id.imgDoctor);
-              if (doctor.getImageUrl() != null && !doctor.getImageUrl().isEmpty()) {
-                img.setImageTintList(null);
-                Glide.with(requireContext())
-                    .load(doctor.getImageUrl())
-                    .placeholder(R.drawable.stethoscope)
-                    .error(R.drawable.stethoscope)
-                    .into(img);
-              } else {
-                img.setImageResource(R.drawable.stethoscope);
-              }
+              ImageLoader.loadTinted(
+                  DoctorFragment.this,
+                  itemView.findViewById(R.id.imgDoctor),
+                  doctor.getImageUrl(),
+                  R.drawable.stethoscope);
               itemView.findViewById(R.id.btnBook).setOnClickListener(v -> onBookClicked(doctor));
             },
             null,
@@ -140,10 +133,6 @@ public class DoctorFragment extends Fragment {
         r.getYears_experience() != null
             ? r.getYears_experience() + "+ Years Exp"
             : (r.getBio() != null ? r.getBio() : "");
-    String imageUrl =
-        r.getProfile_pic_url() != null
-            ? ApiClient.BASE_URL.replaceAll("/$", "") + "/api/v1" + r.getProfile_pic_url()
-            : null;
     return new Doctor(
         String.valueOf(r.getId()),
         r.getName(),
@@ -151,7 +140,7 @@ public class DoctorFragment extends Fragment {
         info,
         r.getDepartment(),
         r.getPhone(),
-        imageUrl);
+        ApiClient.mediaUrl(r.getProfile_pic_url()));
   }
 
   private void setupSearch() {

@@ -25,6 +25,11 @@ public class ApiClient {
 
   public static OkHttpClient okHttpClient;
 
+  public static String mediaUrl(String path) {
+    if (path == null || path.isEmpty()) return null;
+    return BASE_URL.replaceAll("/$", "") + "/api/v1" + path;
+  }
+
   public static Retrofit getRetrofit() {
     if (retrofit == null) {
       HttpLoggingInterceptor loggin = new HttpLoggingInterceptor();
