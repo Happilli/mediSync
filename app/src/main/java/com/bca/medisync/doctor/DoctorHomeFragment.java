@@ -30,6 +30,7 @@ import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.patient.NotificationsActivity;
 import com.bca.medisync.util.EmptyState;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
@@ -41,7 +42,7 @@ import java.util.Locale;
 public class DoctorHomeFragment extends Fragment implements NotificationCenter.Listener {
 
   private RecyclerView rvAppointments;
-  private MaterialButton btnPatients, btnSchedule, btnNotification;
+  private MaterialButton btnNotification;
   private TextView txtDoctorName,
       txtPending,
       txtCompleted,
@@ -73,9 +74,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   public void onResume() {
     super.onResume();
     NotificationCenter.get().register(this);
-    loadDashboardData();
-    loadTodayAppointments();
-    loadUnreadCount();
+    refresh();
   }
 
   @Override
@@ -89,10 +88,15 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
     if (isAdded()) showUnreadIcon();
   }
 
+  public void refresh() {
+    if (!isAdded()) return;
+    loadDashboardData();
+    loadTodayAppointments();
+    loadUnreadCount();
+  }
+
   private void initViews(View view) {
     rvAppointments = view.findViewById(R.id.rvAppointments);
-    btnPatients = view.findViewById(R.id.btnPatients);
-    btnSchedule = view.findViewById(R.id.btnSchedule);
     btnNotification = view.findViewById(R.id.btnNotification);
     txtDoctorName = view.findViewById(R.id.txtDoctorName);
     txtPending = view.findViewById(R.id.txtPending);
@@ -105,7 +109,11 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
 
     rvAppointments.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvAppointments.setAdapter(
-        new AppointmentAdapter(requireContext(), new ArrayList<>(), true, a -> {}));
+        new AppointmentAdapter(
+            requireContext(),
+            new ArrayList<>(),
+            true,
+            a -> BottomNavGoTo(R.id.nav_doctor_schedule)));
   }
 
   private void showUnreadIcon() {
@@ -141,11 +149,9 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
           txtTotalPatients.setText(String.valueOf(p.getTotal_patients()));
         },
         (code, msg) -> {
-          if (code == 401) {
-            handleUnauthorized();
-          } else if (code == -1) {
+          if (code == 401) handleUnauthorized();
+          else if (code == -1)
             Toast.makeText(requireContext(), "Error: " + msg, Toast.LENGTH_SHORT).show();
-          }
         });
   }
 
@@ -162,42 +168,38 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
           for (AppointmentResponse r : all) {
             String apptDate =
                 com.bca.medisync.util.DateTimeUtils.format(r.getAppointment_at(), "yyyy-MM-dd");
-            if (todayStr.equals(apptDate)) {
-              todayAppointments.add(r);
-            }
+            if (todayStr.equals(apptDate)) todayAppointments.add(r);
           }
 
           txtScheduledCount.setText(
               todayAppointments.size()
                   + (todayAppointments.size() == 1 ? " appointment" : " appointments"));
           updateStats(todayAppointments);
-
           EmptyState.bind(rvAppointments, txtNoAppointments, todayAppointments.isEmpty());
+
           if (!todayAppointments.isEmpty()) {
-            txtNoAppointments.setVisibility(View.GONE);
-            rvAppointments.setVisibility(View.VISIBLE);
             AppointmentEnricher.enrichForDoctor(
                 todayAppointments,
                 appointments -> {
                   if (!isAdded()) return;
                   rvAppointments.setAdapter(
                       new AppointmentAdapter(
-                          requireContext(), appointments, true, appointment -> {}));
+                          requireContext(),
+                          appointments,
+                          true,
+                          a -> BottomNavGoTo(R.id.nav_doctor_schedule)));
                 });
           }
         },
         (code, msg) -> {
-          if (code == 401) {
-            handleUnauthorized();
-          } else if (code == -1) {
+          if (code == 401) handleUnauthorized();
+          else if (code == -1)
             Toast.makeText(requireContext(), "Failed to load schedule", Toast.LENGTH_SHORT).show();
-          }
         });
   }
 
   private void BottomNavGoTo(int navItemId) {
-    com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
-        requireActivity().findViewById(R.id.bottomNavDoctor);
+    BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottomNavDoctor);
     bottomNav.setSelectedItemId(navItemId);
   }
 
@@ -210,31 +212,21 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   }
 
   private void updateStats(List<AppointmentResponse> appointments) {
-    int pendingCount = 0;
-    int completedCount = 0;
-    int followUpCount = 0;
-
+    int pendingCount = 0, completedCount = 0, followUpCount = 0;
     for (AppointmentResponse a : appointments) {
       String status = a.getStatus() != null ? a.getStatus().toLowerCase() : "";
       if (status.contains("pending")
           || status.contains("scheduled")
-          || status.contains("confirmed")) {
-        pendingCount++;
-      } else if (status.contains("completed") || status.contains("treated")) {
-        completedCount++;
-      } else if (status.contains("follow")) {
-        followUpCount++;
-      }
+          || status.contains("confirmed")) pendingCount++;
+      else if (status.contains("completed") || status.contains("treated")) completedCount++;
+      else if (status.contains("follow")) followUpCount++;
     }
-
     txtPending.setText(String.valueOf(pendingCount));
     txtCompleted.setText(String.valueOf(completedCount));
     txtFollowUps.setText(String.valueOf(followUpCount));
   }
 
   private void setupListeners() {
-    btnPatients.setOnClickListener(v -> BottomNavGoTo(R.id.nav_doctor_patients));
-    btnSchedule.setOnClickListener(v -> BottomNavGoTo(R.id.nav_doctor_schedule));
     btnNotification.setOnClickListener(
         v -> startActivity(new Intent(requireContext(), NotificationsActivity.class)));
   }

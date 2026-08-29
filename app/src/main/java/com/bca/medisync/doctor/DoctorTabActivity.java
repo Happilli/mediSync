@@ -34,4 +34,9 @@ public class DoctorTabActivity extends BaseTabActivity {
     if (itemId == R.id.nav_doctor_profile) return new DoctorProfileFragment();
     return new DoctorHomeFragment();
   }
+
+  public void refreshHomeIfPresent() {
+    Fragment f = getFragment(R.id.nav_doctor_home);
+    if (f instanceof DoctorHomeFragment) ((DoctorHomeFragment) f).refresh();
+  }
 }

@@ -1,5 +1,6 @@
 package com.bca.medisync.adapter;
 
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ public class SimpleListAdapter<T> extends RecyclerView.Adapter<SimpleListAdapter
   private final Binder<T> binder;
   private final OnItemClick<T> listener;
   private final Matcher<T> matcher;
+  private boolean roundedList = false;
 
   public SimpleListAdapter(
       int layoutRes, List<T> items, Binder<T> binder, OnItemClick<T> listener) {
@@ -43,6 +45,11 @@ public class SimpleListAdapter<T> extends RecyclerView.Adapter<SimpleListAdapter
     this.binder = binder;
     this.listener = listener;
     this.matcher = matcher;
+  }
+
+  public void setRoundedList(boolean roundedList) {
+    this.roundedList = roundedList;
+    notifyDataSetChanged();
   }
 
   public void updateData(List<T> newItems) {
@@ -83,6 +90,44 @@ public class SimpleListAdapter<T> extends RecyclerView.Adapter<SimpleListAdapter
     binder.bind(holder.itemView, item, position);
     if (listener != null) {
       holder.itemView.setOnClickListener(v -> listener.onClick(item));
+    }
+    if (roundedList) {
+      applyRoundedStyle(holder.itemView, position);
+    }
+  }
+
+  private void applyRoundedStyle(View itemView, int position) {
+    float density = itemView.getResources().getDisplayMetrics().density;
+    float radius = density * 18f;
+    boolean isFirst = position == 0;
+    boolean isLast = position == getItemCount() - 1;
+
+    GradientDrawable bg = new GradientDrawable();
+    bg.setColor(
+        itemView
+            .getResources()
+            .getColor(com.bca.medisync.R.color.surface, itemView.getContext().getTheme()));
+    bg.setStroke(
+        (int) (density * 1.2f),
+        itemView
+            .getResources()
+            .getColor(com.bca.medisync.R.color.outline_variant, itemView.getContext().getTheme()));
+
+    if (isFirst && isLast) {
+      bg.setCornerRadius(radius);
+    } else if (isFirst) {
+      bg.setCornerRadii(new float[] {radius, radius, radius, radius, 0, 0, 0, 0});
+    } else if (isLast) {
+      bg.setCornerRadii(new float[] {0, 0, 0, 0, radius, radius, radius, radius});
+    } else {
+      bg.setCornerRadius(0f);
+    }
+    itemView.setBackground(bg);
+
+    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) itemView.getLayoutParams();
+    if (lp != null) {
+      lp.bottomMargin = isLast ? 0 : (int) (density * 4);
+      itemView.setLayoutParams(lp);
     }
   }
 

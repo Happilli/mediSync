@@ -127,6 +127,7 @@ public class MedicationFragment extends Fragment {
             null);
     rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvMedications.setAdapter(adapter);
+    adapter.setRoundedList(true);
   }
 
   private void loadMedications() {

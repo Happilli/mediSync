@@ -83,6 +83,7 @@ public class PatientFragment extends Fragment {
             this::onPatientClicked);
 
     rvPatients.setAdapter(adapter);
+    adapter.setRoundedList(true);
   }
 
   private void loadPatients() {

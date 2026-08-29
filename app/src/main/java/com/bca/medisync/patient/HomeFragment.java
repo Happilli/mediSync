@@ -14,9 +14,11 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
+import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -29,10 +31,11 @@ import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class HomeFragment extends Fragment implements NotificationCenter.Listener {
@@ -40,11 +43,8 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
   private RecyclerView rvDashboard;
   private TextView txtPatientName;
   private MaterialButton btnNotification;
-  private MaterialCardView cardAppointment;
-  private TextView txtAppointmentDoctor,
-      txtAppointmentSpeciality,
-      txtAppointmentDate,
-      txtAppointmentTime;
+  private RecyclerView rvUpcomingHome;
+  private TextView txtNoUpcoming;
 
   public HomeFragment() {}
 
@@ -90,15 +90,11 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
   private void initViews(View view) {
     txtPatientName = view.findViewById(R.id.txtPatientName);
     rvDashboard = view.findViewById(R.id.rvDashboard);
-    cardAppointment = view.findViewById(R.id.cardAppointment);
-    txtAppointmentDoctor = view.findViewById(R.id.txtAppointmentDoctor);
-    txtAppointmentSpeciality = view.findViewById(R.id.txtAppointmentSpeciality);
-    txtAppointmentDate = view.findViewById(R.id.txtAppointmentDate);
-    txtAppointmentTime = view.findViewById(R.id.txtAppointmentTime);
+    rvUpcomingHome = view.findViewById(R.id.rvUpcomingHome);
+    txtNoUpcoming = view.findViewById(R.id.txtNoUpcoming);
     btnNotification = view.findViewById(R.id.btnNotification);
 
-    cardAppointment.setVisibility(View.GONE);
-    cardAppointment.setOnClickListener(v -> goToTab(R.id.nav_appointments));
+    rvUpcomingHome.setLayoutManager(new LinearLayoutManager(requireContext()));
 
     view.findViewById(R.id.btnNotification)
         .setOnClickListener(
@@ -148,20 +144,36 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
         api.getMyAppointments(null, null),
         this,
         body -> {
-          AppointmentResponse next = AppointmentEnricher.findNextUpcoming(body);
-          if (next == null) {
-            cardAppointment.setVisibility(View.GONE);
+          List<AppointmentResponse> upcoming = new ArrayList<>();
+          for (AppointmentResponse a : body) {
+            String status = a.getStatus();
+            if (status != null
+                && (status.equalsIgnoreCase("Confirmed") || status.equalsIgnoreCase("Pending"))) {
+              upcoming.add(a);
+            }
+          }
+          Collections.sort(upcoming, Comparator.comparing(AppointmentResponse::getAppointment_at));
+          List<AppointmentResponse> top3 = upcoming.subList(0, Math.min(3, upcoming.size()));
+
+          if (top3.isEmpty()) {
+            if (!isAdded()) return;
+            rvUpcomingHome.setVisibility(View.GONE);
+            txtNoUpcoming.setVisibility(View.VISIBLE);
             return;
           }
-          AppointmentEnricher.enrichOne(
-              next,
-              appointment -> {
+
+          AppointmentEnricher.enrichAll(
+              top3,
+              appointments -> {
                 if (!isAdded()) return;
-                txtAppointmentDoctor.setText(appointment.getDoctorName());
-                txtAppointmentSpeciality.setText(appointment.getSpeciality());
-                txtAppointmentDate.setText(appointment.getDate());
-                txtAppointmentTime.setText(appointment.getTime());
-                cardAppointment.setVisibility(View.VISIBLE);
+                rvUpcomingHome.setVisibility(View.VISIBLE);
+                txtNoUpcoming.setVisibility(View.GONE);
+                rvUpcomingHome.setAdapter(
+                    new AppointmentAdapter(
+                        requireContext(),
+                        appointments,
+                        false,
+                        a -> goToTab(R.id.nav_appointments)));
               });
         },
         (code, msg) -> {});

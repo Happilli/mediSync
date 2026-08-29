@@ -1,6 +1,8 @@
 package com.bca.medisync.doctor;
 
-import android.app.AlertDialog;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -13,7 +15,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -51,8 +55,6 @@ public class ScheduleFragment extends Fragment {
   private List<Appointment> allAppointments = new ArrayList<>();
   private String selectedDate;
 
-  public ScheduleFragment() {}
-
   @Nullable
   @Override
   public View onCreateView(
@@ -67,6 +69,7 @@ public class ScheduleFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     initViews(view);
     rvSchedule.setLayoutManager(new LinearLayoutManager(requireContext()));
+    setupSwipe();
     setupDateStrip();
     setupFab();
     loadRealSchedule();
@@ -87,6 +90,139 @@ public class ScheduleFragment extends Fragment {
 
   private void setupFab() {
     fabAddTimeslot.setOnClickListener(v -> showAddTimeslotDialog());
+  }
+
+  private void setupSwipe() {
+    ItemTouchHelper helper =
+        new ItemTouchHelper(
+            new ItemTouchHelper.SimpleCallback(0, 0) {
+              @Override
+              public int getMovementFlags(
+                  @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                AppointmentAdapter adapter = (AppointmentAdapter) recyclerView.getAdapter();
+                if (adapter == null) return 0;
+                Appointment a = adapter.getItemAt(viewHolder.getAbsoluteAdapterPosition());
+                if (a == null) return 0;
+                if (a.getStatus().equalsIgnoreCase("Pending"))
+                  return makeMovementFlags(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+                if (a.getStatus().equalsIgnoreCase("Confirmed"))
+                  return makeMovementFlags(0, ItemTouchHelper.LEFT);
+                return 0;
+              }
+
+              @Override
+              public boolean onMove(
+                  @NonNull RecyclerView recyclerView,
+                  @NonNull RecyclerView.ViewHolder viewHolder,
+                  @NonNull RecyclerView.ViewHolder target) {
+                return false;
+              }
+
+              private float spToPx(float sp) {
+                return sp * getResources().getDisplayMetrics().scaledDensity;
+              }
+
+              @Override
+              public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                AppointmentAdapter adapter = (AppointmentAdapter) rvSchedule.getAdapter();
+                if (adapter == null) return;
+                Appointment a = adapter.getItemAt(viewHolder.getAbsoluteAdapterPosition());
+                if (a == null) return;
+                int appointmentId = Integer.parseInt(a.getId());
+                updateStatus(
+                    appointmentId, direction == ItemTouchHelper.RIGHT ? "confirmed" : "cancelled");
+              }
+
+              @Override
+              public void onChildDraw(
+                  @NonNull Canvas c,
+                  @NonNull RecyclerView recyclerView,
+                  @NonNull RecyclerView.ViewHolder viewHolder,
+                  float dX,
+                  float dY,
+                  int actionState,
+                  boolean isCurrentlyActive) {
+                View item = viewHolder.itemView;
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE && Math.abs(dX) > 4) {
+                  boolean swipingRight = dX > 0;
+                  float gapWidth = Math.abs(dX);
+                  float gapMargin = dpToPx(6);
+                  float top = item.getTop() + gapMargin;
+                  float bottom = item.getBottom() - gapMargin;
+                  float bubbleHeight = bottom - top;
+
+                  RectF bubbleRect;
+                  if (swipingRight) {
+                    bubbleRect =
+                        new RectF(
+                            item.getLeft() + gapMargin,
+                            top,
+                            item.getLeft() + gapWidth - gapMargin,
+                            bottom);
+                  } else {
+                    bubbleRect =
+                        new RectF(
+                            item.getRight() - gapWidth + gapMargin,
+                            top,
+                            item.getRight() - gapMargin,
+                            bottom);
+                  }
+
+                  float radius = Math.min(bubbleHeight / 2f, bubbleRect.width() / 2f);
+
+                  Paint bubblePaint = new Paint();
+                  bubblePaint.setAntiAlias(true);
+                  bubblePaint.setColor(
+                      ContextCompat.getColor(
+                          requireContext(),
+                          swipingRight ? R.color.tertiary_container : R.color.error_container));
+                  c.drawRoundRect(bubbleRect, radius, radius, bubblePaint);
+
+                  float maxSwipe = item.getWidth() * 0.5f;
+                  float progress = Math.min(gapWidth / maxSwipe, 1f);
+                  float cx = bubbleRect.centerX();
+                  float cy = bubbleRect.centerY();
+
+                  if (bubbleRect.width() > dpToPx(40)) {
+                    Paint iconPaint = new Paint();
+                    iconPaint.setAntiAlias(true);
+                    iconPaint.setColor(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            swipingRight
+                                ? R.color.on_tertiary_container
+                                : R.color.on_error_container));
+                    iconPaint.setStrokeWidth(2.5f * getResources().getDisplayMetrics().density);
+                    iconPaint.setStrokeCap(Paint.Cap.ROUND);
+                    iconPaint.setStyle(Paint.Style.STROKE);
+
+                    float iconSize = dpToPx(9) + dpToPx(3) * progress;
+
+                    if (swipingRight) {
+                      c.drawLine(
+                          cx - iconSize,
+                          cy,
+                          cx - iconSize * 0.25f,
+                          cy + iconSize * 0.8f,
+                          iconPaint);
+                      c.drawLine(
+                          cx - iconSize * 0.25f,
+                          cy + iconSize * 0.8f,
+                          cx + iconSize,
+                          cy - iconSize * 0.7f,
+                          iconPaint);
+                    } else {
+                      float s = iconSize * 0.85f;
+                      c.drawLine(cx - s, cy - s, cx + s, cy + s, iconPaint);
+                      c.drawLine(cx + s, cy - s, cx - s, cy + s, iconPaint);
+                    }
+                  }
+                }
+                super.onChildDraw(
+                    c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+              }
+            });
+    helper.attachToRecyclerView(rvSchedule);
   }
 
   private void showAddTimeslotDialog() {
@@ -120,7 +256,6 @@ public class ScheduleFragment extends Fragment {
                 String iso =
                     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
                         .format(cal.getTime());
-
                 createTimeslot(iso);
               });
           timePicker.show(getChildFragmentManager(), "TIME_PICKER");
@@ -132,47 +267,17 @@ public class ScheduleFragment extends Fragment {
     List<Appointment> filtered = new ArrayList<>();
     if (date != null) {
       for (Appointment a : allAppointments) {
-        if (date.equals(a.getDate())) {
-          filtered.add(a);
-        }
+        if (date.equals(a.getDate())) filtered.add(a);
       }
     }
     rvSchedule.setAdapter(
-        new AppointmentAdapter(requireContext(), filtered, true, this::onAppointmentClicked));
-
+        new AppointmentAdapter(requireContext(), filtered, true, true, this::onAppointmentClicked));
     EmptyState.bind(rvSchedule, txtNoAppointments, filtered.isEmpty());
   }
 
   private void onAppointmentClicked(Appointment appointment) {
-    String status = appointment.getStatus();
-    int appointmentId = Integer.parseInt(appointment.getId());
-
-    if (status.equalsIgnoreCase("Pending")) {
-      new AlertDialog.Builder(requireContext())
-          .setTitle("Appointment Request")
-          .setMessage(
-              appointment.getPatientName()
-                  + " . "
-                  + appointment.getDate()
-                  + " "
-                  + appointment.getTime())
-          .setPositiveButton("Confirm", (d, w) -> updateStatus(appointmentId, "confirmed"))
-          .setNeutralButton("Reject", (d, w) -> updateStatus(appointmentId, "cancelled"))
-          .setNegativeButton("Cancel", null)
-          .show();
-    } else if (status.equalsIgnoreCase("Confirmed")) {
-      new AlertDialog.Builder(requireContext())
-          .setTitle(appointment.getPatientName())
-          .setItems(
-              new CharSequence[] {"View Patient", "Mark Completed", "Cancel"},
-              (d, which) -> {
-                if (which == 0) {
-                  openPatientDetail(appointment, appointmentId);
-                } else if (which == 1) {
-                  updateStatus(appointmentId, "completed");
-                }
-              })
-          .show();
+    if (appointment.getStatus().equalsIgnoreCase("Confirmed")) {
+      openPatientDetail(appointment, Integer.parseInt(appointment.getId()));
     }
   }
 
@@ -183,13 +288,12 @@ public class ScheduleFragment extends Fragment {
         this,
         body -> Toast.makeText(requireContext(), "Timeslot added.", Toast.LENGTH_SHORT).show(),
         (code, msg) -> {
-          if (code == 400) {
+          if (code == 400)
             Toast.makeText(
                     requireContext(), "Timeslot already exists for this time.", Toast.LENGTH_LONG)
                 .show();
-          } else {
+          else
             Toast.makeText(requireContext(), "Failed to add timeslot.", Toast.LENGTH_SHORT).show();
-          }
         });
   }
 
@@ -240,11 +344,10 @@ public class ScheduleFragment extends Fragment {
           ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
         },
         (code, msg) -> {
-          if (code == -1) {
+          if (code == -1)
             Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
+          else
             Toast.makeText(requireContext(), "Failed to load patient.", Toast.LENGTH_SHORT).show();
-          }
         });
   }
 
@@ -256,6 +359,7 @@ public class ScheduleFragment extends Fragment {
         body -> {
           Toast.makeText(requireContext(), "Appointment " + newStatus, Toast.LENGTH_SHORT).show();
           loadRealSchedule();
+          ((DoctorTabActivity) requireActivity()).refreshHomeIfPresent();
         },
         (code, msg) -> {
           if (code == 400) {
@@ -265,8 +369,10 @@ public class ScheduleFragment extends Fragment {
             loadRealSchedule();
           } else if (code == 403) {
             Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT).show();
+            loadRealSchedule();
           } else {
             Toast.makeText(requireContext(), "Failed to update status.", Toast.LENGTH_SHORT).show();
+            loadRealSchedule();
           }
         });
   }
