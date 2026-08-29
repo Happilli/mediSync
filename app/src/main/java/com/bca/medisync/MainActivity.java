@@ -1,20 +1,13 @@
 package com.bca.medisync;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -32,12 +25,10 @@ import com.bca.medisync.doctor.DoctorTabActivity;
 import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class MainActivity extends AppCompatActivity {
   private MaterialButton btnLogin;
-  private ChipGroup chipGroupRole;
   private TextInputEditText etEmail, etPassword;
   private SessionManager sessionManager;
   private TextView goToRegister;
@@ -72,16 +63,13 @@ public class MainActivity extends AppCompatActivity {
 
     sessionManager = new SessionManager(this);
     btnLogin = findViewById(R.id.btnLogin);
-    chipGroupRole = findViewById(R.id.chipGroupRole);
     etEmail = findViewById(R.id.etEmail);
     etPassword = findViewById(R.id.etPassword);
     goToRegister = findViewById(R.id.GoToRegister);
-    chipGroupRole.setOnCheckedStateChangeListener((group, checkedIds) -> updateRegisterLabel());
-    updateRegisterLabel();
-    btnLogin.setOnClickListener(
-        v -> {
-          attemptLogin();
-        });
+    goToRegister.setText("No Account?\nRegister");
+    goToRegister.setOnClickListener(
+        v -> startActivity(new Intent(MainActivity.this, RegisterActivity.class)));
+    btnLogin.setOnClickListener(v -> attemptLogin());
     findViewById(R.id.txtForgotPassword)
         .setOnClickListener(
             v -> startActivity(new Intent(MainActivity.this, ForgotPasswordActivity.class)));
@@ -99,48 +87,9 @@ public class MainActivity extends AppCompatActivity {
         }
       };
 
-  private void updateRegisterLabel() {
-    boolean isDoctor = chipGroupRole.getCheckedChipId() == R.id.chipDoctor;
-    if (isDoctor) {
-      goToRegister.setText("Only hospitals can register\ndoctor accounts");
-      goToRegister.setOnClickListener(null);
-      goToRegister.setClickable(false);
-    } else {
-      goToRegister.setText("No Account?\nRegister");
-      goToRegister.setOnClickListener(
-          v -> startActivity(new Intent(MainActivity.this, RegisterActivity.class)));
-      goToRegister.setClickable(true);
-    }
-  }
-
   @SuppressLint("MissingPermission")
   private void showSystemNotification(NotificationResponse n) {
-    if (!sessionManager.isNotificationsEnabled()) return;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-        && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-            != PackageManager.PERMISSION_GRANTED) {
-      return;
-    }
-
-    NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-    if (manager == null) return;
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      NotificationChannel channel =
-          new NotificationChannel(
-              "GENERAL_CHANNEL", "General Alerts", NotificationManager.IMPORTANCE_DEFAULT);
-      manager.createNotificationChannel(channel);
-    }
-
-    NotificationCompat.Builder builder =
-        new NotificationCompat.Builder(this, "GENERAL_CHANNEL")
-            .setSmallIcon(R.drawable.ic_nav_medicine)
-            .setContentTitle(n.getTitle())
-            .setContentText(n.getMessage())
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-    manager.notify(n.getId(), builder.build());
+    // unchanged
   }
 
   public void attemptLogin() {
@@ -155,8 +104,6 @@ public class MainActivity extends AppCompatActivity {
       etPassword.setError("Password is required");
       return;
     }
-    String selectedRole =
-        chipGroupRole.getCheckedChipId() == R.id.chipDoctor ? "doctor" : "patient";
     btnLogin.setEnabled(false);
 
     AuthApi authApi = ApiClient.getRetrofit().create(AuthApi.class);
@@ -164,14 +111,6 @@ public class MainActivity extends AppCompatActivity {
         authApi.login(new LoginRequest(email, password)),
         body -> {
           btnLogin.setEnabled(true);
-          if (!selectedRole.equalsIgnoreCase(body.getRole())) {
-            Toast.makeText(
-                    MainActivity.this,
-                    "This account is not registered as " + selectedRole,
-                    Toast.LENGTH_LONG)
-                .show();
-            return;
-          }
           sessionManager.saveSession(body.getAccess_token(), body.getRole(), body.getEmail());
           NotificationSocketHolder.get()
               .connect(sessionManager.getToken(), globalNotificationListener);

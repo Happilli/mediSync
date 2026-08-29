@@ -81,6 +81,7 @@ public class PrescriptionListFragment extends Fragment {
             });
 
     rvPrescriptions.setAdapter(adapter);
+    adapter.setRoundedList(true);
   }
 
   private void loadPrescriptions() {

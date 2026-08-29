@@ -20,8 +20,10 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
+import com.bca.medisync.util.RoundedListStyler;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.card.MaterialCardView;
+
+import java.util.List;
 
 public class PrescriptionDetailFragment extends Fragment {
   private MaterialToolbar toolbar;
@@ -35,7 +37,7 @@ public class PrescriptionDetailFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.activity_prescription_detail, container, false);
+    return inflater.inflate(R.layout.fragment_prescription_detail, container, false);
   }
 
   @Override
@@ -94,36 +96,30 @@ public class PrescriptionDetailFragment extends Fragment {
   }
 
   private void bind(Prescription p) {
-    txtDoctorName.setText(p.getDoctor_name());
     txtDiagnosis.setText(p.getDiagnosis());
     txtInstructions.setText(p.getInstructions());
     txtFollowUp.setText("Follow-up: " + p.getFollowUpDate());
+    txtInstructions.setVisibility(
+        p.getInstructions() == null || p.getInstructions().isEmpty() ? View.GONE : View.VISIBLE);
 
     medicationsContainer.removeAllViews();
-    if (p.getMedications() == null || p.getMedications().isEmpty()) {
+    List<Medication> meds = p.getMedications();
+    if (meds == null || meds.isEmpty()) {
       txtNoMeds.setVisibility(View.VISIBLE);
       return;
     }
     txtNoMeds.setVisibility(View.GONE);
-    for (Medication m : p.getMedications()) {
-      medicationsContainer.addView(buildMedicationRow(m));
+    for (int i = 0; i < meds.size(); i++) {
+      View row = buildMedicationRow(meds.get(i));
+      RoundedListStyler.apply(row, i, meds.size());
+      medicationsContainer.addView(row);
     }
   }
 
-  private MaterialCardView buildMedicationRow(Medication m) {
-    MaterialCardView card = new MaterialCardView(requireContext());
-    LinearLayout.LayoutParams cardLp =
-        new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-    cardLp.bottomMargin = dp(10);
-    card.setLayoutParams(cardLp);
-    card.setRadius(dp(16));
-    card.setCardElevation(0f);
-    card.setCardBackgroundColor(requireContext().getColor(R.color.surface_container));
-
-    LinearLayout content = new LinearLayout(requireContext());
-    content.setOrientation(LinearLayout.VERTICAL);
-    content.setPadding(dp(16), dp(14), dp(16), dp(14));
+  private View buildMedicationRow(Medication m) {
+    LinearLayout row = new LinearLayout(requireContext());
+    row.setOrientation(LinearLayout.VERTICAL);
+    row.setPadding(dp(16), dp(14), dp(16), dp(14));
 
     TextView name = new TextView(requireContext());
     name.setText(m.getName() + " " + m.getDosage());
@@ -135,21 +131,29 @@ public class PrescriptionDetailFragment extends Fragment {
     freq.setText(m.getFrequency() + " \u2022 " + m.getTime());
     freq.setTextSize(12);
     freq.setTextColor(requireContext().getColor(R.color.on_surface_variant));
+    LinearLayout.LayoutParams freqLp =
+        new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    freqLp.topMargin = dp(2);
+    freq.setLayoutParams(freqLp);
 
-    content.addView(name);
-    content.addView(freq);
+    row.addView(name);
+    row.addView(freq);
 
     if (m.getInstruction() != null && !m.getInstruction().isEmpty()) {
       TextView instr = new TextView(requireContext());
       instr.setText(m.getInstruction());
       instr.setTextSize(12);
       instr.setTextColor(requireContext().getColor(R.color.primary));
-      instr.setPadding(0, dp(4), 0, 0);
-      content.addView(instr);
+      LinearLayout.LayoutParams instrLp =
+          new LinearLayout.LayoutParams(
+              LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+      instrLp.topMargin = dp(6);
+      instr.setLayoutParams(instrLp);
+      row.addView(instr);
     }
 
-    card.addView(content);
-    return card;
+    return row;
   }
 
   private int dp(int v) {

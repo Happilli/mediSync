@@ -72,6 +72,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
             },
             null);
     rvHistory.setAdapter(adapter);
+    adapter.setRoundedList(true);
   }
 
   private void loadHistory() {
