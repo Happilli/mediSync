@@ -32,7 +32,7 @@ public class HospitalDetailFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.activity_hospital_detail, container, false);
+    return inflater.inflate(R.layout.fragment_hospital_detail, container, false);
   }
 
   @Override

@@ -49,7 +49,7 @@ public class BookAppointmentFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.activity_book_appointment, container, false);
+    return inflater.inflate(R.layout.fragment_book_appointment, container, false);
   }
 
   @Override

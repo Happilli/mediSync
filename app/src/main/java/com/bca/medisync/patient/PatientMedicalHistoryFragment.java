@@ -42,7 +42,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.activity_patient_medical_history, container, false);
+    return inflater.inflate(R.layout.fragment_patient_medical_history, container, false);
   }
 
   @Override

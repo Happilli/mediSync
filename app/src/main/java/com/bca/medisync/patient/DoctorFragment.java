@@ -44,7 +44,7 @@ public class DoctorFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.activity_doctor, container, false);
+    return inflater.inflate(R.layout.fragment_doctor, container, false);
   }
 
   @Override

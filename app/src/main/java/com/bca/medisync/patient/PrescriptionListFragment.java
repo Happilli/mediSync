@@ -42,7 +42,7 @@ public class PrescriptionListFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.activity_prescription_list, container, false);
+    return inflater.inflate(R.layout.fragment_prescription_list, container, false);
   }
 
   @Override
