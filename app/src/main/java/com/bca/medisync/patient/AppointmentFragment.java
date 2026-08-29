@@ -20,6 +20,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
@@ -29,7 +30,7 @@ import com.bca.medisync.R;
 
 public class AppointmentFragment extends Fragment {
   private RecyclerView rvUpcoming, rvHistory;
-  private TabLayout tabLayout;
+  private MaterialButtonToggleGroup toggleGroup;
   private MaterialToolbar toolbar;
   private ExtendedFloatingActionButton fabBookAppointment;
 
@@ -68,7 +69,7 @@ public class AppointmentFragment extends Fragment {
   private void initViews(View view) {
     rvUpcoming = view.findViewById(R.id.rvUpcoming);
     rvHistory = view.findViewById(R.id.rvHistory);
-    tabLayout = view.findViewById(R.id.tabLayout);
+    toggleGroup = view.findViewById(R.id.toggleGroup);
     toolbar = view.findViewById(R.id.toolbar);
     fabBookAppointment = view.findViewById(R.id.fabBookAppointment);
   }
@@ -78,26 +79,16 @@ public class AppointmentFragment extends Fragment {
   }
 
   private void setupTabs() {
-    tabLayout.addTab(tabLayout.newTab().setText("UpcominG"));
-    tabLayout.addTab(tabLayout.newTab().setText("History"));
-    tabLayout.addOnTabSelectedListener(
-        new TabLayout.OnTabSelectedListener() {
-          @Override
-          public void onTabSelected(TabLayout.Tab tab) {
-            if (tab.getPosition() == 0) {
-              rvUpcoming.setVisibility(View.VISIBLE);
-              rvHistory.setVisibility(View.GONE);
-            } else {
-              rvUpcoming.setVisibility(View.GONE);
-              rvHistory.setVisibility(View.VISIBLE);
-            }
+    toggleGroup.addOnButtonCheckedListener(
+        (group, checkedId, isChecked) -> {
+          if (!isChecked) return;
+          if (checkedId == R.id.btnUpcoming) {
+            rvUpcoming.setVisibility(View.VISIBLE);
+            rvHistory.setVisibility(View.GONE);
+          } else {
+            rvUpcoming.setVisibility(View.GONE);
+            rvHistory.setVisibility(View.VISIBLE);
           }
-
-          @Override
-          public void onTabUnselected(TabLayout.Tab tab) {}
-
-          @Override
-          public void onTabReselected(TabLayout.Tab tab) {}
         });
   }
 

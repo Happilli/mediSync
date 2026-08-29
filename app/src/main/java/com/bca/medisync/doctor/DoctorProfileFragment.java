@@ -22,6 +22,7 @@ import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
+import com.bca.medisync.util.RoundedListStyler;
 import com.bumptech.glide.Glide;
 
 public class DoctorProfileFragment extends Fragment {
@@ -93,13 +94,23 @@ public class DoctorProfileFragment extends Fragment {
         h -> {
           View view = getView();
           if (view == null) return;
-          ((TextView) view.findViewById(R.id.txtHospitalValue)).setText(h.getName());
+          setRowValue(view.findViewById(R.id.rowHospital), h.getName());
         },
         (code, msg) -> {
           View view = getView();
           if (view == null) return;
-          ((TextView) view.findViewById(R.id.txtHospitalValue)).setText("Hospital #" + hospitalId);
+          setRowValue(view.findViewById(R.id.rowHospital), "Hospital #" + hospitalId);
         });
+  }
+
+  private void bindRow(View rowView, int iconRes, String label, String value) {
+    ((ImageView) rowView.findViewById(R.id.imgRowIcon)).setImageResource(iconRes);
+    ((TextView) rowView.findViewById(R.id.txtRowLabel)).setText(label);
+    ((TextView) rowView.findViewById(R.id.txtRowValue)).setText(value);
+  }
+
+  private void setRowValue(View rowView, String value) {
+    ((TextView) rowView.findViewById(R.id.txtRowValue)).setText(value);
   }
 
   private void bindProfile(DoctorProfileResponse p) {
@@ -137,12 +148,28 @@ public class DoctorProfileFragment extends Fragment {
     ((TextView) view.findViewById(R.id.statPatientsTotalValue))
         .setText(String.valueOf(p.getTotal_patients()));
 
-    ((TextView) view.findViewById(R.id.txtSpecializationValue)).setText(p.getSpeciality());
-    ((TextView) view.findViewById(R.id.txtExperienceValue))
-        .setText(years > 0 ? years + " years" : "Not specified");
-    ((TextView) view.findViewById(R.id.txtPhoneValue)).setText(p.getPhone());
-    ((TextView) view.findViewById(R.id.txtEmailValue)).setText(sessionManager.getEmail());
-    ((TextView) view.findViewById(R.id.txtAddressValue)).setText(p.getAddress());
+    View rowSpecialization = view.findViewById(R.id.rowSpecialization);
+    View rowHospital = view.findViewById(R.id.rowHospital);
+    View rowExperience = view.findViewById(R.id.rowExperience);
+    View rowPhone = view.findViewById(R.id.rowPhone);
+    View rowEmail = view.findViewById(R.id.rowEmail);
+    View rowAddress = view.findViewById(R.id.rowAddress);
+
+    bindRow(rowSpecialization, R.drawable.stethoscope, "Specialization", p.getSpeciality());
+    bindRow(rowHospital, R.drawable.hospital, "Hospital", "Hospital #" + p.getHospital_id());
+    bindRow(
+        rowExperience,
+        R.drawable.ic_nav_calendar,
+        "Experience",
+        years > 0 ? years + " years" : "Not specified");
+    bindRow(rowPhone, R.drawable.phone, "Phone", p.getPhone());
+    bindRow(rowEmail, R.drawable.email, "Email", sessionManager.getEmail());
+    bindRow(rowAddress, R.drawable.location, "Address", p.getAddress());
+
+    View[] rows = {rowSpecialization, rowHospital, rowExperience, rowPhone, rowEmail, rowAddress};
+    for (int i = 0; i < rows.length; i++) {
+      RoundedListStyler.apply(rows[i], i, rows.length);
+    }
   }
 
   private void bindProfilePic(String profilePicUrl) {

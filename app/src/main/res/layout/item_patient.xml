@@ -3,56 +3,52 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rowRoot"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="88dp"
     android:background="@android:color/transparent"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingHorizontal="14dp"
-    android:paddingVertical="12dp">
+    android:orientation="horizontal">
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        app:cardBackgroundColor="?attr/colorSecondaryContainer"
-        app:cardCornerRadius="14dp"
-        app:cardElevation="0dp">
-
-        <ImageView
-            android:id="@+id/imgPatientPic"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@null"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_nav_profile" />
-    </com.google.android.material.card.MaterialCardView>
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgPatientPic"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_nav_profile"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Tile" />
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="14dp">
 
         <TextView
             android:id="@+id/txtPatientName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txtPhone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="11sp" />
+            android:textSize="12sp" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/txtBloodGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="14dp"
         android:paddingHorizontal="10dp"
         android:paddingVertical="4dp"
         android:textColor="?attr/colorPrimary"

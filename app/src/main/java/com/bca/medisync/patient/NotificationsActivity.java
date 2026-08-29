@@ -1,7 +1,6 @@
 package com.bca.medisync.patient;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -13,17 +12,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.SimpleListAdapter;
+import com.bca.medisync.adapter.NotificationAdapter;
 import com.bca.medisync.data.model.Notification;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
-import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,11 @@ public class NotificationsActivity extends AppCompatActivity
   private RecyclerView rvNotifications;
   private android.widget.TextView txtEmpty;
   private MaterialButton btnMarkAllRead;
-  private SimpleListAdapter<Notification> adapter;
+  private MaterialButtonToggleGroup toggleGroup;
+  private NotificationAdapter adapter;
+
+  private List<Notification> allNotifications = new ArrayList<>();
+  private boolean showUnreadOnly = true;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +73,7 @@ public class NotificationsActivity extends AppCompatActivity
 
   @Override
   public void onNotificationReceived(NotificationResponse notification) {
-    adapter.prependItem(mapToNotification(notification));
-    EmptyState.bind(rvNotifications, txtEmpty, false);
+    loadNotifications();
   }
 
   private void initViews() {
@@ -79,6 +81,7 @@ public class NotificationsActivity extends AppCompatActivity
     rvNotifications = findViewById(R.id.rvNotifications);
     txtEmpty = findViewById(R.id.txtEmpty);
     btnMarkAllRead = findViewById(R.id.btnMarkAllRead);
+    toggleGroup = findViewById(R.id.toggleGroup);
   }
 
   private void setupToolbar() {
@@ -87,26 +90,7 @@ public class NotificationsActivity extends AppCompatActivity
 
   private void setupRecyclerView() {
     adapter =
-        new SimpleListAdapter<>(
-            R.layout.item_notification,
-            new ArrayList<>(),
-            (itemView, notification, pos) -> {
-              ((android.widget.TextView) itemView.findViewById(R.id.txtNotifTitle))
-                  .setText(notification.getTitle());
-              ((android.widget.TextView) itemView.findViewById(R.id.txtNotifMessage))
-                  .setText(notification.getMessage());
-              ((android.widget.TextView) itemView.findViewById(R.id.txtNotifTime))
-                  .setText(DateTimeUtils.format(notification.getCreatedAt(), "dd MMM, hh:mm a"));
-
-              View unreadDot = itemView.findViewById(R.id.unreadDot);
-              if (notification.isRead()) {
-                unreadDot.setVisibility(View.INVISIBLE);
-                itemView.setAlpha(0.6f);
-              } else {
-                unreadDot.setVisibility(View.VISIBLE);
-                itemView.setAlpha(1f);
-              }
-            },
+        new NotificationAdapter(
             notification -> {
               if (!notification.isRead()) {
                 markAsRead(notification.getId());
@@ -118,6 +102,12 @@ public class NotificationsActivity extends AppCompatActivity
 
   private void setupListeners() {
     btnMarkAllRead.setOnClickListener(v -> markAllRead());
+    toggleGroup.addOnButtonCheckedListener(
+        (group, checkedId, isChecked) -> {
+          if (!isChecked) return;
+          showUnreadOnly = checkedId == R.id.btnUnread;
+          applyFilter();
+        });
   }
 
   private void loadNotifications() {
@@ -125,15 +115,24 @@ public class NotificationsActivity extends AppCompatActivity
     ApiCallback.handle(
         api.getMyNotifications(false),
         body -> {
-          List<Notification> list = new ArrayList<>();
+          allNotifications = new ArrayList<>();
           for (NotificationResponse r : body) {
-            list.add(mapToNotification(r));
+            allNotifications.add(mapToNotification(r));
           }
-          adapter.updateData(list);
-          EmptyState.bind(rvNotifications, txtEmpty, list.isEmpty());
+          applyFilter();
         },
         (code, msg) ->
             Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show());
+  }
+
+  private void applyFilter() {
+    List<Notification> filtered = new ArrayList<>();
+    for (Notification n : allNotifications) {
+      if (!showUnreadOnly || !n.isRead()) filtered.add(n);
+    }
+    adapter.submitList(filtered);
+    EmptyState.bind(rvNotifications, txtEmpty, filtered.isEmpty());
+    txtEmpty.setText(showUnreadOnly ? "No unread notifications" : "No notifications yet");
   }
 
   private void markAsRead(int notificationId) {

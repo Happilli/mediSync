@@ -82,6 +82,7 @@ public class PatientFragment extends Fragment {
             },
             this::onPatientClicked);
 
+    rvPatients.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvPatients.setAdapter(adapter);
     adapter.setRoundedList(true);
   }

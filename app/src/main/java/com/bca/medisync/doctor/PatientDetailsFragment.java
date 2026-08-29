@@ -13,27 +13,23 @@ import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.util.RoundedListStyler;
 import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 public class PatientDetailsFragment extends Fragment {
 
   private int patientId = -1;
   private MaterialToolbar toolbar;
   private ImageView imgProfile;
-  private TextView txtName,
-      txtGender,
-      txtBlood,
-      txtPhone,
-      txtEmail,
-      txtDob,
-      txtAddress,
-      txtEmergency;
-  private MaterialButton btnHistory, btnConsultation;
+  private TextView txtName;
+  private View rowGender, rowBlood, rowPhone, rowEmail, rowDob, rowAddress, rowEmergency;
+  private MaterialButton btnConsultation;
+  private ExtendedFloatingActionButton fabHistory;
 
   private String patientName;
-
   private int appointmentId = -1;
 
   @Nullable
@@ -57,21 +53,27 @@ public class PatientDetailsFragment extends Fragment {
   private void initViews(View view) {
     toolbar = view.findViewById(R.id.toolbar);
     txtName = view.findViewById(R.id.txtPatientName);
-    txtGender = view.findViewById(R.id.txtGender);
-    txtBlood = view.findViewById(R.id.txtBloodGroup);
-    txtPhone = view.findViewById(R.id.txtPhone);
-    txtEmail = view.findViewById(R.id.txtEmail);
-    txtDob = view.findViewById(R.id.txtDob);
-    txtAddress = view.findViewById(R.id.txtAddress);
-    txtEmergency = view.findViewById(R.id.txtEmergency);
-    btnHistory = view.findViewById(R.id.btnHistory);
+    rowGender = view.findViewById(R.id.rowGender);
+    rowBlood = view.findViewById(R.id.rowBlood);
+    rowPhone = view.findViewById(R.id.rowPhone);
+    rowEmail = view.findViewById(R.id.rowEmail);
+    rowDob = view.findViewById(R.id.rowDob);
+    rowAddress = view.findViewById(R.id.rowAddress);
+    rowEmergency = view.findViewById(R.id.rowEmergency);
     btnConsultation = view.findViewById(R.id.btnConsultation);
+    fabHistory = view.findViewById(R.id.fabHistory);
     imgProfile = view.findViewById(R.id.imgPatientProfile);
   }
 
   private void setupToolbar() {
     toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+  }
+
+  private void bindRow(View rowView, int iconRes, String label, String value) {
+    ((ImageView) rowView.findViewById(R.id.imgRowIcon)).setImageResource(iconRes);
+    ((TextView) rowView.findViewById(R.id.txtRowLabel)).setText(label);
+    ((TextView) rowView.findViewById(R.id.txtRowValue)).setText(value);
   }
 
   private void loadData() {
@@ -82,16 +84,33 @@ public class PatientDetailsFragment extends Fragment {
     patientName = args.getString("patient_name");
     toolbar.setTitle(patientName);
     txtName.setText(patientName);
-    txtGender.setText(args.getString("patient_gender"));
-    txtBlood.setText(args.getString("patient_blood"));
-    txtPhone.setText(args.getString("patient_phone"));
-    txtEmail.setText(args.getString("patient_email"));
-    txtDob.setText(args.getString("patient_dob"));
-    txtAddress.setText(args.getString("patient_address"));
-    txtEmergency.setText(args.getString("patient_emergency"));
     appointmentId = args.getInt("appointment_id", -1);
+
+    String gender = args.getString("patient_gender");
+    String blood = args.getString("patient_blood");
+
+    bindRow(rowGender, R.drawable.stethoscope, "Gender", gender);
+    bindRow(rowBlood, R.drawable.stethoscope, "Blood Group", blood);
+    bindRow(rowPhone, R.drawable.phone, "Phone", args.getString("patient_phone"));
+    bindRow(rowEmail, R.drawable.email, "Email", args.getString("patient_email"));
+    bindRow(rowDob, R.drawable.birthdate, "Date of Birth", args.getString("patient_dob"));
+    bindRow(rowAddress, R.drawable.location, "Address", args.getString("patient_address"));
+    bindRow(
+        rowEmergency,
+        R.drawable.emergency,
+        "Emergency Contact",
+        args.getString("patient_emergency"));
+
+    applyRoundedRows();
     bindProfilePic(args.getString("patient_pic_url"));
     btnConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
+  }
+
+  private void applyRoundedRows() {
+    View[] rows = {rowGender, rowBlood, rowPhone, rowEmail, rowDob, rowAddress, rowEmergency};
+    for (int i = 0; i < rows.length; i++) {
+      RoundedListStyler.apply(rows[i], i, rows.length);
+    }
   }
 
   private void bindProfilePic(String url) {
@@ -108,7 +127,7 @@ public class PatientDetailsFragment extends Fragment {
   }
 
   private void setupListener() {
-    btnHistory.setOnClickListener(
+    fabHistory.setOnClickListener(
         v -> {
           Bundle args = new Bundle();
           args.putString("patient_name", patientName);
