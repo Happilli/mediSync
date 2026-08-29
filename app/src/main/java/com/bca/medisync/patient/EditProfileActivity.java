@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -14,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -24,11 +22,9 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -133,13 +129,7 @@ public class EditProfileActivity extends AppCompatActivity {
           etEmergencyContact.setText(p.getEmergency_contact());
           bindProfilePic(p.getProfile_pic_url());
         },
-        (code, msg) -> {
-          if (code == -1) {
-            Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(this, "Failed to load current profile.", Toast.LENGTH_SHORT).show();
-          }
-        });
+        ApiCallback.simpleError(this, "Failed to load current profile."));
   }
 
   private void uploadProfilePic(Uri uri) {
@@ -162,13 +152,8 @@ public class EditProfileActivity extends AppCompatActivity {
           Toast.makeText(this, "Profile picture updated.", Toast.LENGTH_SHORT).show();
           bindProfilePic(p.getProfile_pic_url());
         },
-        (code, msg) -> {
-          if (code == -1) {
-            Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(this, "Failed to update profile picture.", Toast.LENGTH_SHORT).show();
-          }
-        });
+        ApiCallback.simpleError(this, "Failed to update profile picture."));
+    ;
   }
 
   private void attemptSave() {
@@ -197,6 +182,7 @@ public class EditProfileActivity extends AppCompatActivity {
     btnSave.setEnabled(false);
 
     PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    ;
     ApiCallback.handle(
         api.updateMyProfile(new PatientUpdateRequest(name, phone, address, emergencyContact)),
         body -> {
@@ -206,11 +192,7 @@ public class EditProfileActivity extends AppCompatActivity {
         },
         (code, msg) -> {
           btnSave.setEnabled(true);
-          if (code == -1) {
-            Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(this, "Failed to update profile.", Toast.LENGTH_SHORT).show();
-          }
+          ApiCallback.simpleError(this, "Failed to update profile.").run(code, msg);
         });
   }
 

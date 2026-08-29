@@ -7,14 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Hospital;
@@ -24,7 +21,6 @@ import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -119,9 +115,7 @@ public class HospitalFragment extends Fragment {
           }
           adapter.updateData(hospitals);
         },
-        (code, msg) ->
-            Toast.makeText(requireContext(), "Failed to load hospitals..", Toast.LENGTH_SHORT)
-                .show());
+        ApiCallback.simpleError(requireContext(), "Failed to load hospitals."));
   }
 
   private Hospital mapToHospital(HospitalResponse r) {

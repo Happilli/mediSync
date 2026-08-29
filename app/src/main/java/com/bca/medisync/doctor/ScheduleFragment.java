@@ -9,14 +9,12 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
@@ -34,7 +32,6 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -213,8 +210,7 @@ public class ScheduleFragment extends Fragment {
                 filterByDate(selectedDate);
               });
         },
-        (code, msg) ->
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show());
+        ApiCallback.simpleError(requireContext(), "Failed to load schedule."));
   }
 
   private void openPatientDetail(Appointment appointment, int appointmentId) {

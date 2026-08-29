@@ -5,30 +5,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Prescription;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
-import com.bca.medisync.data.remote.dto.prescription.PrescriptionResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.util.EmptyState;
 import com.google.android.material.appbar.MaterialToolbar;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class PrescriptionListFragment extends Fragment {
   private MaterialToolbar toolbar;
@@ -86,42 +78,24 @@ public class PrescriptionListFragment extends Fragment {
 
   private void loadPrescriptions() {
     PrescriptionApi api = ApiClient.getRetrofit().create(PrescriptionApi.class);
-    api.getMyPrescriptions()
-        .enqueue(
-            new Callback<List<PrescriptionResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<PrescriptionResponse>> call,
-                  Response<List<PrescriptionResponse>> response) {
+    ApiCallback.handle(
+        api.getMyPrescriptions(),
+        this,
+        body -> {
+          if (body.isEmpty()) {
+            adapter.updateData(new ArrayList<>());
+            showEmpty(true);
+            return;
+          }
+          PrescriptionEnricher.enrichAll(
+              body,
+              (List<Prescription> enriched) -> {
                 if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  if (response.body().isEmpty()) {
-                    adapter.updateData(new ArrayList<>());
-                    showEmpty(true);
-                    return;
-                  }
-                  PrescriptionEnricher.enrichAll(
-                      response.body(),
-                      (List<Prescription> enriched) -> {
-                        if (!isAdded()) return;
-                        adapter.updateData(enriched);
-                        showEmpty(enriched.isEmpty());
-                      });
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to load prescriptions", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<PrescriptionResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+                adapter.updateData(enriched);
+                showEmpty(enriched.isEmpty());
+              });
+        },
+        ApiCallback.simpleError(requireContext(), "Failed to load prescriptions."));
   }
 
   private void showEmpty(boolean empty) {

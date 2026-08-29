@@ -6,28 +6,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Patient;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bumptech.glide.Glide;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class PatientFragment extends Fragment {
 
@@ -89,30 +82,11 @@ public class PatientFragment extends Fragment {
 
   private void loadPatients() {
     PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    api.getTreatedPatients()
-        .enqueue(
-            new Callback<List<PatientPublicResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<PatientPublicResponse>> call,
-                  Response<List<PatientPublicResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  bindPatients(response.body());
-                } else {
-                  Toast.makeText(requireContext(), "Failed to load patients", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<PatientPublicResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.getTreatedPatients(),
+        this,
+        this::bindPatients,
+        ApiCallback.simpleError(requireContext(), "Failed to load patients."));
   }
 
   private void bindPatients(List<PatientPublicResponse> patients) {

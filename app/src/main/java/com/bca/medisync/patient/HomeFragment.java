@@ -7,8 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -16,7 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.adapter.SimpleListAdapter;
@@ -31,7 +28,6 @@ import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -121,8 +117,7 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
         api.getMyProfile(),
         this,
         body -> txtPatientName.setText(body.getName()),
-        (code, msg) ->
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_SHORT).show());
+        ApiCallback.simpleError(requireContext(), "Failed to load profile."));
   }
 
   @Override

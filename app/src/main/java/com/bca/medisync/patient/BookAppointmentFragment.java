@@ -7,13 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.TimeSlotAdapter;
 import com.bca.medisync.data.model.TimeSlot;
@@ -29,7 +27,6 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,9 +154,7 @@ public class BookAppointmentFragment extends Fragment {
           }
           bindTimeSlots(slots);
         },
-        (code, msg) ->
-            Toast.makeText(requireContext(), "Failed to load available slots", Toast.LENGTH_SHORT)
-                .show());
+        ApiCallback.simpleError(requireContext(), "Failed to load available slots."));
   }
 
   private void setupConfirmButton() {

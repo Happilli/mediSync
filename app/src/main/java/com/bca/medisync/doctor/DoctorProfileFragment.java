@@ -10,14 +10,12 @@ import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
@@ -29,11 +27,9 @@ import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.util.RoundedListStyler;
 import com.bumptech.glide.Glide;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -162,13 +158,7 @@ public class DoctorProfileFragment extends Fragment {
           bindProfile(profile);
           loadHospitalName(profile.getHospital_id());
         },
-        (code, msg) -> {
-          if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show();
-          }
-        });
+        ApiCallback.simpleError(requireContext(), "Failed to load profile."));
   }
 
   private void loadHospitalName(int hospitalId) {

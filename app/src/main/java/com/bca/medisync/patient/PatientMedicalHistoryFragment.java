@@ -5,30 +5,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
+import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.util.EmptyState;
 import com.google.android.material.appbar.MaterialToolbar;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class PatientMedicalHistoryFragment extends Fragment {
   private MaterialToolbar toolbar;
@@ -77,38 +70,21 @@ public class PatientMedicalHistoryFragment extends Fragment {
 
   private void loadHistory() {
     MedicalHistoryApi api = ApiClient.getRetrofit().create(MedicalHistoryApi.class);
-    api.getMyMedicalHistory()
-        .enqueue(
-            new Callback<List<MedicalHistoryResponse>>() {
-              @Override
-              public void onResponse(
-                  Call<List<MedicalHistoryResponse>> call,
-                  Response<List<MedicalHistoryResponse>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null) {
-                  List<MedicalHistoryEntry> entries = new ArrayList<>();
-                  for (MedicalHistoryResponse r : response.body()) {
-                    entries.add(
-                        new MedicalHistoryEntry(
-                            PrescriptionEnricher.formatDate(r.getDate()),
-                            r.getTitle(),
-                            r.getDescription()));
-                  }
-                  adapter.updateData(entries);
-                  EmptyState.bind(rvHistory, txtEmpty, entries.isEmpty());
-                } else {
-                  Toast.makeText(requireContext(), "Failed to load history", Toast.LENGTH_SHORT)
-                      .show();
-                }
-              }
-
-              @Override
-              public void onFailure(Call<List<MedicalHistoryResponse>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(
-                        requireContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG)
-                    .show();
-              }
-            });
+    ApiCallback.handle(
+        api.getMyMedicalHistory(),
+        this,
+        body -> {
+          List<MedicalHistoryEntry> entries = new ArrayList<>();
+          for (MedicalHistoryResponse r : body) {
+            entries.add(
+                new MedicalHistoryEntry(
+                    PrescriptionEnricher.formatDate(r.getDate()),
+                    r.getTitle(),
+                    r.getDescription()));
+          }
+          adapter.updateData(entries);
+          EmptyState.bind(rvHistory, txtEmpty, entries.isEmpty());
+        },
+        ApiCallback.simpleError(requireContext(), "Failed to load history."));
   }
 }

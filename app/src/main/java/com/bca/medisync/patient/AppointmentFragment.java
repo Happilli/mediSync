@@ -172,9 +172,7 @@ public class AppointmentFragment extends Fragment {
         api.getMyAppointments(null, null),
         this,
         body -> AppointmentEnricher.enrichAll(body, AppointmentFragment.this::bindLists),
-        (code, msg) ->
-            Toast.makeText(requireContext(), "failed to load appointments", Toast.LENGTH_SHORT)
-                .show());
+        ApiCallback.simpleError(requireContext(), "Failed to load appointments."));
   }
 
   private void cancelAppointment(Appointment appointment) {

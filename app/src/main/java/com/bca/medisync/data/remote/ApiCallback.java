@@ -1,5 +1,7 @@
 package com.bca.medisync.data.remote;
 
+import android.content.Context;
+import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,5 +55,15 @@ public class ApiCallback {
             onErr.run(-1, t.getMessage());
           }
         });
+  }
+
+  public static OnError simpleError(Context ctx, String fallbackMessage) {
+    return (code, msg) -> {
+      if (code == -1) {
+        Toast.makeText(ctx, "Network error: " + msg, Toast.LENGTH_LONG).show();
+      } else {
+        Toast.makeText(ctx, fallbackMessage, Toast.LENGTH_SHORT).show();
+      }
+    };
   }
 }

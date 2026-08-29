@@ -9,13 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.MedicationAdapter;
 import com.bca.medisync.data.model.Medication;
@@ -25,7 +23,6 @@ import com.bca.medisync.data.remote.api.MedicationApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.google.android.material.button.MaterialButton;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -122,9 +119,7 @@ public class MedicationFragment extends Fragment {
           bindMedications(meds);
           scheduleAllReminders(body);
         },
-        (code, msg) ->
-            Toast.makeText(requireContext(), "Failed to load medications", Toast.LENGTH_SHORT)
-                .show());
+        ApiCallback.simpleError(requireContext(), "Failed to load medications."));
   }
 
   private void scheduleAllReminders(List<MedicationResponse> responses) {

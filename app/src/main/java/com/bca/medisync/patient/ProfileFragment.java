@@ -11,14 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
@@ -33,7 +31,6 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.util.Calendar;
 
 public class ProfileFragment extends Fragment {
@@ -252,11 +249,8 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(
                     requireContext(), "Your account is pending verification", Toast.LENGTH_LONG)
                 .show();
-          } else if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
           } else {
-            Toast.makeText(requireContext(), "Failed to load  your profile", Toast.LENGTH_SHORT)
-                .show();
+            ApiCallback.simpleError(requireContext(), "Failed to load your profile").run(code, msg);
           }
         });
   }
