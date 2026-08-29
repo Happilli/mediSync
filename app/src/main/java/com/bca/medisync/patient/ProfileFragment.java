@@ -1,7 +1,6 @@
 package com.bca.medisync.patient;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -28,6 +27,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
+import com.bca.medisync.util.RoundedListStyler;
 import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -45,6 +45,9 @@ public class ProfileFragment extends Fragment {
   private TextView txtVerifiedBadge;
   private MaterialSwitch switchNotifications;
   private SessionManager sessionManager;
+
+  private View securityAnswerForm;
+  private TextInputEditText etSecurityAnswer, etCurrentPassword;
 
   public ProfileFragment() {}
 
@@ -91,6 +94,11 @@ public class ProfileFragment extends Fragment {
     txtVerifiedBadge = view.findViewById(R.id.txtVerifiedBadge);
 
     switchNotifications = view.findViewById(R.id.switchNotifications);
+
+    securityAnswerForm = view.findViewById(R.id.securityAnswerForm);
+    etSecurityAnswer = view.findViewById(R.id.etSecurityAnswer);
+    etCurrentPassword = view.findViewById(R.id.etCurrentPassword);
+
     notifPermLauncher =
         registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
@@ -121,10 +129,15 @@ public class ProfileFragment extends Fragment {
   }
 
   private void setupSettingsRows() {
-    setRowLabel(R.id.rowPrivacyPolicy, "Privacy Policy");
-    setRowLabel(R.id.rowTerms, "Terms and Conditions");
-    setRowLabel(R.id.rowHelp, "Help and Support");
     setRowLabel(R.id.rowSecurityAnswer, "Security Answer");
+    applyRoundedInfoRows();
+  }
+
+  private void applyRoundedInfoRows() {
+    View[] rows = {rowEmail, rowPhone, rowDob, rowAddress};
+    for (int i = 0; i < rows.length; i++) {
+      RoundedListStyler.apply(rows[i], i, rows.length);
+    }
   }
 
   private void setRowLabel(int rowId, String label) {
@@ -192,45 +205,50 @@ public class ProfileFragment extends Fragment {
     }
   }
 
-  private void showSecurityAnswerDialog() {
-    View dialogView =
-        LayoutInflater.from(requireContext()).inflate(R.layout.dialog_security_answer, null);
-    TextInputEditText etAnswer = dialogView.findViewById(R.id.etDialogSecurityAnswer);
-    TextInputEditText etPassword = dialogView.findViewById(R.id.etDialogCurrentPassword);
+  private void toggleSecurityAnswerForm() {
+    boolean expanding = securityAnswerForm.getVisibility() != View.VISIBLE;
+    securityAnswerForm.setVisibility(expanding ? View.VISIBLE : View.GONE);
+    if (!expanding) {
+      etSecurityAnswer.setText("");
+      etCurrentPassword.setText("");
+    }
+  }
 
-    AlertDialog dialog =
-        new AlertDialog.Builder(requireContext())
-            .setTitle("Set Security Answer")
-            .setView(dialogView)
-            .setPositiveButton("Save", null)
-            .setNegativeButton("Cancel", null)
-            .create();
+  private void submitSecurityAnswer() {
+    String answer =
+        etSecurityAnswer.getText() != null ? etSecurityAnswer.getText().toString().trim() : "";
+    String password =
+        etCurrentPassword.getText() != null ? etCurrentPassword.getText().toString().trim() : "";
 
-    dialog.setOnShowListener(
-        dialogInterface ->
-            dialog
-                .getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(
-                    v -> {
-                      String answer =
-                          etAnswer.getText() != null ? etAnswer.getText().toString().trim() : "";
-                      String password =
-                          etPassword.getText() != null
-                              ? etPassword.getText().toString().trim()
-                              : "";
+    if (answer.isEmpty()) {
+      etSecurityAnswer.setError("Answer is required");
+      return;
+    }
+    if (password.isEmpty()) {
+      etCurrentPassword.setError("Password is required");
+      return;
+    }
 
-                      if (answer.isEmpty()) {
-                        etAnswer.setError("Answer is required");
-                        return;
-                      }
-                      if (password.isEmpty()) {
-                        etPassword.setError("Password is required");
-                        return;
-                      }
-                      submitSecurityAnswer(answer, password, dialog);
-                    }));
-
-    dialog.show();
+    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
+    ApiCallback.handle(
+        api.updateSecurityAnswer(new PatientSecurityAnswerUpdateRequest(password, answer)),
+        this,
+        body -> {
+          Toast.makeText(requireContext(), "Security answer updated.", Toast.LENGTH_SHORT).show();
+          toggleSecurityAnswerForm();
+        },
+        (code, msg) -> {
+          if (code == 401) {
+            Toast.makeText(requireContext(), "Current password is incorrect.", Toast.LENGTH_SHORT)
+                .show();
+          } else if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(
+                    requireContext(), "Failed to update security answer.", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
   }
 
   private void loadPatientData() {
@@ -248,29 +266,6 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
           } else {
             Toast.makeText(requireContext(), "Failed to load  your profile", Toast.LENGTH_SHORT)
-                .show();
-          }
-        });
-  }
-
-  private void submitSecurityAnswer(String answer, String password, AlertDialog dialog) {
-    PatientApi api = ApiClient.getRetrofit().create(PatientApi.class);
-    ApiCallback.handle(
-        api.updateSecurityAnswer(new PatientSecurityAnswerUpdateRequest(password, answer)),
-        this,
-        body -> {
-          Toast.makeText(requireContext(), "Security answer updated.", Toast.LENGTH_SHORT).show();
-          dialog.dismiss();
-        },
-        (code, msg) -> {
-          if (code == 401) {
-            Toast.makeText(requireContext(), "Current password is incorrect.", Toast.LENGTH_SHORT)
-                .show();
-          } else if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(
-                    requireContext(), "Failed to update security answer.", Toast.LENGTH_SHORT)
                 .show();
           }
         });
@@ -300,12 +295,12 @@ public class ProfileFragment extends Fragment {
         .findViewById(R.id.btnEditProfile)
         .setOnClickListener(
             v -> startActivity(new Intent(requireContext(), EditProfileActivity.class)));
-    requireView().findViewById(R.id.rowPrivacyPolicy).setOnClickListener(v -> {});
-    requireView().findViewById(R.id.rowTerms).setOnClickListener(v -> {});
-    requireView().findViewById(R.id.rowHelp).setOnClickListener(v -> {});
     requireView()
         .findViewById(R.id.rowSecurityAnswer)
-        .setOnClickListener(v -> showSecurityAnswerDialog());
+        .setOnClickListener(v -> toggleSecurityAnswerForm());
+    requireView()
+        .findViewById(R.id.btnSaveSecurityAnswer)
+        .setOnClickListener(v -> submitSecurityAnswer());
     requireView()
         .findViewById(R.id.btnLogout)
         .setOnClickListener(

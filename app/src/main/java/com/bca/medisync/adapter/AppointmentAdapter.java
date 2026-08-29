@@ -1,7 +1,6 @@
 package com.bca.medisync.adapter;
 
 import android.content.Context;
-import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.data.model.Appointment;
 import com.bca.medisync.R;
+import com.bca.medisync.util.RoundedListStyler;
+import com.bca.medisync.util.StatusChip;
 
 import java.util.HashSet;
 import java.util.List;
@@ -73,51 +74,14 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     holder.txtStatus.setText(a.getStatus());
     holder.txtDate.setText(a.getDate() + " - " + a.getTime());
 
-    switch (a.getStatus()) {
-      case "Confirmed":
-        holder.txtStatus.setTextColor(context.getColor(R.color.tertiary));
-        holder.txtStatus.setBackgroundColor(context.getColor(R.color.tertiary_container));
-        break;
-      case "Pending":
-        holder.txtStatus.setTextColor(context.getColor(R.color.secondary));
-        holder.txtStatus.setBackgroundColor(context.getColor(R.color.secondary_container));
-        break;
-      default:
-        holder.txtStatus.setTextColor(context.getColor(R.color.primary));
-        holder.txtStatus.setBackgroundColor(context.getColor(R.color.primary_container));
-        break;
-    }
+    StatusChip.bind(holder.txtStatus, a.getStatus());
 
     boolean showHint = swipeEnabled && pending && hintShown.contains(a.getId());
     holder.footerRow.setVisibility(showHint ? View.GONE : View.VISIBLE);
     holder.txtSwipeHint.setVisibility(showHint ? View.VISIBLE : View.GONE);
     holder.divider.setVisibility(View.GONE);
 
-    float density = context.getResources().getDisplayMetrics().density;
-    float radius = density * 18f;
-    boolean isFirst = position == 0;
-    boolean isLast = position == getItemCount() - 1;
-
-    GradientDrawable bg = new GradientDrawable();
-    bg.setColor(context.getColor(R.color.surface));
-    bg.setStroke((int) (density * 1.2f), context.getColor(R.color.outline_variant));
-    if (isFirst && isLast) {
-      bg.setCornerRadius(radius);
-    } else if (isFirst) {
-      bg.setCornerRadii(new float[] {radius, radius, radius, radius, 0, 0, 0, 0});
-    } else if (isLast) {
-      bg.setCornerRadii(new float[] {0, 0, 0, 0, radius, radius, radius, radius});
-    } else {
-      bg.setCornerRadius(0f);
-    }
-    holder.itemView.setBackground(bg);
-
-    ViewGroup.MarginLayoutParams lp =
-        (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
-    if (lp != null) {
-      lp.bottomMargin = isLast ? 0 : (int) (density * 4);
-      holder.itemView.setLayoutParams(lp);
-    }
+    RoundedListStyler.apply(holder.itemView, position, getItemCount());
 
     holder.itemView.setOnClickListener(
         v -> {
