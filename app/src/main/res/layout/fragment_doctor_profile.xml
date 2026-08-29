@@ -19,18 +19,42 @@
             android:paddingHorizontal="24dp"
             android:paddingTop="24dp">
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/imgDoctorProfile"
+            <FrameLayout
                 android:layout_width="120dp"
                 android:layout_height="120dp"
-                android:layout_gravity="center_horizontal"
-                android:background="?attr/colorSecondaryContainer"
-                android:contentDescription="doctor profile photo"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_nav_profile"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Avatar"
-                app:strokeColor="?attr/colorSurface"
-                app:strokeWidth="4dp" />
+                android:layout_gravity="center_horizontal">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgDoctorProfile"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:background="?attr/colorSecondaryContainer"
+                    android:clickable="true"
+                    android:contentDescription="doctor profile photo"
+                    android:focusable="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_nav_profile"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Avatar"
+                    app:strokeColor="?attr/colorSurface"
+                    app:strokeWidth="4dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="bottom|end"
+                    app:cardBackgroundColor="?attr/colorSurface"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="change photo"
+                        android:src="@drawable/camera"
+                        app:tint="?attr/colorOnSurface" />
+                </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/txtDoctorName"

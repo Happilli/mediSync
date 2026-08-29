@@ -1,14 +1,19 @@
 package com.bca.medisync.doctor;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -25,9 +30,18 @@ import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.util.RoundedListStyler;
 import com.bumptech.glide.Glide;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+
 public class DoctorProfileFragment extends Fragment {
 
   private SessionManager sessionManager;
+  private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
 
   public DoctorProfileFragment() {}
 
@@ -44,6 +58,16 @@ public class DoctorProfileFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     sessionManager = new SessionManager(requireContext());
+
+    pickMedia =
+        registerForActivityResult(
+            new ActivityResultContracts.PickVisualMedia(),
+            uri -> {
+              if (uri != null) {
+                uploadProfilePic(uri);
+              }
+            });
+
     setupListeners(view);
     loadProfile();
   }
@@ -55,6 +79,14 @@ public class DoctorProfileFragment extends Fragment {
   }
 
   private void setupListeners(View view) {
+    view.findViewById(R.id.imgDoctorProfile)
+        .setOnClickListener(
+            v ->
+                pickMedia.launch(
+                    new PickVisualMediaRequest.Builder()
+                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                        .build()));
+
     view.findViewById(R.id.btnLogoutDoctor)
         .setOnClickListener(
             v -> {
@@ -66,6 +98,59 @@ public class DoctorProfileFragment extends Fragment {
               startActivity(intent);
               requireActivity().finish();
             });
+  }
+
+  private File copyUriToCache(Uri uri) throws Exception {
+    android.content.ContentResolver resolver = requireContext().getContentResolver();
+    String mimeType = resolver.getType(uri);
+    String ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+    if (ext == null) ext = "jpg";
+    File outFile =
+        new File(
+            requireContext().getCacheDir(),
+            "doctor_profile_pic_" + System.currentTimeMillis() + "." + ext);
+    try (InputStream in = resolver.openInputStream(uri);
+        FileOutputStream out = new FileOutputStream(outFile)) {
+      byte[] buffer = new byte[8192];
+      int read;
+      while (in != null && (read = in.read(buffer)) != -1) {
+        out.write(buffer, 0, read);
+      }
+    }
+    return outFile;
+  }
+
+  private void uploadProfilePic(Uri uri) {
+    File cachedFile;
+    try {
+      cachedFile = copyUriToCache(uri);
+    } catch (Exception e) {
+      Toast.makeText(requireContext(), "Couldn't read the selected photo!", Toast.LENGTH_SHORT)
+          .show();
+      return;
+    }
+
+    RequestBody fileBody = RequestBody.create(cachedFile, MediaType.parse("image/*"));
+    MultipartBody.Part filePart =
+        MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
+
+    DoctorApi api = ApiClient.getRetrofit().create(DoctorApi.class);
+    ApiCallback.handle(
+        api.updateProfilePic(filePart),
+        this,
+        d -> {
+          Toast.makeText(requireContext(), "Profile picture updated.", Toast.LENGTH_SHORT).show();
+          bindProfilePic(d.getProfile_pic_url());
+        },
+        (code, msg) -> {
+          if (code == -1) {
+            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
+          } else {
+            Toast.makeText(
+                    requireContext(), "Failed to update profile picture.", Toast.LENGTH_SHORT)
+                .show();
+          }
+        });
   }
 
   private void loadProfile() {

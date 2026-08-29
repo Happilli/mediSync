@@ -33,7 +33,7 @@ public class RoundedListStyler {
 
     ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) itemView.getLayoutParams();
     if (lp != null) {
-      lp.bottomMargin = isLast ? 0 : (int) (density * 4);
+      lp.bottomMargin = isLast ? 0 : (int) (density * 6);
       itemView.setLayoutParams(lp);
     }
   }
