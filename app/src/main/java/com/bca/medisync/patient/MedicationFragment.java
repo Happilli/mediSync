@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.SimpleListAdapter;
+import com.bca.medisync.adapter.MedicationAdapter;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -37,8 +37,8 @@ public class MedicationFragment extends Fragment {
   private RecyclerView rvMedications;
   private TextView tvActiveTime, tvActiveName, tvActiveDosage;
   private MaterialButton btnMarkTaken;
-  private SimpleListAdapter<Medication> adapter;
 
+  private MedicationAdapter adapter;
   private Medication activeMedication;
 
   public MedicationFragment() {}
@@ -97,37 +97,16 @@ public class MedicationFragment extends Fragment {
 
   private void setUpRecyclerView() {
     adapter =
-        new SimpleListAdapter<>(
-            R.layout.item_medication,
-            new ArrayList<>(),
-            (itemView, med, pos) -> {
-              ((TextView) itemView.findViewById(R.id.tvMedName))
-                  .setText(med.getName() + " " + med.getDosage());
-              ((TextView) itemView.findViewById(R.id.tvMedFrequency)).setText(med.getFrequency());
-              TextView tvTime = itemView.findViewById(R.id.tvMedTime);
-
-              if (med.isTaken()) {
-                tvTime.setText("Taken");
-                itemView.setAlpha(0.6f);
+        new MedicationAdapter(
+            med -> {
+              if (!med.isTaken()) {
+                markTaken(med);
               } else {
-                tvTime.setText(med.getTime());
-                itemView.setAlpha(1f);
+                Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show();
               }
-
-              itemView.setOnClickListener(
-                  v -> {
-                    if (!med.isTaken()) {
-                      markTaken(med);
-                    } else {
-                      Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT)
-                          .show();
-                    }
-                  });
-            },
-            null);
+            });
     rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvMedications.setAdapter(adapter);
-    adapter.setRoundedList(true);
   }
 
   private void loadMedications() {
@@ -190,7 +169,7 @@ public class MedicationFragment extends Fragment {
   }
 
   private void bindMedications(List<Medication> meds) {
-    adapter.updateData(meds);
+    adapter.submitList(meds);
 
     activeMedication = null;
     for (Medication m : meds) {
@@ -234,6 +213,7 @@ public class MedicationFragment extends Fragment {
         displayTime,
         r.getDuration_days() + " Days",
         r.isIs_taken(),
-        r.getInstruction());
+        r.getInstruction(),
+        r.getDoctor_name());
   }
 }

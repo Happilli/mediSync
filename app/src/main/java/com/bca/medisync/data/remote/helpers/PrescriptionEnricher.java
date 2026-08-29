@@ -99,7 +99,8 @@ public class PrescriptionEnricher {
         displayTime,
         m.getDuration_days() + " Days",
         m.isIs_taken(),
-        m.getInstruction());
+        m.getInstruction(),
+        m.getDoctor_name());
   }
 
   public static String formatDate(String iso) {

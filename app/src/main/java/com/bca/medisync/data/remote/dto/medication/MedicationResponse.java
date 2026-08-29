@@ -15,6 +15,17 @@ public class MedicationResponse {
   private int duration_days;
   private boolean is_taken;
   private String taken_at;
+  private int doctor_id;
+
+  public String getDoctor_name() {
+    return doctor_name;
+  }
+
+  public int getDoctor_id() {
+    return doctor_id;
+  }
+
+  private String doctor_name;
 
   public int getId() {
     return id;

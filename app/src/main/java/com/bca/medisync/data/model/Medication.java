@@ -8,8 +8,8 @@ public class Medication {
   private final String time;
   private final String duration;
   private final boolean taken;
-
   private final String instruction;
+  private final String doctorName;
 
   public Medication(
       int id,
@@ -19,7 +19,8 @@ public class Medication {
       String time,
       String duration,
       boolean taken,
-      String instruction) {
+      String instruction,
+      String doctorName) {
     this.id = id;
     this.name = name;
     this.dosage = dosage;
@@ -28,6 +29,11 @@ public class Medication {
     this.duration = duration;
     this.taken = taken;
     this.instruction = instruction;
+    this.doctorName = doctorName;
+  }
+
+  public String getDoctorName() {
+    return doctorName;
   }
 
   public String getInstruction() {
