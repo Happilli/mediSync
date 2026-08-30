@@ -24,6 +24,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import android.widget.ImageView;
+import com.bumptech.glide.Glide;
 
 public class HospitalFragment extends Fragment {
   private RecyclerView rvHospitals;
@@ -75,6 +77,26 @@ public class HospitalFragment extends Fragment {
                   hospital.getRating() > 0
                       ? String.format(Locale.getDefault(), "%.1f", hospital.getRating())
                       : "");
+
+                ImageView imgHospital = itemView.findViewById(R.id.imgHospital);
+
+                String imageUrl = hospital.getImageUrl();
+                String fullImageUrl = ApiClient.mediaUrl(imageUrl);
+
+                if (fullImageUrl != null) {
+
+                    Glide.with(itemView.getContext())
+                            .load(fullImageUrl)
+                            .placeholder(R.drawable.ic_medisync_logo)
+                            .error(R.drawable.ic_medisync_logo)
+                            .centerCrop()
+                            .into(imgHospital);
+
+                } else {
+
+                    imgHospital.setImageResource(R.drawable.ic_medisync_logo);
+
+                }
               itemView
                   .findViewById(R.id.btnViewMore)
                   .setOnClickListener(v -> onHospitalClicked(hospital));
@@ -97,6 +119,8 @@ public class HospitalFragment extends Fragment {
     args.putString("hospital_website", hospital.getWebsite());
     args.putString("hospital_description", hospital.getDescription());
     args.putDouble("hospital_rating", hospital.getRating());
+
+    args.putString("hospital_image_url", hospital.getImageUrl());
 
     HospitalDetailFragment fragment = new HospitalDetailFragment();
     fragment.setArguments(args);
