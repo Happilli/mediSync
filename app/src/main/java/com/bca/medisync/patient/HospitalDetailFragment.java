@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,8 @@ import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.R;
 import com.google.android.material.button.MaterialButton;
+import com.bumptech.glide.Glide;
+import com.bca.medisync.data.remote.ApiClient;
 
 public class HospitalDetailFragment extends Fragment {
   private TextView txtName, txtRating, txtDescription, txtAddress;
@@ -25,6 +28,8 @@ public class HospitalDetailFragment extends Fragment {
   private String hospitalWebsite;
   private String hospitalAddress;
   private String hospitalDescription;
+
+  private ImageView imgHospital;
 
   @Nullable
   @Override
@@ -53,6 +58,7 @@ public class HospitalDetailFragment extends Fragment {
     btnWebsite = view.findViewById(R.id.btnWebsite);
     btnDirection = view.findViewById(R.id.btnDirection);
     btnSeeDoctors = view.findViewById(R.id.btnSeeDoctors);
+    imgHospital = view.findViewById(R.id.imgHospital);
   }
 
   private void loadData() {
@@ -71,6 +77,19 @@ public class HospitalDetailFragment extends Fragment {
     txtRating.setText("+ " + hospitalRating);
     txtDescription.setText(hospitalDescription);
     txtAddress.setText(hospitalAddress);
+      String imageUrl = args.getString("hospital_image_url");
+      String fullImageUrl = ApiClient.mediaUrl(imageUrl);
+
+      if (fullImageUrl != null) {
+          Glide.with(this)
+                  .load(fullImageUrl)
+                  .placeholder(R.drawable.ic_medisync_logo)
+                  .error(R.drawable.ic_medisync_logo)
+                  .centerCrop()
+                  .into(imgHospital);
+      } else {
+          imgHospital.setImageResource(R.drawable.ic_medisync_logo);
+      }
   }
 
   private void setupListeners() {
@@ -105,5 +124,6 @@ public class HospitalDetailFragment extends Fragment {
           fragment.setArguments(args);
           ((MainTabActivity) requireActivity()).pushFragment(fragment);
         });
+
   }
 }

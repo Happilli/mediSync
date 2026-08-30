@@ -23,11 +23,9 @@
                 android:id="@+id/imgHospital"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="32dp"
                 android:src="@drawable/ic_medisync_logo"
-                android:contentDescription="something"
-                app:tint="?attr/colorOnPrimaryContainer"
-                android:scaleType="fitCenter"/>
+                android:contentDescription="Hospital image"
+                android:scaleType="centerCrop"/>
         </com.google.android.material.card.MaterialCardView>
         <TextView
             android:id="@+id/txtHospitalName"

@@ -17,17 +17,20 @@
             android:orientation="vertical">
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:background="?attr/colorPrimaryContainer">
+                android:layout_height="240dp">
 
                 <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:contentDescription="something"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_medisync_logo"
-                    app:tint="?attr/colorOnPrimaryContainer"
-                    android:scaleType="fitCenter"/>
+                    android:id="@+id/imgHospital"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Hospital image"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_medisync_logo" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#33000000" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBack"
@@ -37,7 +40,8 @@
                     android:layout_gravity="top|start"
                     android:layout_margin="12dp"
                     app:icon="@drawable/hospital"
-                    app:iconTint="?attr/colorOnPrimaryContainer"/>
+                    app:iconTint="@android:color/white" />
+
             </FrameLayout>
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

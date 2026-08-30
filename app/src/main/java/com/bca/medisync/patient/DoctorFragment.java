@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.bumptech.glide.Glide;
 
 public class DoctorFragment extends Fragment {
   private RecyclerView rvDoctors;
@@ -99,11 +100,20 @@ public class DoctorFragment extends Fragment {
               ((TextView) itemView.findViewById(R.id.txtSpeciality))
                   .setText(doctor.getSpeciality());
               ((TextView) itemView.findViewById(R.id.txtInfo)).setText(doctor.getInfo());
-              ImageLoader.loadTinted(
-                  DoctorFragment.this,
-                  itemView.findViewById(R.id.imgDoctor),
-                  doctor.getImageUrl(),
-                  R.drawable.stethoscope);
+                ImageView doctorImage = itemView.findViewById(R.id.imgDoctor);
+
+                String imageUrl = doctor.getImageUrl();
+
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    Glide.with(DoctorFragment.this)
+                            .load(imageUrl)
+                            .placeholder(R.drawable.stethoscope)
+                            .error(R.drawable.stethoscope)
+                            .centerCrop()
+                            .into(doctorImage);
+                } else {
+                    doctorImage.setImageResource(R.drawable.stethoscope);
+                }
 
               boolean expanded = expandedIds.contains(doctor.getId());
               View divider = itemView.findViewById(R.id.dividerExpand);

@@ -17,7 +17,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-  public static final String BASE_URL = "http://192.168.240.1:8000/";
+  public static final String BASE_URL = "http://192.168.100.224:8000/";
   private static Retrofit retrofit;
   private static SessionManager sessionManager;
   private static final Map<Class<?>, Object> apiCache = new ConcurrentHashMap<>();
@@ -29,8 +29,11 @@ public class ApiClient {
   public static OkHttpClient okHttpClient;
 
   public static String mediaUrl(String path) {
-    if (path == null || path.isEmpty()) return null;
-    return BASE_URL.replaceAll("/$", "") + "/api/v1" + path;
+    if (path == null || path.isEmpty()) {
+      return null;
+    }
+
+    return BASE_URL.replaceAll("/$", "") + path;
   }
 
   @SuppressWarnings("unchecked")

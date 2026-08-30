@@ -33,8 +33,7 @@
                     android:layout_height="match_parent"
                     android:contentDescription="doctor photo"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/stethoscope"
-                    app:tint="?attr/colorOnPrimaryContainer" />
+                    android:src="@drawable/stethoscope" />
 
             </com.google.android.material.card.MaterialCardView>
 
