@@ -115,10 +115,14 @@ public class ProfileFragment extends Fragment {
     setRowLabel(R.id.rowSecurityAnswer, "Security Answer");
   }
 
-  private void applyRoundedRows() {
-    View[] rows = {rowAge, rowGender, rowBloodGroup, rowEmail, rowPhone, rowDob, rowAddress};
-    for (int i = 0; i < rows.length; i++) {
-      RoundedListStyler.apply(rows[i], i, rows.length);
+  private int genderIcon(String gender) {
+    switch (gender.trim().toLowerCase()) {
+      case "male":
+        return R.drawable.male;
+      case "female":
+        return R.drawable.female;
+      default:
+        return R.drawable.othergender;
     }
   }
 
@@ -134,9 +138,9 @@ public class ProfileFragment extends Fragment {
     InfoRowBinder.bind(
         new View[] {rowAge, rowGender, rowBloodGroup, rowEmail, rowPhone, rowDob, rowAddress},
         new int[] {
-          R.drawable.birthdate,
-          R.drawable.stethoscope,
-          R.drawable.stethoscope,
+          R.drawable.age,
+          genderIcon(patient.getGender()),
+          R.drawable.bloodtype,
           R.drawable.email,
           R.drawable.phone,
           R.drawable.birthdate,
