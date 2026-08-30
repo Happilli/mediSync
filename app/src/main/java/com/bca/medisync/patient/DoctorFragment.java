@@ -1,15 +1,21 @@
 package com.bca.medisync.patient;
 
 import android.os.Bundle;
+import android.transition.ChangeBounds;
+import android.transition.Fade;
+import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
@@ -18,12 +24,17 @@ import com.bca.medisync.data.model.Doctor;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
+import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 import com.bca.medisync.util.ImageLoader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DoctorFragment extends Fragment {
   private RecyclerView rvDoctors;
@@ -32,6 +43,9 @@ public class DoctorFragment extends Fragment {
   private SimpleListAdapter<Doctor> adapter;
 
   private Integer filterHospitalId;
+
+  private final Set<String> expandedIds = new HashSet<>();
+  private final Map<Integer, String> hospitalNameCache = new HashMap<>();
 
   @Nullable
   @Override
@@ -74,6 +88,8 @@ public class DoctorFragment extends Fragment {
   }
 
   private void setupRecyclerView() {
+    rvDoctors.setItemAnimator(null);
+
     adapter =
         new SimpleListAdapter<>(
             R.layout.item_doctor,
@@ -88,7 +104,58 @@ public class DoctorFragment extends Fragment {
                   itemView.findViewById(R.id.imgDoctor),
                   doctor.getImageUrl(),
                   R.drawable.stethoscope);
-              itemView.findViewById(R.id.btnBook).setOnClickListener(v -> onBookClicked(doctor));
+
+              boolean expanded = expandedIds.contains(doctor.getId());
+              View divider = itemView.findViewById(R.id.dividerExpand);
+              View detail = itemView.findViewById(R.id.detailContainer);
+              divider.setVisibility(expanded ? View.VISIBLE : View.GONE);
+              detail.setVisibility(expanded ? View.VISIBLE : View.GONE);
+
+              ImageView expandArrow = itemView.findViewById(R.id.imgExpandArrow);
+              expandArrow.setImageResource(R.drawable.arrow);
+              expandArrow.setRotation(expanded ? 90f : 0f);
+
+              if (expanded) {
+                TextView txtBio = itemView.findViewById(R.id.txtBio);
+                TextView txtAddress = itemView.findViewById(R.id.txtDoctorAddress);
+                TextView txtHospital = itemView.findViewById(R.id.txtHospitalName);
+                TextView txtPhone = itemView.findViewById(R.id.txtDoctorPhone);
+
+                boolean hasBio = doctor.getBio() != null && !doctor.getBio().isEmpty();
+                txtBio.setVisibility(hasBio ? View.VISIBLE : View.GONE);
+                txtBio.setText(doctor.getBio());
+                txtAddress.setText(doctor.getAddress());
+                txtPhone.setText(doctor.getPhone());
+
+                String cachedHospital = hospitalNameCache.get(doctor.getHospitalId());
+                if (cachedHospital != null) {
+                  txtHospital.setText(cachedHospital);
+                } else {
+                  txtHospital.setText("Loading hospital...");
+                  loadHospitalName(doctor.getHospitalId(), txtHospital);
+                }
+
+                itemView.findViewById(R.id.btnBook).setOnClickListener(v -> onBookClicked(doctor));
+              }
+
+              itemView.setOnClickListener(
+                  v -> {
+                    TransitionSet transition =
+                        new TransitionSet()
+                            .addTransition(new ChangeBounds())
+                            .addTransition(new Fade(Fade.IN))
+                            .setDuration(280)
+                            .setInterpolator(new FastOutSlowInInterpolator());
+                    TransitionManager.beginDelayedTransition(rvDoctors, transition);
+
+                    boolean nowExpanded = !expandedIds.contains(doctor.getId());
+                    if (nowExpanded) expandedIds.add(doctor.getId());
+                    else expandedIds.remove(doctor.getId());
+
+                    expandArrow.animate().rotation(nowExpanded ? 90f : 0f).setDuration(280).start();
+
+                    adapter.notifyItemChanged(pos);
+                  });
             },
             null,
             (doctor, q) ->
@@ -97,6 +164,18 @@ public class DoctorFragment extends Fragment {
 
     rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvDoctors.setAdapter(adapter);
+  }
+
+  private void loadHospitalName(int hospitalId, TextView target) {
+    HospitalApi api = ApiClient.api(HospitalApi.class);
+    ApiCallback.handle(
+        api.getHospitalDetail(hospitalId),
+        this,
+        h -> {
+          hospitalNameCache.put(hospitalId, h.getName());
+          if (isAdded()) target.setText(h.getName());
+        },
+        (code, msg) -> target.setText("Hospital #" + hospitalId));
   }
 
   private void onBookClicked(Doctor doctor) {
@@ -140,7 +219,12 @@ public class DoctorFragment extends Fragment {
         info,
         r.getDepartment(),
         r.getPhone(),
-        ApiClient.mediaUrl(r.getProfile_pic_url()));
+        ApiClient.mediaUrl(r.getProfile_pic_url()),
+        r.getBio(),
+        r.getAddress(),
+        r.getHospital_id(),
+        r.getYears_experience(),
+        r.isIs_verified());
   }
 
   private void setupSearch() {
