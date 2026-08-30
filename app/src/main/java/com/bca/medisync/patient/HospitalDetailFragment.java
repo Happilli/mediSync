@@ -14,8 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.R;
+import com.bca.medisync.util.ImageLoader;
 import com.google.android.material.button.MaterialButton;
-import com.bumptech.glide.Glide;
 import com.bca.medisync.data.remote.ApiClient;
 
 public class HospitalDetailFragment extends Fragment {
@@ -77,19 +77,8 @@ public class HospitalDetailFragment extends Fragment {
     txtRating.setText("+ " + hospitalRating);
     txtDescription.setText(hospitalDescription);
     txtAddress.setText(hospitalAddress);
-      String imageUrl = args.getString("hospital_image_url");
-      String fullImageUrl = ApiClient.mediaUrl(imageUrl);
-
-      if (fullImageUrl != null) {
-          Glide.with(this)
-                  .load(fullImageUrl)
-                  .placeholder(R.drawable.ic_medisync_logo)
-                  .error(R.drawable.ic_medisync_logo)
-                  .centerCrop()
-                  .into(imgHospital);
-      } else {
-          imgHospital.setImageResource(R.drawable.ic_medisync_logo);
-      }
+    String imageUrl = args.getString("hospital_image_url");
+    ImageLoader.loadHospitalImage(this, imgHospital, imageUrl);
   }
 
   private void setupListeners() {
@@ -124,6 +113,5 @@ public class HospitalDetailFragment extends Fragment {
           fragment.setArguments(args);
           ((MainTabActivity) requireActivity()).pushFragment(fragment);
         });
-
   }
 }

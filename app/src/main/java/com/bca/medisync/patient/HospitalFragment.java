@@ -19,13 +19,13 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
+import com.bca.medisync.util.ImageLoader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import android.widget.ImageView;
-import com.bumptech.glide.Glide;
 
 public class HospitalFragment extends Fragment {
   private RecyclerView rvHospitals;
@@ -78,25 +78,9 @@ public class HospitalFragment extends Fragment {
                       ? String.format(Locale.getDefault(), "%.1f", hospital.getRating())
                       : "");
 
-                ImageView imgHospital = itemView.findViewById(R.id.imgHospital);
-
-                String imageUrl = hospital.getImageUrl();
-                String fullImageUrl = ApiClient.mediaUrl(imageUrl);
-
-                if (fullImageUrl != null) {
-
-                    Glide.with(itemView.getContext())
-                            .load(fullImageUrl)
-                            .placeholder(R.drawable.ic_medisync_logo)
-                            .error(R.drawable.ic_medisync_logo)
-                            .centerCrop()
-                            .into(imgHospital);
-
-                } else {
-
-                    imgHospital.setImageResource(R.drawable.ic_medisync_logo);
-
-                }
+              ImageView imgHospital = itemView.findViewById(R.id.imgHospital);
+              ImageLoader.loadHospitalImage(
+                  HospitalFragment.this, imgHospital, hospital.getImageUrl());
               itemView
                   .findViewById(R.id.btnViewMore)
                   .setOnClickListener(v -> onHospitalClicked(hospital));
