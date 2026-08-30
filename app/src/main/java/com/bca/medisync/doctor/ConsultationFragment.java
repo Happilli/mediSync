@@ -76,6 +76,30 @@ public class ConsultationFragment extends Fragment {
     if (latestDiagnosis != null) {
       etDiagnosis.setText(latestDiagnosis);
     }
+
+    checkExistingConsultation();
+  }
+
+  private void checkExistingConsultation() {
+    if (appointmentId == -1) return;
+
+    ConsultationApi api = ApiClient.api(ConsultationApi.class);
+    ApiCallback.handle(
+        api.getConsultationForAppointment(appointmentId),
+        this,
+        consultation -> {
+          Bundle args = new Bundle();
+          args.putString("patient_name", patientName);
+          args.putInt("appointment_id", appointmentId);
+          args.putString("diagnosis", consultation.getDiagnosis());
+          args.putString("complaint", consultation.getComplaint());
+          args.putString("notes", consultation.getNotes());
+
+          PrescriptionFragment fragment = new PrescriptionFragment();
+          fragment.setArguments(args);
+          ((DoctorTabActivity) requireActivity()).replaceCurrentFragment(fragment);
+        },
+        (code, msg) -> {});
   }
 
   private void setupListeners() {
@@ -135,6 +159,8 @@ public class ConsultationFragment extends Fragment {
                 if (code == 403) {
                   Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
                       .show();
+                } else if (code == 409) {
+                  fetchExistingConsultationAndContinue();
                 } else if (code == 400) {
                   Toast.makeText(
                           requireContext(),
@@ -151,5 +177,29 @@ public class ConsultationFragment extends Fragment {
                 }
               });
         });
+  }
+
+  private void fetchExistingConsultationAndContinue() {
+    if (appointmentId == -1) return;
+    ConsultationApi api = ApiClient.api(ConsultationApi.class);
+    ApiCallback.handle(
+        api.getConsultationForAppointment(appointmentId),
+        this,
+        consultation -> {
+          Bundle args = new Bundle();
+          args.putString("patient_name", patientName);
+          args.putInt("appointment_id", appointmentId);
+          args.putString("diagnosis", consultation.getDiagnosis());
+          args.putString("complaint", consultation.getComplaint());
+          args.putString("notes", consultation.getNotes());
+
+          PrescriptionFragment fragment = new PrescriptionFragment();
+          fragment.setArguments(args);
+          ((DoctorTabActivity) requireActivity()).replaceCurrentFragment(fragment);
+        },
+        (code, msg) ->
+            Toast.makeText(
+                    requireContext(), "Couldn't load existing consultation.", Toast.LENGTH_SHORT)
+                .show());
   }
 }

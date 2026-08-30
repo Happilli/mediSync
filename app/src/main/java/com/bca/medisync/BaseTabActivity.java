@@ -21,10 +21,15 @@ public abstract class BaseTabActivity extends AppCompatActivity {
   private BottomNavigationView bottomNav;
   private final Map<Integer, Fragment> fragmentCache = new HashMap<>();
   private Fragment activeFragment;
+
   protected abstract int getLayoutRes();
+
   protected abstract int getContainerId();
+
   protected abstract int getBottomNavId();
+
   protected abstract int getDefaultTabId();
+
   protected abstract Fragment createFragment(int itemId);
 
   @Override
@@ -83,6 +88,13 @@ public abstract class BaseTabActivity extends AppCompatActivity {
     }
     tx.show(fragment).commit();
     activeFragment = fragment;
+  }
+
+  public void replaceCurrentFragment(Fragment fragment) {
+    bottomNav.setVisibility(View.VISIBLE);
+    FragmentManager fm = getSupportFragmentManager();
+    fm.popBackStack();
+    fm.beginTransaction().add(getContainerId(), fragment).addToBackStack(null).commit();
   }
 
   public void pushFragment(Fragment fragment) {

@@ -1,6 +1,5 @@
 package com.bca.medisync.doctor;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -86,6 +85,8 @@ public class MedicalHistoryFragment extends Fragment {
 
     tvHeader.setText(patientName != null ? patientName + "\nOverview" : "Patient\nOverview");
 
+    btnStartConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
+
     if (patientId == -1) {
       Toast.makeText(requireContext(), "Missing patient reference.", Toast.LENGTH_SHORT).show();
       requireActivity().getOnBackPressedDispatcher().onBackPressed();
@@ -146,10 +147,12 @@ public class MedicalHistoryFragment extends Fragment {
   private void setupListener() {
     btnStartConsultation.setOnClickListener(
         v -> {
-          Intent intent = new Intent(requireContext(), ConsultationFragment.class);
-          intent.putExtra("patient_name", patientName);
-          intent.putExtra("appointment_id", appointmentId);
-          startActivity(intent);
+          Bundle args = new Bundle();
+          args.putString("patient_name", patientName);
+          args.putInt("appointment_id", appointmentId);
+          ConsultationFragment fragment = new ConsultationFragment();
+          fragment.setArguments(args);
+          ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
         });
   }
 }
