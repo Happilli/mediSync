@@ -55,7 +55,7 @@
                                 android:layout_height="24dp"
                                 android:layout_gravity="center"
                                 android:contentDescription="Medicine"
-                                android:src="@drawable/medications"
+                                android:src="@drawable/alarm"
                                 app:tint="?attr/colorOnPrimary" />
 
                         </com.google.android.material.card.MaterialCardView>
