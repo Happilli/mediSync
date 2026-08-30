@@ -1,25 +1,24 @@
 package com.bca.medisync.data.remote.dto.medication;
 
+import java.util.List;
+
 public class MedicationCreateRequest {
   private String name;
   private String dosage;
-  private String dosage_time;
   private String instruction;
-  private int frequency_per_day;
   private int duration_days;
+  private List<MedicationTimeCreateRequest> dosage_times;
 
   public MedicationCreateRequest(
       String name,
       String dosage,
-      String dosage_time,
       String instruction,
-      int frequency_per_day,
-      int duration_days) {
+      int duration_days,
+      List<MedicationTimeCreateRequest> dosage_times) {
     this.name = name;
     this.dosage = dosage;
-    this.dosage_time = dosage_time;
     this.instruction = instruction;
-    this.frequency_per_day = frequency_per_day;
     this.duration_days = duration_days;
+    this.dosage_times = dosage_times;
   }
 }

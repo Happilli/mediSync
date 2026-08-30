@@ -16,14 +16,18 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationCreateRequest;
+import com.bca.medisync.data.remote.dto.medication.MedicationTimeCreateRequest;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionCreateRequest;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -32,14 +36,15 @@ import java.util.Locale;
 public class PrescriptionFragment extends Fragment {
 
   private TextView tvPatientName, tvDiagnosis;
-  private TextInputEditText etMedicine, etDosage, etFrequency, etDuration, etInstructions;
-  private MaterialButton btnSelectDosageTime, btnSelectFollowUp, btnSavePrescription;
-  private TextView txtSelectedDosageTime, txtSelectedFollowUp;
+  private TextInputEditText etMedicine, etDosage, etDuration, etInstructions;
+  private MaterialButton btnAddDosageTime, btnSelectFollowUp, btnSavePrescription;
+  private ChipGroup chipDosageTimes;
+  private TextView txtSelectedFollowUp;
   private String patientName, diagnosis, notes;
   private int appointmentId = -1;
 
-  private String selectedDosageTime; // "HH:mm:ss"
-  private String selectedFollowUpIso; // ISO datetime, nullable
+  private final List<MedicationTimeCreateRequest> dosageTimes = new ArrayList<>();
+  private String selectedFollowUpIso;
 
   @Nullable
   @Override
@@ -63,11 +68,10 @@ public class PrescriptionFragment extends Fragment {
     tvDiagnosis = view.findViewById(R.id.tvDiagnosis);
     etMedicine = view.findViewById(R.id.etMedicine);
     etDosage = view.findViewById(R.id.etDosage);
-    etFrequency = view.findViewById(R.id.etFrequency);
     etDuration = view.findViewById(R.id.etDuration);
     etInstructions = view.findViewById(R.id.etInstructions);
-    btnSelectDosageTime = view.findViewById(R.id.btnSelectDosageTime);
-    txtSelectedDosageTime = view.findViewById(R.id.txtSelectedDosageTime);
+    btnAddDosageTime = view.findViewById(R.id.btnSelectDosageTime);
+    chipDosageTimes = view.findViewById(R.id.chipDosageTimes);
     btnSelectFollowUp = view.findViewById(R.id.btnSelectFollowUp);
     txtSelectedFollowUp = view.findViewById(R.id.txtSelectedFollowUp);
     btnSavePrescription = view.findViewById(R.id.btnSavePrescription);
@@ -81,35 +85,59 @@ public class PrescriptionFragment extends Fragment {
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
 
     if (patientName != null) tvPatientName.setText("Prescription -> " + patientName);
-
     if (diagnosis != null && !diagnosis.isEmpty()) tvDiagnosis.setText("Diagnosis: " + diagnosis);
   }
 
   private void setupListeners() {
-    btnSelectDosageTime.setOnClickListener(v -> showTimePicker());
+    btnAddDosageTime.setOnClickListener(v -> showAddDosageTimePicker());
     btnSelectFollowUp.setOnClickListener(v -> showFollowUpDatePicker());
     btnSavePrescription.setOnClickListener(v -> attemptSave());
   }
 
-  private void showTimePicker() {
+  private void showAddDosageTimePicker() {
     MaterialTimePicker picker =
         new MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_12H)
-            .setTitleText("Select Dosage Time")
+            .setTitleText("Add Dosage Time")
             .build();
     picker.addOnPositiveButtonClickListener(
         v -> {
           int hour = picker.getHour();
           int minute = picker.getMinute();
-          selectedDosageTime = String.format(Locale.US, "%02d:%02d:00", hour, minute);
-          Calendar cal = Calendar.getInstance();
-          cal.set(Calendar.HOUR_OF_DAY, hour);
-          cal.set(Calendar.MINUTE, minute);
-          String display =
-              new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(cal.getTime());
-          txtSelectedDosageTime.setText(display);
+          String time24 = String.format(Locale.US, "%02d:%02d:00", hour, minute);
+          String label = inferLabel(hour);
+
+          dosageTimes.add(new MedicationTimeCreateRequest(time24, label));
+          addDosageTimeChip(time24, label, hour, minute);
         });
     picker.show(getParentFragmentManager(), "DOSAGE_TIME_PICKER");
+  }
+
+  private String inferLabel(int hour) {
+    if (hour < 11) return "Morning";
+    if (hour < 16) return "Afternoon";
+    if (hour < 20) return "Evening";
+    return "Night";
+  }
+
+  private void addDosageTimeChip(String time24, String label, int hour, int minute) {
+    Calendar cal = Calendar.getInstance();
+    cal.set(Calendar.HOUR_OF_DAY, hour);
+    cal.set(Calendar.MINUTE, minute);
+    String display = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(cal.getTime());
+
+    Chip chip = new Chip(requireContext());
+    chip.setText(label + " \u2022 " + display);
+    chip.setCloseIconVisible(true);
+    chip.setOnCloseIconClickListener(
+        v -> {
+          int index = chipDosageTimes.indexOfChild(chip);
+          chipDosageTimes.removeView(chip);
+          if (index >= 0 && index < dosageTimes.size()) {
+            dosageTimes.remove(index);
+          }
+        });
+    chipDosageTimes.addView(chip);
   }
 
   private void showFollowUpDatePicker() {
@@ -132,7 +160,6 @@ public class PrescriptionFragment extends Fragment {
   private void attemptSave() {
     String medicine = etMedicine.getText().toString().trim();
     String dosage = etDosage.getText().toString().trim();
-    String frequencyStr = etFrequency.getText().toString().trim();
     String durationStr = etDuration.getText().toString().trim();
     String instructions = etInstructions.getText().toString().trim();
 
@@ -144,16 +171,12 @@ public class PrescriptionFragment extends Fragment {
       etDosage.setError("Dosage is required");
       return;
     }
-    if (frequencyStr.isEmpty()) {
-      etFrequency.setError("Frequency is required");
-      return;
-    }
     if (durationStr.isEmpty()) {
       etDuration.setError("Duration is required");
       return;
     }
-    if (selectedDosageTime == null) {
-      Toast.makeText(requireContext(), "Please select a dosage time", Toast.LENGTH_SHORT).show();
+    if (dosageTimes.isEmpty()) {
+      Toast.makeText(requireContext(), "Add at least one dosage time", Toast.LENGTH_SHORT).show();
       return;
     }
     if (appointmentId == -1) {
@@ -165,18 +188,11 @@ public class PrescriptionFragment extends Fragment {
       return;
     }
 
-    int frequencyPerDay;
     int durationDays;
     try {
-      frequencyPerDay = Integer.parseInt(frequencyStr);
       durationDays = Integer.parseInt(durationStr);
     } catch (NumberFormatException e) {
-      Toast.makeText(requireContext(), "Frequency and duration must be numbers", Toast.LENGTH_SHORT)
-          .show();
-      return;
-    }
-    if (frequencyPerDay < 1 || frequencyPerDay > 6) {
-      etFrequency.setError("Frequency must be between 1 and 6 per day");
+      Toast.makeText(requireContext(), "Duration must be a number", Toast.LENGTH_SHORT).show();
       return;
     }
     if (durationDays < 1) {
@@ -188,10 +204,9 @@ public class PrescriptionFragment extends Fragment {
         new MedicationCreateRequest(
             medicine,
             dosage,
-            selectedDosageTime,
             instructions.isEmpty() ? "" : instructions,
-            frequencyPerDay,
-            durationDays);
+            durationDays,
+            new ArrayList<>(dosageTimes));
 
     List<MedicationCreateRequest> medications = Collections.singletonList(medication);
 

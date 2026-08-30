@@ -1,47 +1,49 @@
 package com.bca.medisync.data.model;
 
 public class Medication {
-  private final int id;
+  private final int scheduleId;
+  private final int medicationId;
   private final String name;
   private final String dosage;
   private final String frequency;
   private final String time;
+  private final String label;
   private final String duration;
   private final boolean taken;
   private final String instruction;
   private final String doctorName;
 
   public Medication(
-      int id,
+      int scheduleId,
+      int medicationId,
       String name,
       String dosage,
       String frequency,
       String time,
+      String label,
       String duration,
       boolean taken,
       String instruction,
       String doctorName) {
-    this.id = id;
+    this.scheduleId = scheduleId;
+    this.medicationId = medicationId;
     this.name = name;
     this.dosage = dosage;
     this.frequency = frequency;
     this.time = time;
+    this.label = label;
     this.duration = duration;
     this.taken = taken;
     this.instruction = instruction;
     this.doctorName = doctorName;
   }
 
-  public String getDoctorName() {
-    return doctorName;
+  public int getScheduleId() {
+    return scheduleId;
   }
 
-  public String getInstruction() {
-    return instruction;
-  }
-
-  public int getId() {
-    return id;
+  public int getMedicationId() {
+    return medicationId;
   }
 
   public String getName() {
@@ -60,11 +62,23 @@ public class Medication {
     return time;
   }
 
+  public String getLabel() {
+    return label;
+  }
+
   public String getDuration() {
     return duration;
   }
 
   public boolean isTaken() {
     return taken;
+  }
+
+  public String getInstruction() {
+    return instruction;
+  }
+
+  public String getDoctorName() {
+    return doctorName;
   }
 }

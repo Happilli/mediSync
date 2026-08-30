@@ -53,11 +53,13 @@ public class PrescriptionEnricher {
     String frequencyLabel =
         m.getFrequency_per_day() + "x Daily \u2022 " + m.getDuration_days() + " Days";
     return new Medication(
-        m.getId(),
+        m.getSchedule_id(),
+        m.getMedication_id(),
         m.getName(),
         m.getDosage(),
         frequencyLabel,
         displayTime,
+        m.getLabel(),
         m.getDuration_days() + " Days",
         m.isIs_taken(),
         m.getInstruction(),

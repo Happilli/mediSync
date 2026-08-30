@@ -125,49 +125,23 @@
                             android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <LinearLayout
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:orientation="horizontal">
+                        android:hint="Duration (days)"
+                        app:boxCornerRadiusBottomEnd="14dp"
+                        app:boxCornerRadiusBottomStart="14dp"
+                        app:boxCornerRadiusTopEnd="14dp"
+                        app:boxCornerRadiusTopStart="14dp">
 
-                        <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                            android:layout_width="0dp"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etDuration"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:hint="Times / Day"
-                            app:boxCornerRadiusBottomEnd="14dp"
-                            app:boxCornerRadiusBottomStart="14dp"
-                            app:boxCornerRadiusTopEnd="14dp"
-                            app:boxCornerRadiusTopStart="14dp">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etFrequency"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="number" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:hint="Duration (days)"
-                            app:boxCornerRadiusBottomEnd="14dp"
-                            app:boxCornerRadiusBottomStart="14dp"
-                            app:boxCornerRadiusTopEnd="14dp"
-                            app:boxCornerRadiusTopStart="14dp">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etDuration"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="number" />
-                        </com.google.android.material.textfield.TextInputLayout>
-                    </LinearLayout>
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <View
                         android:layout_width="match_parent"
@@ -226,7 +200,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Dosage Time"
+                            android:text="Dosage Times"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -238,18 +212,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="52dp"
                         android:layout_marginTop="10dp"
-                        android:text="Select Time"
+                        android:text="Add Dosage Time"
                         android:textAllCaps="false"
                         app:cornerRadius="14dp" />
 
-                    <TextView
-                        android:id="@+id/txtSelectedDosageTime"
-                        android:layout_width="wrap_content"
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipDosageTimes"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="No time selected"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="13sp" />
+                        android:layout_marginTop="10dp"
+                        app:chipSpacingHorizontal="8dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

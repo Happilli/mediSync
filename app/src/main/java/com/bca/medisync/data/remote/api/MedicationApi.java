@@ -13,6 +13,6 @@ public interface MedicationApi {
   @GET("api/v1/medications/me")
   Call<List<MedicationResponse>> getMyMedications();
 
-  @PATCH("api/v1/medications/{medication_id}/taken")
-  Call<MedicationResponse> markTaken(@Path("medication_id") int medicationId);
+  @PATCH("api/v1/medications/{schedule_id}/taken")
+  Call<MedicationResponse> markTaken(@Path("schedule_id") int scheduleId);
 }

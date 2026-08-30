@@ -135,7 +135,7 @@ public class MedicationFragment extends Fragment {
       }
       MedicationAlarmScheduler.schedule(
           requireContext(),
-          r.getId(),
+          r.getSchedule_id(),
           r.getName(),
           r.getDosage(),
           r.getDosage_time(),
@@ -147,7 +147,7 @@ public class MedicationFragment extends Fragment {
   private void markTaken(Medication medication) {
     MedicationApi api = ApiClient.api(MedicationApi.class);
     ApiCallback.handle(
-        api.markTaken(medication.getId()),
+        api.markTaken(medication.getScheduleId()),
         this,
         body -> {
           Toast.makeText(requireContext(), "Marked as taken", Toast.LENGTH_SHORT).show();
@@ -201,11 +201,13 @@ public class MedicationFragment extends Fragment {
         r.getFrequency_per_day() + "x Daily \u2022 " + r.getDuration_days() + " Days";
 
     return new Medication(
-        r.getId(),
+        r.getSchedule_id(),
+        r.getMedication_id(),
         r.getName(),
         r.getDosage(),
         frequencyLabel,
         displayTime,
+        r.getLabel(),
         r.getDuration_days() + " Days",
         r.isIs_taken(),
         r.getInstruction(),
