@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import com.bca.medisync.R;
 import com.bca.medisync.util.ImageLoader;
 import com.google.android.material.button.MaterialButton;
-import com.bca.medisync.data.remote.ApiClient;
 
 public class HospitalDetailFragment extends Fragment {
   private TextView txtName, txtRating, txtDescription, txtAddress;
