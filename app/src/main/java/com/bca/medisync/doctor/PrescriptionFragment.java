@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +30,6 @@ import com.google.android.material.timepicker.TimeFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,14 +37,21 @@ public class PrescriptionFragment extends Fragment {
 
   private TextView tvPatientName, tvDiagnosis;
   private TextInputEditText etMedicine, etDosage, etDuration, etInstructions;
-  private MaterialButton btnAddDosageTime, btnSelectFollowUp, btnSavePrescription;
+  private MaterialButton btnAddDosageTime, btnAddMedicine, btnSelectFollowUp, btnSavePrescription;
   private ChipGroup chipDosageTimes;
-  private TextView txtSelectedFollowUp;
+  private LinearLayout addedMedicinesContainer;
+  private TextView txtSelectedFollowUp, txtNoMedicinesAdded;
   private String patientName, diagnosis, notes;
   private int appointmentId = -1;
 
-  private final List<MedicationTimeCreateRequest> dosageTimes = new ArrayList<>();
-  private String selectedFollowUpIso;
+  // Draft dosage times for the medicine currently being filled in.
+  private final List<MedicationTimeCreateRequest> draftDosageTimes = new ArrayList<>();
+
+  // All medicines added so far for this prescription.
+  private final List<MedicationCreateRequest> medications = new ArrayList<>();
+  private final List<String> medicationSummaries = new ArrayList<>();
+
+  private String selectedFollowUpIso; // ISO datetime, nullable
 
   @Nullable
   @Override
@@ -61,6 +68,7 @@ public class PrescriptionFragment extends Fragment {
     initViews(view);
     loadData();
     setupListeners();
+    refreshAddedMedicinesUi();
   }
 
   private void initViews(View view) {
@@ -72,6 +80,9 @@ public class PrescriptionFragment extends Fragment {
     etInstructions = view.findViewById(R.id.etInstructions);
     btnAddDosageTime = view.findViewById(R.id.btnSelectDosageTime);
     chipDosageTimes = view.findViewById(R.id.chipDosageTimes);
+    btnAddMedicine = view.findViewById(R.id.btnAddMedicine);
+    addedMedicinesContainer = view.findViewById(R.id.addedMedicinesContainer);
+    txtNoMedicinesAdded = view.findViewById(R.id.txtNoMedicinesAdded);
     btnSelectFollowUp = view.findViewById(R.id.btnSelectFollowUp);
     txtSelectedFollowUp = view.findViewById(R.id.txtSelectedFollowUp);
     btnSavePrescription = view.findViewById(R.id.btnSavePrescription);
@@ -90,8 +101,9 @@ public class PrescriptionFragment extends Fragment {
 
   private void setupListeners() {
     btnAddDosageTime.setOnClickListener(v -> showAddDosageTimePicker());
+    btnAddMedicine.setOnClickListener(v -> attemptAddMedicine());
     btnSelectFollowUp.setOnClickListener(v -> showFollowUpDatePicker());
-    btnSavePrescription.setOnClickListener(v -> attemptSave());
+    btnSavePrescription.setOnClickListener(v -> attemptSavePrescription());
   }
 
   private void showAddDosageTimePicker() {
@@ -107,8 +119,8 @@ public class PrescriptionFragment extends Fragment {
           String time24 = String.format(Locale.US, "%02d:%02d:00", hour, minute);
           String label = inferLabel(hour);
 
-          dosageTimes.add(new MedicationTimeCreateRequest(time24, label));
-          addDosageTimeChip(time24, label, hour, minute);
+          draftDosageTimes.add(new MedicationTimeCreateRequest(time24, label));
+          addDosageTimeChip(label, hour, minute);
         });
     picker.show(getParentFragmentManager(), "DOSAGE_TIME_PICKER");
   }
@@ -120,7 +132,7 @@ public class PrescriptionFragment extends Fragment {
     return "Night";
   }
 
-  private void addDosageTimeChip(String time24, String label, int hour, int minute) {
+  private void addDosageTimeChip(String label, int hour, int minute) {
     Calendar cal = Calendar.getInstance();
     cal.set(Calendar.HOUR_OF_DAY, hour);
     cal.set(Calendar.MINUTE, minute);
@@ -133,31 +145,14 @@ public class PrescriptionFragment extends Fragment {
         v -> {
           int index = chipDosageTimes.indexOfChild(chip);
           chipDosageTimes.removeView(chip);
-          if (index >= 0 && index < dosageTimes.size()) {
-            dosageTimes.remove(index);
+          if (index >= 0 && index < draftDosageTimes.size()) {
+            draftDosageTimes.remove(index);
           }
         });
     chipDosageTimes.addView(chip);
   }
 
-  private void showFollowUpDatePicker() {
-    MaterialDatePicker<Long> picker =
-        MaterialDatePicker.Builder.datePicker().setTitleText("Select Follow-up Date").build();
-    picker.addOnPositiveButtonClickListener(
-        dateMillis -> {
-          Calendar cal = Calendar.getInstance();
-          cal.setTimeInMillis(dateMillis);
-          selectedFollowUpIso =
-              new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
-                  .format(cal.getTime());
-          String display =
-              new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(cal.getTime());
-          txtSelectedFollowUp.setText(display);
-        });
-    picker.show(getParentFragmentManager(), "FOLLOWUP_DATE_PICKER");
-  }
-
-  private void attemptSave() {
+  private void attemptAddMedicine() {
     String medicine = etMedicine.getText().toString().trim();
     String dosage = etDosage.getText().toString().trim();
     String durationStr = etDuration.getText().toString().trim();
@@ -175,16 +170,8 @@ public class PrescriptionFragment extends Fragment {
       etDuration.setError("Duration is required");
       return;
     }
-    if (dosageTimes.isEmpty()) {
+    if (draftDosageTimes.isEmpty()) {
       Toast.makeText(requireContext(), "Add at least one dosage time", Toast.LENGTH_SHORT).show();
-      return;
-    }
-    if (appointmentId == -1) {
-      Toast.makeText(
-              requireContext(),
-              "Missing appointment reference. Go back and try again.",
-              Toast.LENGTH_LONG)
-          .show();
       return;
     }
 
@@ -206,9 +193,116 @@ public class PrescriptionFragment extends Fragment {
             dosage,
             instructions.isEmpty() ? "" : instructions,
             durationDays,
-            new ArrayList<>(dosageTimes));
+            new ArrayList<>(draftDosageTimes));
 
-    List<MedicationCreateRequest> medications = Collections.singletonList(medication);
+    medications.add(medication);
+    medicationSummaries.add(
+        medicine
+            + " "
+            + dosage
+            + " \u2022 "
+            + draftDosageTimes.size()
+            + "x Daily \u2022 "
+            + durationDays
+            + " Days");
+
+    refreshAddedMedicinesUi();
+    clearDraftForm();
+
+    Toast.makeText(requireContext(), medicine + " added.", Toast.LENGTH_SHORT).show();
+  }
+
+  private void clearDraftForm() {
+    etMedicine.setText("");
+    etDosage.setText("");
+    etDuration.setText("");
+    etInstructions.setText("");
+    draftDosageTimes.clear();
+    chipDosageTimes.removeAllViews();
+  }
+
+  private void refreshAddedMedicinesUi() {
+    addedMedicinesContainer.removeAllViews();
+
+    if (medications.isEmpty()) {
+      txtNoMedicinesAdded.setVisibility(View.VISIBLE);
+      return;
+    }
+    txtNoMedicinesAdded.setVisibility(View.GONE);
+
+    for (int i = 0; i < medications.size(); i++) {
+      addedMedicinesContainer.addView(buildAddedMedicineRow(i));
+    }
+  }
+
+  private View buildAddedMedicineRow(int index) {
+    LinearLayout row = new LinearLayout(requireContext());
+    row.setOrientation(LinearLayout.HORIZONTAL);
+    row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+    row.setPadding(dp(16), dp(12), dp(16), dp(12));
+
+    TextView txt = new TextView(requireContext());
+    txt.setText(medicationSummaries.get(index));
+    txt.setTextColor(requireContext().getColor(R.color.on_surface));
+    txt.setTextSize(13);
+    LinearLayout.LayoutParams txtLp =
+        new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+    txt.setLayoutParams(txtLp);
+
+    TextView remove = new TextView(requireContext());
+    remove.setText("Remove");
+    remove.setTextColor(requireContext().getColor(R.color.error));
+    remove.setTextSize(12);
+    remove.setTypeface(null, android.graphics.Typeface.BOLD);
+    remove.setPadding(dp(8), dp(4), dp(8), dp(4));
+    remove.setOnClickListener(
+        v -> {
+          medications.remove(index);
+          medicationSummaries.remove(index);
+          refreshAddedMedicinesUi();
+        });
+
+    row.addView(txt);
+    row.addView(remove);
+    return row;
+  }
+
+  private int dp(int v) {
+    return (int) (v * getResources().getDisplayMetrics().density);
+  }
+
+  private void showFollowUpDatePicker() {
+    MaterialDatePicker<Long> picker =
+        MaterialDatePicker.Builder.datePicker().setTitleText("Select Follow-up Date").build();
+    picker.addOnPositiveButtonClickListener(
+        dateMillis -> {
+          Calendar cal = Calendar.getInstance();
+          cal.setTimeInMillis(dateMillis);
+          selectedFollowUpIso =
+              new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
+                  .format(cal.getTime());
+          String display =
+              new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(cal.getTime());
+          txtSelectedFollowUp.setText(display);
+        });
+    picker.show(getParentFragmentManager(), "FOLLOWUP_DATE_PICKER");
+  }
+
+  private void attemptSavePrescription() {
+    if (medications.isEmpty()) {
+      Toast.makeText(requireContext(), "Add at least one medicine.", Toast.LENGTH_SHORT).show();
+      return;
+    }
+    if (appointmentId == -1) {
+      Toast.makeText(
+              requireContext(),
+              "Missing appointment reference. Go back and try again.",
+              Toast.LENGTH_LONG)
+          .show();
+      return;
+    }
+
+    String instructions = etInstructions.getText().toString().trim();
 
     PrescriptionCreateRequest request =
         new PrescriptionCreateRequest(
@@ -216,7 +310,7 @@ public class PrescriptionFragment extends Fragment {
             diagnosis != null ? diagnosis : "",
             instructions.isEmpty() ? (notes != null ? notes : "") : instructions,
             selectedFollowUpIso,
-            medications);
+            new ArrayList<>(medications));
 
     btnSavePrescription.setEnabled(false);
 
