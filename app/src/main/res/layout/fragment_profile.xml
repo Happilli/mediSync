@@ -30,6 +30,27 @@
                     android:layout_height="wrap_content"
                     android:padding="16dp">
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnEditProfile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:text="Edit Profile"
+                        android:textAllCaps="false"
+                        android:textColor="?attr/colorOnSecondaryContainer"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:minHeight="0dp"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="0dp"
+                        app:backgroundTint="?attr/colorSecondaryContainer"
+                        app:cornerRadius="14dp"
+                        app:elevation="0dp"
+                        app:layout_constraintStart_toEndOf="@id/cardVerifiedBadge"
+                        app:layout_constraintTop_toTopOf="@id/cardVerifiedBadge"
+                        app:layout_constraintBottom_toBottomOf="@id/cardVerifiedBadge" />
+
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/imgProfile"
                         android:layout_width="88dp"
@@ -58,7 +79,7 @@
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardVerifiedBadge"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
                         android:layout_marginTop="8dp"
                         app:cardCornerRadius="14dp"
                         app:cardElevation="0dp"
@@ -68,28 +89,14 @@
                         <TextView
                             android:id="@+id/txtVerifiedBadge"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:paddingHorizontal="14dp"
+                            android:gravity="center"
                             android:paddingVertical="6dp"
                             android:textSize="12sp"
                             android:textStyle="bold" />
                     </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnEditProfile"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="12dp"
-                        android:text="Edit Profile"
-                        android:textAllCaps="false"
-                        android:textColor="?attr/colorOnSecondaryContainer"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        app:backgroundTint="?attr/colorSecondaryContainer"
-                        app:cornerRadius="16dp"
-                        app:elevation="0dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/imgProfile" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
