@@ -5,8 +5,6 @@ import android.transition.ChangeBounds;
 import android.transition.Fade;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +25,10 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 import com.bca.medisync.util.ImageLoader;
+import com.bca.medisync.util.SearchSuggestionHelper;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.search.SearchBar;
+import com.google.android.material.search.SearchView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,8 +38,10 @@ import java.util.Set;
 
 public class DoctorFragment extends Fragment {
   private RecyclerView rvDoctors;
+  private RecyclerView rvSearchSuggestions;
   private MaterialToolbar toolbar;
-  private TextInputEditText etSearch;
+  private SearchBar searchBar;
+  private SearchView searchView;
   private SimpleListAdapter<Doctor> adapter;
 
   private Integer filterHospitalId;
@@ -79,12 +81,60 @@ public class DoctorFragment extends Fragment {
   private void initViews(View view) {
     rvDoctors = view.findViewById(R.id.rvDoctors);
     toolbar = view.findViewById(R.id.toolbar);
-    etSearch = view.findViewById(R.id.etSearch);
+    searchBar = view.findViewById(R.id.searchBar);
+    searchView = view.findViewById(R.id.searchView);
+    rvSearchSuggestions = view.findViewById(R.id.rvSearchSuggestions);
   }
 
   private void setupToolbar() {
     toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+  }
+
+  private void setupSearch() {
+    SearchSuggestionHelper<Doctor> searchHelper =
+        new SearchSuggestionHelper<>(
+            this,
+            searchBar,
+            searchView,
+            rvSearchSuggestions,
+            (query, onResult) -> {
+              DoctorApi api = ApiClient.api(DoctorApi.class);
+              ApiCallback.handle(
+                  api.getDoctors(filterHospitalId, null, null, query),
+                  this,
+                  body -> {
+                    List<Doctor> doctors = new ArrayList<>();
+                    for (DoctorResponse r : body) doctors.add(mapToDoctor(r));
+                    onResult.onResult(doctors);
+                  },
+                  (code, msg) -> onResult.onResult(new ArrayList<>()));
+            },
+            new SearchSuggestionHelper.SuggestionBinder<Doctor>() {
+              @Override
+              public String getTitle(Doctor item) {
+                return item.getName();
+              }
+
+              @Override
+              public String getSubtitle(Doctor item) {
+                return item.getSpeciality();
+              }
+
+              @Override
+              public String getImageUrl(Doctor item) {
+                return item.getImageUrl();
+              }
+
+              @Override
+              public int getPlaceholderRes() {
+                return R.drawable.stethoscope;
+              }
+            },
+            doctor -> loadDoctors(doctor.getName()),
+            query -> loadDoctors(query));
+
+    searchHelper.attach();
   }
 
   private void setupRecyclerView() {
@@ -154,10 +204,7 @@ public class DoctorFragment extends Fragment {
                     adapter.notifyItemChanged(pos);
                   });
             },
-            null,
-            (doctor, q) ->
-                doctor.getName().toLowerCase().contains(q)
-                    || doctor.getSpeciality().toLowerCase().contains(q));
+            null);
 
     rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvDoctors.setAdapter(adapter);
@@ -222,21 +269,5 @@ public class DoctorFragment extends Fragment {
         r.getHospital_id(),
         r.getYears_experience(),
         r.isIs_verified());
-  }
-
-  private void setupSearch() {
-    etSearch.addTextChangedListener(
-        new TextWatcher() {
-          @Override
-          public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-          @Override
-          public void onTextChanged(CharSequence s, int start, int before, int count) {
-            adapter.filter(s.toString());
-          }
-
-          @Override
-          public void afterTextChanged(Editable s) {}
-        });
   }
 }

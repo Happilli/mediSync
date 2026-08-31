@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.util.RoundedListStyler;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,6 +22,10 @@ public class MedicationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
   public interface OnItemClickListener {
     void onItemClick(Medication medication);
+  }
+
+  public interface OnTakenToggleListener {
+    void onToggle(Medication medication, boolean taken);
   }
 
   private static class Row {
@@ -49,9 +54,11 @@ public class MedicationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
   private final List<Row> rows = new ArrayList<>();
   private final OnItemClickListener listener;
+  private final OnTakenToggleListener toggleListener;
 
-  public MedicationAdapter(OnItemClickListener listener) {
+  public MedicationAdapter(OnItemClickListener listener, OnTakenToggleListener toggleListener) {
     this.listener = listener;
+    this.toggleListener = toggleListener;
   }
 
   public void submitList(List<Medication> medications) {
@@ -105,6 +112,20 @@ public class MedicationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     itemHolder.tvMedName.setText(m.getName() + " " + m.getDosage());
     itemHolder.tvMedFrequency.setText(m.getFrequency());
 
+    itemHolder.cbTaken.setOnCheckedChangeListener(null);
+    itemHolder.cbTaken.setChecked(m.isTaken());
+    itemHolder.cbTaken.setEnabled(!m.isTaken());
+    itemHolder.cbTaken.setClickable(!m.isTaken());
+
+    if (!m.isTaken()) {
+      itemHolder.cbTaken.setOnCheckedChangeListener(
+          (buttonView, isChecked) -> {
+            if (isChecked) {
+              toggleListener.onToggle(m, true);
+            }
+          });
+    }
+
     if (m.isTaken()) {
       itemHolder.tvMedTime.setText("Taken");
       itemHolder.itemView.setAlpha(0.6f);
@@ -133,12 +154,14 @@ public class MedicationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
   static class ItemVH extends RecyclerView.ViewHolder {
     TextView tvMedName, tvMedFrequency, tvMedTime;
+    MaterialCheckBox cbTaken;
 
     ItemVH(View itemView) {
       super(itemView);
       tvMedName = itemView.findViewById(R.id.tvMedName);
       tvMedFrequency = itemView.findViewById(R.id.tvMedFrequency);
       tvMedTime = itemView.findViewById(R.id.tvMedTime);
+      cbTaken = itemView.findViewById(R.id.cbTaken);
     }
   }
 }

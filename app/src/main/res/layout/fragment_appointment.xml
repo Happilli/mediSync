@@ -35,7 +35,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnUpcoming"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.MediSync.Button.ToggleOutlined"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Upcoming"
@@ -43,13 +43,12 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHistory"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.MediSync.Button.ToggleOutlined"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="History"
                 android:textAllCaps="false" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
@@ -88,5 +87,4 @@
         app:backgroundTint="?attr/colorPrimaryContainer"
         app:icon="@android:drawable/ic_input_add"
         app:iconTint="?attr/colorOnPrimaryContainer" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

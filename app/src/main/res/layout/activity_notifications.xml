@@ -11,8 +11,7 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
         app:elevation="0dp"
-        app:liftOnScroll="false"
-        >
+        app:liftOnScroll="false">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -45,7 +44,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnUnread"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.MediSync.Button.ToggleOutlined"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Unread"
@@ -53,13 +52,12 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHistory"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.MediSync.Button.ToggleOutlined"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="History"
                 android:textAllCaps="false" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView

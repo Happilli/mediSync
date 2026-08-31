@@ -18,12 +18,20 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.util.ImageLoader;
+import com.bca.medisync.util.SearchSuggestionHelper;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.search.SearchBar;
+import com.google.android.material.search.SearchView;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PatientFragment extends Fragment {
 
   private RecyclerView rvPatients;
+  private RecyclerView rvSearchSuggestions;
+  private MaterialToolbar toolbar;
+  private SearchBar searchBar;
+  private SearchView searchView;
   private SimpleListAdapter<Patient> adapter;
   private List<PatientPublicResponse> currentResponses = new ArrayList<>();
 
@@ -42,11 +50,17 @@ public class PatientFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     initViews(view);
-    loadPatients();
+    setupSearch();
+    loadPatients(null);
   }
 
   private void initViews(View view) {
     rvPatients = view.findViewById(R.id.rvPatients);
+    toolbar = view.findViewById(R.id.toolbar);
+    searchBar = view.findViewById(R.id.searchBar);
+    searchView = view.findViewById(R.id.searchView);
+    rvSearchSuggestions = view.findViewById(R.id.rvSearchSuggestions);
+
     rvPatients.setLayoutManager(new LinearLayoutManager(requireContext()));
 
     adapter =
@@ -69,10 +83,57 @@ public class PatientFragment extends Fragment {
     adapter.setRoundedList(true);
   }
 
-  private void loadPatients() {
+  private void setupSearch() {
+    SearchSuggestionHelper<Patient> searchHelper =
+        new SearchSuggestionHelper<>(
+            this,
+            searchBar,
+            searchView,
+            rvSearchSuggestions,
+            (query, onResult) -> {
+              PatientApi api = ApiClient.api(PatientApi.class);
+              ApiCallback.handle(
+                  api.getTreatedPatients(query),
+                  this,
+                  body -> {
+                    currentResponses = body;
+                    List<Patient> patients = new ArrayList<>();
+                    for (PatientPublicResponse r : body) patients.add(mapToPatient(r));
+                    onResult.onResult(patients);
+                  },
+                  (code, msg) -> onResult.onResult(new ArrayList<>()));
+            },
+            new SearchSuggestionHelper.SuggestionBinder<Patient>() {
+              @Override
+              public String getTitle(Patient item) {
+                return item.getName();
+              }
+
+              @Override
+              public String getSubtitle(Patient item) {
+                return item.getPhone();
+              }
+
+              @Override
+              public String getImageUrl(Patient item) {
+                return ApiClient.mediaUrl(item.getProfilePicUrl());
+              }
+
+              @Override
+              public int getPlaceholderRes() {
+                return R.drawable.ic_nav_profile;
+              }
+            },
+            this::onPatientClicked,
+            query -> loadPatients(query));
+
+    searchHelper.attach();
+  }
+
+  private void loadPatients(String search) {
     PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
-        api.getTreatedPatients(),
+        api.getTreatedPatients(search),
         this,
         this::bindPatients,
         ApiCallback.simpleError(requireContext(), "Failed to load patients."));

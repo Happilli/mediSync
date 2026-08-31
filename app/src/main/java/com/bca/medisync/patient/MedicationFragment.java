@@ -23,6 +23,7 @@ import com.bca.medisync.data.remote.api.MedicationApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +35,8 @@ public class MedicationFragment extends Fragment {
   private RecyclerView rvMedications;
   private TextView tvActiveTime, tvActiveName, tvActiveDosage;
   private MaterialButton btnMarkTaken;
+  private CircularProgressIndicator progressAdherence;
+  private TextView tvAdherenceCount;
 
   private MedicationAdapter adapter;
   private Medication activeMedication;
@@ -70,6 +73,8 @@ public class MedicationFragment extends Fragment {
     tvActiveName = view.findViewById(R.id.tvActiveName);
     tvActiveDosage = view.findViewById(R.id.tvActiveDosage);
     btnMarkTaken = view.findViewById(R.id.btnMarkTaken);
+    progressAdherence = view.findViewById(R.id.progressAdherence);
+    tvAdherenceCount = view.findViewById(R.id.tvAdherenceCount);
 
     btnMarkTaken.setOnClickListener(
         v -> {
@@ -95,13 +100,9 @@ public class MedicationFragment extends Fragment {
   private void setUpRecyclerView() {
     adapter =
         new MedicationAdapter(
-            med -> {
-              if (!med.isTaken()) {
-                markTaken(med);
-              } else {
-                Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show();
-              }
-            });
+            med ->
+                Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show(),
+            (med, taken) -> markTaken(med));
     rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvMedications.setAdapter(adapter);
   }
@@ -160,11 +161,21 @@ public class MedicationFragment extends Fragment {
             Toast.makeText(requireContext(), "Failed to update medication.", Toast.LENGTH_SHORT)
                 .show();
           }
+          loadMedications();
         });
   }
 
   private void bindMedications(List<Medication> meds) {
     adapter.submitList(meds);
+
+    int total = meds.size();
+    int taken = 0;
+    for (Medication m : meds) {
+      if (m.isTaken()) taken++;
+    }
+    tvAdherenceCount.setText(taken + "/" + total);
+    int percent = total == 0 ? 0 : (int) ((taken / (float) total) * 100);
+    progressAdherence.setProgressCompat(percent, true);
 
     activeMedication = null;
     for (Medication m : meds) {

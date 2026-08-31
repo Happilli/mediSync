@@ -1,11 +1,10 @@
 package com.bca.medisync.patient;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,19 +20,22 @@ import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.LoadingHelper;
+import com.bca.medisync.util.SearchSuggestionHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.loadingindicator.LoadingIndicator;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.search.SearchBar;
+import com.google.android.material.search.SearchView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import android.widget.ImageView;
 
 public class HospitalFragment extends Fragment {
   private RecyclerView rvHospitals;
+  private RecyclerView rvSearchSuggestions;
   private MaterialToolbar toolbar;
+  private SearchBar searchBar;
+  private SearchView searchView;
   private SimpleListAdapter<Hospital> adapter;
-  private TextInputEditText etSearch;
   private LoadingIndicator loadingIndicator;
 
   @Nullable
@@ -58,13 +60,61 @@ public class HospitalFragment extends Fragment {
   private void initView(View view) {
     rvHospitals = view.findViewById(R.id.rvHospitals);
     toolbar = view.findViewById(R.id.toolbar);
-    etSearch = view.findViewById(R.id.etSearch);
+    searchBar = view.findViewById(R.id.searchBar);
+    searchView = view.findViewById(R.id.searchView);
+    rvSearchSuggestions = view.findViewById(R.id.rvSearchSuggestions);
     loadingIndicator = view.findViewById(R.id.loadingIndicator);
   }
 
   private void setupToolbar() {
     toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+  }
+
+  private void setupSearch() {
+    SearchSuggestionHelper<Hospital> searchHelper =
+        new SearchSuggestionHelper<>(
+            this,
+            searchBar,
+            searchView,
+            rvSearchSuggestions,
+            (query, onResult) -> {
+              HospitalApi api = ApiClient.api(HospitalApi.class);
+              ApiCallback.handle(
+                  api.getHospitals(query),
+                  this,
+                  body -> {
+                    List<Hospital> hospitals = new ArrayList<>();
+                    for (HospitalResponse r : body) hospitals.add(mapToHospital(r));
+                    onResult.onResult(hospitals);
+                  },
+                  (code, msg) -> onResult.onResult(new ArrayList<>()));
+            },
+            new SearchSuggestionHelper.SuggestionBinder<Hospital>() {
+              @Override
+              public String getTitle(Hospital item) {
+                return item.getName();
+              }
+
+              @Override
+              public String getSubtitle(Hospital item) {
+                return item.getAddress();
+              }
+
+              @Override
+              public String getImageUrl(Hospital item) {
+                return ApiClient.mediaUrl(item.getImageUrl());
+              }
+
+              @Override
+              public int getPlaceholderRes() {
+                return R.drawable.ic_medisync_logo;
+              }
+            },
+            hospital -> loadHospitals(hospital.getName()),
+            query -> loadHospitals(query));
+
+    searchHelper.attach();
   }
 
   private void setupRecycleView() {
@@ -89,10 +139,7 @@ public class HospitalFragment extends Fragment {
                   .findViewById(R.id.btnViewMore)
                   .setOnClickListener(v -> onHospitalClicked(hospital));
             },
-            null,
-            (hospital, q) ->
-                hospital.getName().toLowerCase().contains(q)
-                    || hospital.getAddress().toLowerCase().contains(q));
+            null);
 
     rvHospitals.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvHospitals.setAdapter(adapter);
@@ -154,21 +201,5 @@ public class HospitalFragment extends Fragment {
         r.getDescription(),
         0.0,
         r.getImage_url());
-  }
-
-  private void setupSearch() {
-    etSearch.addTextChangedListener(
-        new TextWatcher() {
-          @Override
-          public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-          @Override
-          public void onTextChanged(CharSequence s, int start, int before, int count) {
-            adapter.filter(s.toString());
-          }
-
-          @Override
-          public void afterTextChanged(Editable s) {}
-        });
   }
 }
