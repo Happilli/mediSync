@@ -123,9 +123,9 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   private void setGreeting() {
     int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
     String greeting;
-    if (hour < 12) greeting = "Good morning";
-    else if (hour < 17) greeting = "Good afternoon";
-    else greeting = "Good evening";
+    if (hour < 12) greeting = "Good morning,";
+    else if (hour < 17) greeting = "Good afternoon,";
+    else greeting = "Good evening,";
     txtGreeting.setText(greeting);
   }
 
@@ -157,9 +157,10 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
         api.getMyProfile(),
         this,
         p -> {
-          txtDoctorName.setText("Dr. " + p.getName());
+          txtDoctorName.setText("Dr. " + p.getName() + " !");
           txtPatientsMonth.setText(String.valueOf(p.getPatients_this_month()));
           txtTotalPatients.setText(String.valueOf(p.getTotal_patients()));
+          txtFollowUps.setText(String.valueOf(p.getUpcoming_followups()));
         },
         (code, msg) -> {
           if (code == 401) handleUnauthorized();
@@ -240,11 +241,9 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
           || status.contains("scheduled")
           || status.contains("confirmed")) pendingCount++;
       else if (status.contains("completed") || status.contains("treated")) completedCount++;
-      else if (status.contains("follow")) followUpCount++;
     }
     txtPending.setText(String.valueOf(pendingCount));
     txtCompleted.setText(String.valueOf(completedCount));
-    txtFollowUps.setText(String.valueOf(followUpCount));
   }
 
   private void setupListeners() {

@@ -37,21 +37,23 @@ public class PrescriptionFragment extends Fragment {
 
   private TextView tvPatientName, tvDiagnosis;
   private TextInputEditText etMedicine, etDosage, etDuration, etInstructions;
-  private MaterialButton btnAddDosageTime, btnAddMedicine, btnSelectFollowUp, btnSavePrescription;
+  private MaterialButton btnAddDosageTime,
+      btnAddMedicine,
+      btnSelectFollowUp,
+      btnSavePrescription,
+      btnClearFollowUp;
   private ChipGroup chipDosageTimes;
   private LinearLayout addedMedicinesContainer;
   private TextView txtSelectedFollowUp, txtNoMedicinesAdded;
   private String patientName, diagnosis, notes;
   private int appointmentId = -1;
 
-  // Draft dosage times for the medicine currently being filled in.
   private final List<MedicationTimeCreateRequest> draftDosageTimes = new ArrayList<>();
 
-  // All medicines added so far for this prescription.
   private final List<MedicationCreateRequest> medications = new ArrayList<>();
   private final List<String> medicationSummaries = new ArrayList<>();
 
-  private String selectedFollowUpIso; // ISO datetime, nullable
+  private String selectedFollowUpIso;
 
   @Nullable
   @Override
@@ -85,6 +87,7 @@ public class PrescriptionFragment extends Fragment {
     txtNoMedicinesAdded = view.findViewById(R.id.txtNoMedicinesAdded);
     btnSelectFollowUp = view.findViewById(R.id.btnSelectFollowUp);
     txtSelectedFollowUp = view.findViewById(R.id.txtSelectedFollowUp);
+    btnClearFollowUp = view.findViewById(R.id.btnClearFollowUp);
     btnSavePrescription = view.findViewById(R.id.btnSavePrescription);
   }
 
@@ -103,6 +106,7 @@ public class PrescriptionFragment extends Fragment {
     btnAddDosageTime.setOnClickListener(v -> showAddDosageTimePicker());
     btnAddMedicine.setOnClickListener(v -> attemptAddMedicine());
     btnSelectFollowUp.setOnClickListener(v -> showFollowUpDatePicker());
+    btnClearFollowUp.setOnClickListener(v -> clearFollowUp());
     btnSavePrescription.setOnClickListener(v -> attemptSavePrescription());
   }
 
@@ -284,8 +288,15 @@ public class PrescriptionFragment extends Fragment {
           String display =
               new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(cal.getTime());
           txtSelectedFollowUp.setText(display);
+          btnClearFollowUp.setVisibility(View.VISIBLE);
         });
     picker.show(getParentFragmentManager(), "FOLLOWUP_DATE_PICKER");
+  }
+
+  private void clearFollowUp() {
+    selectedFollowUpIso = null;
+    txtSelectedFollowUp.setText("No follow-up needed");
+    btnClearFollowUp.setVisibility(View.GONE);
   }
 
   private void attemptSavePrescription() {

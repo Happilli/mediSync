@@ -17,7 +17,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-  public static final String BASE_URL = "http://192.168.100.224:8000/";
+  //  ** for using commentone, uncomment other**
+  //  public static final String BASE_URL = "http://192.168.100.224:8000/";
+  public static final String BASE_URL = "http://192.168.240.1:8000/";
   private static Retrofit retrofit;
   private static SessionManager sessionManager;
   private static final Map<Class<?>, Object> apiCache = new ConcurrentHashMap<>();

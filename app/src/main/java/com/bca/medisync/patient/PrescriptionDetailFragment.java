@@ -98,7 +98,15 @@ public class PrescriptionDetailFragment extends Fragment {
   private void bind(Prescription p) {
     txtDiagnosis.setText(p.getDiagnosis());
     txtInstructions.setText(p.getInstructions());
-    txtFollowUp.setText("Follow-up: " + p.getFollowUpDate());
+
+    String followUp = p.getFollowUpDate();
+    if (followUp == null || followUp.isEmpty()) {
+      txtFollowUp.setVisibility(View.GONE);
+    } else {
+      txtFollowUp.setVisibility(View.VISIBLE);
+      txtFollowUp.setText("Follow-up: " + followUp);
+    }
+
     txtInstructions.setVisibility(
         p.getInstructions() == null || p.getInstructions().isEmpty() ? View.GONE : View.VISIBLE);
 

@@ -15,6 +15,11 @@ public class DoctorProfileResponse {
   private int patients_this_month;
   private int total_patients;
   private boolean has_security_answer;
+  private int upcoming_followups;
+
+  public int getUpcoming_followups() {
+    return upcoming_followups;
+  }
 
   public int getId() {
     return id;
