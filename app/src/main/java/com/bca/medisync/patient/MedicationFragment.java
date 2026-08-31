@@ -100,8 +100,11 @@ public class MedicationFragment extends Fragment {
   private void setUpRecyclerView() {
     adapter =
         new MedicationAdapter(
-            med ->
-                Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show(),
+            med -> {
+              if (!med.isTaken()) {
+                Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show();
+              }
+            },
             (med, taken) -> markTaken(med));
     rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvMedications.setAdapter(adapter);
