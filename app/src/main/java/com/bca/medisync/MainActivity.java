@@ -24,11 +24,14 @@ import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.doctor.DoctorTabActivity;
 import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
+import com.bca.medisync.util.LoadingHelper;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class MainActivity extends AppCompatActivity {
   private MaterialButton btnLogin;
+  private LoadingIndicator loadingIndicator;
   private TextInputEditText etEmail, etPassword;
   private SessionManager sessionManager;
   private TextView goToRegister;
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return i;
         });
-
+    loadingIndicator = findViewById(R.id.loadingIndicator);
     sessionManager = new SessionManager(this);
     btnLogin = findViewById(R.id.btnLogin);
     etEmail = findViewById(R.id.etEmail);
@@ -88,9 +91,7 @@ public class MainActivity extends AppCompatActivity {
       };
 
   @SuppressLint("MissingPermission")
-  private void showSystemNotification(NotificationResponse n) {
-    // unchanged
-  }
+  private void showSystemNotification(NotificationResponse n) {}
 
   public void attemptLogin() {
     String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
@@ -104,35 +105,48 @@ public class MainActivity extends AppCompatActivity {
       etPassword.setError("Password is required");
       return;
     }
+
     btnLogin.setEnabled(false);
+    LoadingHelper.show(loadingIndicator);
 
     AuthApi authApi = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
         authApi.login(new LoginRequest(email, password)),
         body -> {
-          btnLogin.setEnabled(true);
-          sessionManager.saveSession(body.getAccess_token(), body.getRole(), body.getEmail());
-          NotificationSocketHolder.get()
-              .connect(sessionManager.getToken(), globalNotificationListener);
+          LoadingHelper.hide(
+              loadingIndicator,
+              () -> {
+                btnLogin.setEnabled(true);
+                sessionManager.saveSession(body.getAccess_token(), body.getRole(), body.getEmail());
+                NotificationSocketHolder.get()
+                    .connect(sessionManager.getToken(), globalNotificationListener);
 
-          Intent intent;
-          if ("doctor".equalsIgnoreCase(body.getRole())) {
-            intent = new Intent(MainActivity.this, DoctorTabActivity.class);
-          } else {
-            intent = new Intent(MainActivity.this, MainTabActivity.class);
-          }
-          startActivity(intent);
-          finish();
+                Intent intent;
+                if ("doctor".equalsIgnoreCase(body.getRole())) {
+                  intent = new Intent(MainActivity.this, DoctorTabActivity.class);
+                } else {
+                  intent = new Intent(MainActivity.this, MainTabActivity.class);
+                }
+                startActivity(intent);
+                finish();
+              });
         },
         (code, msg) -> {
-          btnLogin.setEnabled(true);
-          if (code == -1) {
-            Toast.makeText(MainActivity.this, "network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(
-                    MainActivity.this, "login failed: invalid credentials", Toast.LENGTH_SHORT)
-                .show();
-          }
+          LoadingHelper.hide(
+              loadingIndicator,
+              () -> {
+                btnLogin.setEnabled(true);
+                if (code == -1) {
+                  Toast.makeText(MainActivity.this, "network error: " + msg, Toast.LENGTH_LONG)
+                      .show();
+                } else {
+                  Toast.makeText(
+                          MainActivity.this,
+                          "login failed: invalid credentials",
+                          Toast.LENGTH_SHORT)
+                      .show();
+                }
+              });
         });
   }
 }

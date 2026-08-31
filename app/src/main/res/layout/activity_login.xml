@@ -99,7 +99,6 @@
             android:textSize="13sp"
             android:textStyle="bold" />
 
-
         <!-- Login Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogin"
@@ -109,6 +108,15 @@
             android:text="Login"
             android:textSize="16sp"
             app:cornerRadius="12dp" />
+
+        <com.google.android.material.loadingindicator.LoadingIndicator
+            android:id="@+id/loadingIndicator"
+            style="@style/Widget.MediSync.LoadingIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:visibility="invisible" />
 
         <!-- register Button -->
         <TextView

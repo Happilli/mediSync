@@ -20,7 +20,9 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
 import com.bca.medisync.util.ImageLoader;
+import com.bca.medisync.util.LoadingHelper;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public class HospitalFragment extends Fragment {
   private MaterialToolbar toolbar;
   private SimpleListAdapter<Hospital> adapter;
   private TextInputEditText etSearch;
+  private LoadingIndicator loadingIndicator;
 
   @Nullable
   @Override
@@ -56,6 +59,7 @@ public class HospitalFragment extends Fragment {
     rvHospitals = view.findViewById(R.id.rvHospitals);
     toolbar = view.findViewById(R.id.toolbar);
     etSearch = view.findViewById(R.id.etSearch);
+    loadingIndicator = view.findViewById(R.id.loadingIndicator);
   }
 
   private void setupToolbar() {
@@ -112,18 +116,32 @@ public class HospitalFragment extends Fragment {
   }
 
   private void loadHospitals(String search) {
+    LoadingHelper.show(loadingIndicator);
+    rvHospitals.setVisibility(View.GONE);
+
     HospitalApi api = ApiClient.api(HospitalApi.class);
     ApiCallback.handle(
         api.getHospitals(search),
         this,
-        body -> {
-          List<Hospital> hospitals = new ArrayList<>();
-          for (HospitalResponse r : body) {
-            hospitals.add(mapToHospital(r));
-          }
-          adapter.updateData(hospitals);
-        },
-        ApiCallback.simpleError(requireContext(), "Failed to load hospitals."));
+        body ->
+            LoadingHelper.hide(
+                loadingIndicator,
+                () -> {
+                  rvHospitals.setVisibility(View.VISIBLE);
+                  List<Hospital> hospitals = new ArrayList<>();
+                  for (HospitalResponse r : body) {
+                    hospitals.add(mapToHospital(r));
+                  }
+                  adapter.updateData(hospitals);
+                }),
+        (code, msg) ->
+            LoadingHelper.hide(
+                loadingIndicator,
+                () -> {
+                  rvHospitals.setVisibility(View.VISIBLE);
+                  ApiCallback.simpleError(requireContext(), "Failed to load hospitals.")
+                      .run(code, msg);
+                }));
   }
 
   private Hospital mapToHospital(HospitalResponse r) {

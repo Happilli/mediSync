@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--    <style name="MediSyncActiveIndicator" parent="Widget.Material3Expressive.BottomNavigationView.ActiveIndicator">-->
-    <!--        <item name="android:color">?attr/colorTertiaryContainer</item>-->
-    <!--    </style>-->
+
+    <style name="Widget.MediSync.LoadingIndicator" parent="Widget.Material3.LoadingIndicator">
+        <item name="indicatorSize">48dp</item>
+        <item name="indicatorColor">?attr/colorPrimary</item>
+        <item name="containerColor">?attr/colorSurfaceContainerHigh</item>
+        <item name="containerWidth">64dp</item>
+        <item name="containerHeight">64dp</item>
+    </style>
+
     <style name="ShapeAppearanceOverlay.MediSync.Tile" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">20dp</item>
