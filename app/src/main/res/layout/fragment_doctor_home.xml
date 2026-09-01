@@ -189,10 +189,10 @@
                             android:padding="16dp">
 
                             <ImageView
-                                android:layout_width="20dp"
+                                android:layout_width="17dp"
                                 android:layout_height="20dp"
                                 android:contentDescription="null"
-                                android:src="@drawable/alarm"
+                                android:src="@drawable/pending"
                                 app:tint="?attr/colorOnTertiaryContainer" />
 
                             <TextView
@@ -237,7 +237,7 @@
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:contentDescription="null"
-                                android:src="@drawable/record"
+                                android:src="@drawable/completed"
                                 app:tint="?attr/colorOnSecondaryContainer" />
 
                             <TextView
