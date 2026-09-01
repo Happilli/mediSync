@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,12 +23,12 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.api.DoctorApi;
-import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.patient.NotificationsActivity;
 import com.bca.medisync.util.EmptyState;
+import com.bca.medisync.util.NotificationBadgeHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
@@ -88,7 +87,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
 
   @Override
   public void onNotificationReceived(NotificationResponse notification) {
-    if (isAdded()) showUnreadIcon();
+    if (isAdded()) NotificationBadgeHelper.showUnread(this, btnNotification);
   }
 
   public void refresh() {
@@ -129,26 +128,8 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
     txtGreeting.setText(greeting);
   }
 
-  private void showUnreadIcon() {
-    btnNotification.setIcon(
-        ContextCompat.getDrawable(requireContext(), R.drawable.notification_dot));
-  }
-
-  private void showReadIcon() {
-    btnNotification.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.notification));
-  }
-
   private void loadUnreadCount() {
-    NotificationApi api = ApiClient.api(NotificationApi.class);
-    ApiCallback.handle(
-        api.getUnreadCount(),
-        this,
-        body -> {
-          Integer count = body.get("unread_count");
-          if (count != null && count > 0) showUnreadIcon();
-          else showReadIcon();
-        },
-        (code, msg) -> {});
+    NotificationBadgeHelper.refresh(this, btnNotification);
   }
 
   private void loadDashboardData() {

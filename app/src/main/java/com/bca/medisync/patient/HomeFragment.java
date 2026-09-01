@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,11 +20,11 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.AppointmentApi;
-import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.util.NotificationBadgeHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
@@ -80,7 +79,7 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
     if (!isAdded()) {
       return;
     }
-    showUnreadIcon();
+    NotificationBadgeHelper.showUnread(this, btnNotification);
   }
 
   private void initViews(View view) {
@@ -102,15 +101,6 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
     bottomNav.setSelectedItemId(navItemId);
   }
 
-  private void showUnreadIcon() {
-    btnNotification.setIcon(
-        ContextCompat.getDrawable(requireContext(), R.drawable.notification_dot));
-  }
-
-  private void showReadIcon() {
-    btnNotification.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.notification));
-  }
-
   private void loadPatientName() {
     PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
@@ -130,16 +120,7 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
   }
 
   private void loadUnreadCount() {
-    NotificationApi api = ApiClient.api(NotificationApi.class);
-    ApiCallback.handle(
-        api.getUnreadCount(),
-        this,
-        body -> {
-          Integer count = body.get("unread_count");
-          if (count != null && count > 0) showUnreadIcon();
-          else showReadIcon();
-        },
-        (code, msg) -> {});
+    NotificationBadgeHelper.refresh(this, btnNotification);
   }
 
   private void loadUpcomingAppointment() {
