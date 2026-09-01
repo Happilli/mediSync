@@ -22,21 +22,32 @@ import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.SearchSuggestionHelper;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.carousel.CarouselLayoutManager;
+import com.google.android.material.carousel.HeroCarouselStrategy;
 import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class HospitalFragment extends Fragment {
   private RecyclerView rvHospitals;
+  private RecyclerView rvHospitalsCarousel;
   private RecyclerView rvSearchSuggestions;
   private MaterialToolbar toolbar;
   private SearchBar searchBar;
   private SearchView searchView;
   private SimpleListAdapter<Hospital> adapter;
+  private SimpleListAdapter<Hospital> carouselAdapter;
   private LoadingIndicator loadingIndicator;
+  private View carouselSection;
+  private TextView txtFeaturedLabel;
+  private TextView txtAllHospitalsLabel;
+
+  private final Set<String> expandedHospitalIds = new HashSet<>();
 
   @Nullable
   @Override
@@ -52,6 +63,7 @@ public class HospitalFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     initView(view);
     setupToolbar();
+    setupCarousel();
     setupRecycleView();
     setupSearch();
     loadHospitals(null);
@@ -59,6 +71,7 @@ public class HospitalFragment extends Fragment {
 
   private void initView(View view) {
     rvHospitals = view.findViewById(R.id.rvHospitals);
+    rvHospitalsCarousel = view.findViewById(R.id.rvHospitalsCarousel);
     toolbar = view.findViewById(R.id.toolbar);
     searchBar = view.findViewById(R.id.searchBar);
     searchView = view.findViewById(R.id.searchView);
@@ -69,6 +82,53 @@ public class HospitalFragment extends Fragment {
   private void setupToolbar() {
     toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+  }
+
+  private void setupCarousel() {
+    rvHospitalsCarousel.setLayoutManager(new CarouselLayoutManager(new HeroCarouselStrategy()));
+
+    carouselAdapter =
+        new SimpleListAdapter<>(
+            R.layout.item_hospital_carousel,
+            new ArrayList<>(),
+            (itemView, hospital, pos) -> {
+              ((TextView) itemView.findViewById(R.id.txtHospitalName)).setText(hospital.getName());
+              ((TextView) itemView.findViewById(R.id.txtHospitalAddress))
+                  .setText(hospital.getAddress());
+              TextView rating = itemView.findViewById(R.id.txtHospitalRating);
+              rating.setText(
+                  hospital.getRating() > 0
+                      ? "\u2605 " + String.format(Locale.getDefault(), "%.1f", hospital.getRating())
+                      : "");
+
+              ImageView imgHospital = itemView.findViewById(R.id.imgHospital);
+              ImageLoader.loadHospitalImage(
+                  HospitalFragment.this, imgHospital, hospital.getImageUrl());
+
+              View overlay = itemView.findViewById(R.id.overlayScrim);
+              View textContainer = itemView.findViewById(R.id.textContainer);
+              boolean expanded = expandedHospitalIds.contains(hospital.getId());
+              overlay.setVisibility(expanded ? View.VISIBLE : View.GONE);
+              textContainer.setVisibility(expanded ? View.VISIBLE : View.GONE);
+
+              itemView.setOnClickListener(
+                  v -> {
+                    if (expandedHospitalIds.contains(hospital.getId())) {
+                      onHospitalClicked(hospital);
+                    } else {
+                      expandedHospitalIds.clear();
+                      expandedHospitalIds.add(hospital.getId());
+                      carouselAdapter.notifyDataSetChanged();
+                    }
+                  });
+
+              itemView
+                  .findViewById(R.id.btnViewMore)
+                  .setOnClickListener(v -> onHospitalClicked(hospital));
+            },
+            null);
+
+    rvHospitalsCarousel.setAdapter(carouselAdapter);
   }
 
   private void setupSearch() {
@@ -129,12 +189,8 @@ public class HospitalFragment extends Fragment {
               TextView rating = itemView.findViewById(R.id.txtHospitalRating);
               rating.setText(
                   hospital.getRating() > 0
-                      ? String.format(Locale.getDefault(), "%.1f", hospital.getRating())
+                      ? "\u2605 " + String.format(Locale.getDefault(), "%.1f", hospital.getRating())
                       : "");
-
-              ImageView imgHospital = itemView.findViewById(R.id.imgHospital);
-              ImageLoader.loadHospitalImage(
-                  HospitalFragment.this, imgHospital, hospital.getImageUrl());
               itemView
                   .findViewById(R.id.btnViewMore)
                   .setOnClickListener(v -> onHospitalClicked(hospital));
@@ -143,6 +199,7 @@ public class HospitalFragment extends Fragment {
 
     rvHospitals.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvHospitals.setAdapter(adapter);
+    adapter.setRoundedList(true);
   }
 
   private void onHospitalClicked(Hospital hospital) {
@@ -154,7 +211,6 @@ public class HospitalFragment extends Fragment {
     args.putString("hospital_website", hospital.getWebsite());
     args.putString("hospital_description", hospital.getDescription());
     args.putDouble("hospital_rating", hospital.getRating());
-
     args.putString("hospital_image_url", hospital.getImageUrl());
 
     HospitalDetailFragment fragment = new HospitalDetailFragment();
@@ -162,7 +218,18 @@ public class HospitalFragment extends Fragment {
     ((MainTabActivity) requireActivity()).pushFragment(fragment);
   }
 
+  private void updateCarouselVisibility(String search) {
+    boolean isSearch = search != null && !search.trim().isEmpty();
+    int visibility = isSearch ? View.GONE : View.VISIBLE;
+    rvHospitalsCarousel.setVisibility(visibility);
+    View root = getView();
+    if (root == null) return;
+    View lblFeatured = root.findViewById(R.id.lblFeaturedHospitals);
+    if (lblFeatured != null) lblFeatured.setVisibility(visibility);
+  }
+
   private void loadHospitals(String search) {
+    updateCarouselVisibility(search);
     LoadingHelper.show(loadingIndicator);
     rvHospitals.setVisibility(View.GONE);
 
@@ -180,6 +247,8 @@ public class HospitalFragment extends Fragment {
                     hospitals.add(mapToHospital(r));
                   }
                   adapter.updateData(hospitals);
+                  boolean isSearch = search != null && !search.trim().isEmpty();
+                  if (!isSearch) carouselAdapter.updateData(hospitals);
                 }),
         (code, msg) ->
             LoadingHelper.hide(
