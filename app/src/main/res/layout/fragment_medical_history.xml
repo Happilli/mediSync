@@ -1,287 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/record"
+            app:navigationIconTint="?attr/colorOnSurface"
+            app:titleTextColor="?attr/colorOnSurface" />
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="120dp">
+        android:paddingBottom="100dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/heroBackground"
-                android:layout_width="0dp"
-                android:layout_height="290dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="48dp"
-                android:layout_marginEnd="24dp"
-                app:cardBackgroundColor="?attr/colorPrimaryContainer"
-                app:cardCornerRadius="32dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/tvHeader"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="44dp"
-                android:layout_marginTop="88dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginHorizontal="4dp"
+                android:layout_marginBottom="20dp"
                 android:text=""
-                android:textColor="?attr/colorOnPrimaryContainer"
-                android:textSize="36sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="10dp"
+                android:letterSpacing="0.06"
+                android:text="LATEST RECORD"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardRx"
-                android:layout_width="0dp"
-                android:layout_height="180dp"
-                android:layout_marginStart="36dp"
-                android:layout_marginTop="232dp"
-                android:layout_marginEnd="8dp"
-                app:cardBackgroundColor="?attr/colorTertiaryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="?attr/colorPrimaryContainer"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp"
-                app:layout_constraintEnd_toStartOf="@+id/cardLab"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:cardElevation="0dp">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="20dp">
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="18dp">
 
-                    <ImageView
-                        android:id="@+id/icRx"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@drawable/ic_nav_medicine"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="?attr/colorOnTertiaryContainer"/>
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        app:cardBackgroundColor="?attr/colorOnPrimaryContainer"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
 
-                    <TextView
-                        android:id="@+id/tvRxName"
-                        android:layout_width="wrap_content"
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="null"
+                            android:src="@drawable/ic_nav_medicine"
+                            app:tint="?attr/colorPrimaryContainer" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textColor="?attr/colorOnTertiaryContainer"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toTopOf="@+id/tvRxDesc"
-                        app:layout_constraintStart_toStartOf="parent"/>
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvRxDesc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textColor="?attr/colorOnTertiaryContainer"
-                        android:textSize="14sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"/>
+                        <TextView
+                            android:id="@+id/tvRxName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardLab"
-                android:layout_width="0dp"
-                android:layout_height="180dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="232dp"
-                android:layout_marginEnd="36dp"
-                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/cardRx"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="20dp">
-
-                    <ImageView
-                        android:id="@+id/icLab"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@drawable/record"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="?attr/colorPrimary"/>
-
-                    <TextView
-                        android:id="@+id/tvLabTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toTopOf="@+id/tvLabDesc"
-                        app:layout_constraintStart_toStartOf="parent"/>
-
-                    <TextView
-                        android:id="@+id/tvLabDesc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="14sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"/>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:id="@+id/tvRxDesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text=""
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
-                android:id="@+id/tvTimelineHeader"
+                android:id="@+id/tvLabTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="48dp"
-                android:letterSpacing="0.1"
+                android:text=""
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvLabDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="10dp"
+                android:letterSpacing="0.06"
                 android:text="HISTORY TIMELINE"
                 android:textColor="?attr/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtEmptyTimeline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="No history records yet"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="13sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardRx"/>
+                android:visibility="gone" />
 
-            <View
-                android:id="@+id/dot1"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="28dp"
-                android:layout_marginTop="32dp"
-                android:background="@drawable/record"
-                android:backgroundTint="?attr/colorPrimary"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvTimelineHeader"/>
-
-            <View
-                android:id="@+id/timelineLine"
-                android:layout_width="2dp"
-                android:layout_height="0dp"
-                android:background="?attr/colorOutlineVariant"
-                app:layout_constraintBottom_toTopOf="@id/dot2"
-                app:layout_constraintEnd_toEndOf="@id/dot1"
-                app:layout_constraintStart_toStartOf="@id/dot1"
-                app:layout_constraintTop_toBottomOf="@id/dot1"/>
-
-            <TextView
-                android:id="@+id/date1"
-                android:layout_width="wrap_content"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTimeline"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:text=""
-                android:textColor="?attr/colorPrimary"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/dot1"
-                app:layout_constraintStart_toEndOf="@id/dot1"
-                app:layout_constraintTop_toTopOf="@id/dot1"/>
+                android:layout_marginBottom="24dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false" />
 
-            <TextView
-                android:id="@+id/title1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
-                android:text=""
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@id/date1"
-                app:layout_constraintTop_toBottomOf="@id/date1"/>
-
-            <TextView
-                android:id="@+id/desc1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
-                android:lineSpacingExtra="4dp"
-                android:text=""
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="15sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@id/date1"
-                app:layout_constraintTop_toBottomOf="@id/title1"/>
-
-            <View
-                android:id="@+id/dot2"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginTop="48dp"
-                android:background="@drawable/record"
-                android:backgroundTint="?attr/colorOutline"
-                app:layout_constraintEnd_toEndOf="@id/dot1"
-                app:layout_constraintStart_toStartOf="@id/dot1"
-                app:layout_constraintTop_toBottomOf="@id/desc1"/>
-
-            <TextView
-                android:id="@+id/date2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:text=""
-                android:textColor="?attr/colorOutline"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/dot2"
-                app:layout_constraintStart_toEndOf="@id/dot2"
-                app:layout_constraintTop_toTopOf="@id/dot2"/>
-
-            <TextView
-                android:id="@+id/title2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
-                android:text=""
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@id/date2"
-                app:layout_constraintTop_toBottomOf="@id/date2"/>
-
-            <TextView
-                android:id="@+id/desc2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
-                android:lineSpacingExtra="4dp"
-                android:text=""
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="15sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@id/date2"
-                app:layout_constraintTop_toBottomOf="@id/title2"/>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -290,15 +169,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="24dp"
         android:text="Start Consultation"
+        android:textAllCaps="false"
         android:textColor="?attr/colorOnPrimary"
-        android:textSize="16sp"
+        android:textSize="15sp"
         app:backgroundTint="?attr/colorPrimary"
-        app:elevation="4dp"
+        app:cornerRadius="18dp"
         app:icon="@drawable/stethoscope"
-        app:iconSize="24dp"
-        app:iconTint="?attr/colorOnPrimary"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"/>
+        app:iconSize="20dp"
+        app:iconTint="?attr/colorOnPrimary" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

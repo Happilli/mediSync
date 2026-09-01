@@ -49,6 +49,22 @@
         <item name="cornerSizeBottomLeft">0dp</item>
     </style>
 
+    <style name="ShapeAppearanceOverlay.MediSync.TopRounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">18dp</item>
+        <item name="cornerSizeTopRight">18dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.MediSync.BottomRounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeTopRight">0dp</item>
+        <item name="cornerSizeBottomLeft">18dp</item>
+        <item name="cornerSizeBottomRight">18dp</item>
+    </style>
+
     <style name="ShapeAppearanceOverlay.MediSync.DosageBadge" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">12dp</item>

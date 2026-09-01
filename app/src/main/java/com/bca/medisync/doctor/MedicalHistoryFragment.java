@@ -10,14 +10,18 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
+import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
+import com.bca.medisync.util.EmptyState;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.ArrayList;
@@ -29,17 +33,9 @@ public class MedicalHistoryFragment extends Fragment {
   private String patientName;
   private int patientId = -1;
   private int appointmentId = -1;
-  private TextView tvHeader,
-      tvRxName,
-      tvRxDesc,
-      tvLabTitle,
-      tvLabDesc,
-      date1,
-      title1,
-      desc1,
-      date2,
-      title2,
-      desc2;
+  private TextView tvHeader, tvRxName, tvRxDesc, tvLabTitle, tvLabDesc, txtEmptyTimeline;
+  private RecyclerView rvTimeline;
+  private SimpleListAdapter<MedicalHistoryEntry> adapter;
 
   public MedicalHistoryFragment() {}
 
@@ -67,14 +63,23 @@ public class MedicalHistoryFragment extends Fragment {
     tvRxName = view.findViewById(R.id.tvRxName);
     tvLabTitle = view.findViewById(R.id.tvLabTitle);
     tvLabDesc = view.findViewById(R.id.tvLabDesc);
+    txtEmptyTimeline = view.findViewById(R.id.txtEmptyTimeline);
+    rvTimeline = view.findViewById(R.id.rvTimeline);
 
-    date1 = view.findViewById(R.id.date1);
-    title1 = view.findViewById(R.id.title1);
-    desc1 = view.findViewById(R.id.desc1);
-
-    date2 = view.findViewById(R.id.date2);
-    title2 = view.findViewById(R.id.title2);
-    desc2 = view.findViewById(R.id.desc2);
+    rvTimeline.setLayoutManager(new LinearLayoutManager(requireContext()));
+    adapter =
+        new SimpleListAdapter<>(
+            R.layout.item_medical_history,
+            new ArrayList<>(),
+            (itemView, entry, pos) -> {
+              ((TextView) itemView.findViewById(R.id.txtDate)).setText(entry.getDate());
+              ((TextView) itemView.findViewById(R.id.txtTitle)).setText(entry.getTitle());
+              ((TextView) itemView.findViewById(R.id.txtDescription))
+                  .setText(entry.getDescription());
+            },
+            null);
+    rvTimeline.setAdapter(adapter);
+    adapter.setRoundedList(true);
   }
 
   private void loadData() {
@@ -112,8 +117,6 @@ public class MedicalHistoryFragment extends Fragment {
           }
           tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
           tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
-          tvLabTitle.setText("");
-          tvLabDesc.setText("");
           bindTimeline(entries);
         },
         (code, msg) -> {
@@ -132,16 +135,8 @@ public class MedicalHistoryFragment extends Fragment {
   }
 
   private void bindTimeline(List<MedicalHistoryEntry> timeline) {
-    if (!timeline.isEmpty()) {
-      date1.setText(timeline.get(0).getDate());
-      title1.setText(timeline.get(0).getTitle());
-      desc1.setText(timeline.get(0).getDescription());
-    }
-    if (timeline.size() >= 2) {
-      date2.setText(timeline.get(1).getDate());
-      title2.setText(timeline.get(1).getTitle());
-      desc2.setText(timeline.get(1).getDescription());
-    }
+    adapter.updateData(timeline);
+    EmptyState.bind(rvTimeline, txtEmptyTimeline, timeline.isEmpty());
   }
 
   private void setupListener() {
