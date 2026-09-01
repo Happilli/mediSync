@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,11 +27,7 @@ import com.bca.medisync.util.FileUploadHelper;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 
 public class DoctorProfileFragment extends Fragment {
 

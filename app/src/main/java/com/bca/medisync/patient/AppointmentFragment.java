@@ -120,10 +120,6 @@ public class AppointmentFragment extends Fragment {
         .attachTo(rvUpcoming);
   }
 
-  private int dpToPx(int dp) {
-    return (int) (dp * getResources().getDisplayMetrics().density);
-  }
-
   private void setupFab() {
     fabBookAppointment.setOnClickListener(
         v -> ((MainTabActivity) requireActivity()).pushFragment(new HospitalFragment()));

@@ -55,7 +55,7 @@ public class SwipeActionHelper {
   }
 
   private int dpToPx(int dp) {
-    return (int) (dp * fragment.getResources().getDisplayMetrics().density);
+    return ViewUtils.dp(fragment.requireContext(), dp);
   }
 
   private class Callback extends ItemTouchHelper.SimpleCallback {

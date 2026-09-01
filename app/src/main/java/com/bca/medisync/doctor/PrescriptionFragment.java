@@ -19,6 +19,7 @@ import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationCreateRequest;
 import com.bca.medisync.data.remote.dto.medication.MedicationTimeCreateRequest;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionCreateRequest;
+import com.bca.medisync.util.ViewUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -272,7 +273,7 @@ public class PrescriptionFragment extends Fragment {
   }
 
   private int dp(int v) {
-    return (int) (v * getResources().getDisplayMetrics().density);
+    return ViewUtils.dp(requireContext(), v);
   }
 
   private void showFollowUpDatePicker() {

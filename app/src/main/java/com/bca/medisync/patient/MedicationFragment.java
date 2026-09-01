@@ -22,14 +22,12 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicationApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
+import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MedicationFragment extends Fragment {
   private RecyclerView rvMedications;
@@ -118,7 +116,7 @@ public class MedicationFragment extends Fragment {
         body -> {
           List<Medication> meds = new ArrayList<>();
           for (MedicationResponse r : body) {
-            meds.add(mapToMedication(r));
+            meds.add(PrescriptionEnricher.mapMedication(r));
           }
           bindMedications(meds);
           scheduleAllReminders(body);
@@ -201,30 +199,5 @@ public class MedicationFragment extends Fragment {
       btnMarkTaken.setEnabled(false);
       btnMarkTaken.setText("Nothing Pending");
     }
-  }
-
-  private Medication mapToMedication(MedicationResponse r) {
-    String displayTime = r.getDosage_time();
-    try {
-      LocalTime t = LocalTime.parse(r.getDosage_time());
-      displayTime = t.format(DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault()));
-    } catch (Exception ignored) {
-    }
-
-    String frequencyLabel =
-        r.getFrequency_per_day() + "x Daily \u2022 " + r.getDuration_days() + " Days";
-
-    return new Medication(
-        r.getSchedule_id(),
-        r.getMedication_id(),
-        r.getName(),
-        r.getDosage(),
-        frequencyLabel,
-        displayTime,
-        r.getLabel(),
-        r.getDuration_days() + " Days",
-        r.isIs_taken(),
-        r.getInstruction(),
-        r.getDoctor_name());
   }
 }

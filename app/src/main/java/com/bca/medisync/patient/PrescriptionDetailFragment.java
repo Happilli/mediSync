@@ -21,6 +21,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.util.RoundedListStyler;
+import com.bca.medisync.util.ViewUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.List;
@@ -165,6 +166,6 @@ public class PrescriptionDetailFragment extends Fragment {
   }
 
   private int dp(int v) {
-    return (int) (v * getResources().getDisplayMetrics().density);
+    return ViewUtils.dp(requireContext(), v);
   }
 }

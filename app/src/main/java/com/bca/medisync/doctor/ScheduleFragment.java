@@ -28,6 +28,7 @@ import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.SwipeActionHelper;
+import com.bca.medisync.util.ViewUtils;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.timepicker.MaterialTimePicker;
@@ -359,6 +360,6 @@ public class ScheduleFragment extends Fragment {
   }
 
   private int dpToPx(int dp) {
-    return (int) (dp * getResources().getDisplayMetrics().density);
+    return ViewUtils.dp(requireContext(), dp);
   }
 }
