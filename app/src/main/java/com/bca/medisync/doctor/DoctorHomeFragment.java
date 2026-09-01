@@ -109,6 +109,8 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
     txtPatientsMonth = view.findViewById(R.id.txtPatientsMonth);
     txtTotalPatients = view.findViewById(R.id.txtTotalPatients);
     txtNoAppointments = view.findViewById(R.id.txtNoAppointments);
+    View cardTodaySchedule = view.findViewById(R.id.cardTodaySchedule);
+    cardTodaySchedule.setOnClickListener(v -> BottomNavGoTo(R.id.nav_doctor_schedule));
 
     rvAppointments.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvAppointments.setAdapter(
