@@ -24,6 +24,7 @@ import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
+import com.bca.medisync.util.FileUploadHelper;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import java.io.File;
@@ -95,39 +96,17 @@ public class DoctorProfileFragment extends Fragment {
             });
   }
 
-  private File copyUriToCache(Uri uri) throws Exception {
-    android.content.ContentResolver resolver = requireContext().getContentResolver();
-    String mimeType = resolver.getType(uri);
-    String ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-    if (ext == null) ext = "jpg";
-    File outFile =
-        new File(
-            requireContext().getCacheDir(),
-            "doctor_profile_pic_" + System.currentTimeMillis() + "." + ext);
-    try (InputStream in = resolver.openInputStream(uri);
-        FileOutputStream out = new FileOutputStream(outFile)) {
-      byte[] buffer = new byte[8192];
-      int read;
-      while (in != null && (read = in.read(buffer)) != -1) {
-        out.write(buffer, 0, read);
-      }
-    }
-    return outFile;
-  }
-
   private void uploadProfilePic(Uri uri) {
     File cachedFile;
     try {
-      cachedFile = copyUriToCache(uri);
+      cachedFile = FileUploadHelper.copyUriToCache(requireContext(), uri, "doctor_profile_pic");
     } catch (Exception e) {
       Toast.makeText(requireContext(), "Couldn't read the selected photo!", Toast.LENGTH_SHORT)
           .show();
       return;
     }
 
-    RequestBody fileBody = RequestBody.create(cachedFile, MediaType.parse("image/*"));
-    MultipartBody.Part filePart =
-        MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
+    MultipartBody.Part filePart = FileUploadHelper.toImagePart(cachedFile, "file");
 
     DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(

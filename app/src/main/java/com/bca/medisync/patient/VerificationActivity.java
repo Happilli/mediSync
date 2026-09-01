@@ -1,10 +1,8 @@
 package com.bca.medisync.patient;
 
-import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -21,6 +19,7 @@ import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
+import com.bca.medisync.util.FileUploadHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -28,8 +27,6 @@ import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -108,7 +105,7 @@ public class VerificationActivity extends AppCompatActivity {
 
     File cachedFile;
     try {
-      cachedFile = copyUriToCache(selectedImageUri);
+      cachedFile = FileUploadHelper.copyUriToCache(this, selectedImageUri, "citizenship");
     } catch (Exception e) {
       Toast.makeText(this, "couldn't read the selected photo!", Toast.LENGTH_SHORT).show();
       return;
@@ -120,9 +117,7 @@ public class VerificationActivity extends AppCompatActivity {
 
     RequestBody citizenshipBody =
         RequestBody.create(citizenshipNumber, MediaType.parse("text/plain"));
-    RequestBody fileBody = RequestBody.create(cachedFile, MediaType.parse("image/*"));
-    MultipartBody.Part filePart =
-        MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
+    MultipartBody.Part filePart = FileUploadHelper.toImagePart(cachedFile, "file");
 
     PatientApi patientApi = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
@@ -156,22 +151,5 @@ public class VerificationActivity extends AppCompatActivity {
                 .show();
           }
         });
-  }
-
-  private File copyUriToCache(Uri uri) throws Exception {
-    ContentResolver resolver = getContentResolver();
-    String mimeType = resolver.getType(uri);
-    String ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-    if (ext == null) ext = "jpg";
-    File outFile = new File(getCacheDir(), "citizenship_" + System.currentTimeMillis() + "." + ext);
-    try (InputStream in = resolver.openInputStream(uri);
-        FileOutputStream out = new FileOutputStream(outFile)) {
-      byte[] buffer = new byte[8192];
-      int read;
-      while (in != null && (read = in.read(buffer)) != -1) {
-        out.write(buffer, 0, read);
-      }
-    }
-    return outFile;
   }
 }

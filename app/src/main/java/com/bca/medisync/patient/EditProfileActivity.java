@@ -2,7 +2,6 @@ package com.bca.medisync.patient;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
@@ -18,16 +17,13 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
+import com.bca.medisync.util.FileUploadHelper;
 import com.bca.medisync.util.ImageLoader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -88,23 +84,6 @@ public class EditProfileActivity extends AppCompatActivity {
     ImageLoader.loadProfilePic(this, imgProfilePreview, profilePicUrl);
   }
 
-  private File copyUriToCache(Uri uri) throws Exception {
-    android.content.ContentResolver resolver = getContentResolver();
-    String mimeType = resolver.getType(uri);
-    String ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-    if (ext == null) ext = "jpg";
-    File outFile = new File(getCacheDir(), "profile_pic_" + System.currentTimeMillis() + "." + ext);
-    try (InputStream in = resolver.openInputStream(uri);
-        FileOutputStream out = new FileOutputStream(outFile)) {
-      byte[] buffer = new byte[8192];
-      int read;
-      while (in != null && (read = in.read(buffer)) != -1) {
-        out.write(buffer, 0, read);
-      }
-    }
-    return outFile;
-  }
-
   private void setupListeners() {
     btnSave.setOnClickListener(v -> attemptSave());
   }
@@ -126,15 +105,13 @@ public class EditProfileActivity extends AppCompatActivity {
   private void uploadProfilePic(Uri uri) {
     File cachedFile;
     try {
-      cachedFile = copyUriToCache(uri);
+      cachedFile = FileUploadHelper.copyUriToCache(this, uri, "profile_pic");
     } catch (Exception e) {
       Toast.makeText(this, "Couldn't read the selected photo!", Toast.LENGTH_SHORT).show();
       return;
     }
 
-    RequestBody fileBody = RequestBody.create(cachedFile, MediaType.parse("image/*"));
-    MultipartBody.Part filePart =
-        MultipartBody.Part.createFormData("file", cachedFile.getName(), fileBody);
+    MultipartBody.Part filePart = FileUploadHelper.toImagePart(cachedFile, "file");
 
     PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
@@ -144,7 +121,6 @@ public class EditProfileActivity extends AppCompatActivity {
           bindProfilePic(p.getProfile_pic_url());
         },
         ApiCallback.simpleError(this, "Failed to update profile picture."));
-    ;
   }
 
   private void attemptSave() {

@@ -22,7 +22,7 @@ public class ApiCallback {
         new Callback<T>() {
           @Override
           public void onResponse(Call<T> call, Response<T> response) {
-            if (!f.isAdded()) return;
+            if (f != null && !f.isAdded()) return;
             if (response.isSuccessful()) {
               onOk.run(response.body());
             } else {
@@ -32,29 +32,14 @@ public class ApiCallback {
 
           @Override
           public void onFailure(Call<T> call, Throwable t) {
-            if (!f.isAdded()) return;
+            if (f != null && !f.isAdded()) return;
             onErr.run(-1, t.getMessage());
           }
         });
   }
 
   public static <T> void handle(Call<T> call, OnSuccess<T> onOk, OnError onErr) {
-    call.enqueue(
-        new Callback<T>() {
-          @Override
-          public void onResponse(Call<T> call, Response<T> response) {
-            if (response.isSuccessful()) {
-              onOk.run(response.body());
-            } else {
-              onErr.run(response.code(), null);
-            }
-          }
-
-          @Override
-          public void onFailure(Call<T> call, Throwable t) {
-            onErr.run(-1, t.getMessage());
-          }
-        });
+    handle(call, null, onOk, onErr);
   }
 
   public static OnError simpleError(Context ctx, String fallbackMessage) {
