@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -7,10 +7,12 @@
     android:background="?attr/colorSurface">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="40dp">
+        android:paddingBottom="40dp"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -35,21 +37,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginStart="8dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="0dp"
                         android:text="Edit Profile"
                         android:textAllCaps="false"
                         android:textColor="?attr/colorOnSecondaryContainer"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:minHeight="0dp"
-                        android:minWidth="0dp"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="0dp"
                         app:backgroundTint="?attr/colorSecondaryContainer"
                         app:cornerRadius="14dp"
                         app:elevation="0dp"
+                        app:layout_constraintBottom_toBottomOf="@id/cardVerifiedBadge"
                         app:layout_constraintStart_toEndOf="@id/cardVerifiedBadge"
-                        app:layout_constraintTop_toTopOf="@id/cardVerifiedBadge"
-                        app:layout_constraintBottom_toBottomOf="@id/cardVerifiedBadge" />
+                        app:layout_constraintTop_toTopOf="@id/cardVerifiedBadge" />
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/imgProfile"
@@ -90,8 +92,8 @@
                             android:id="@+id/txtVerifiedBadge"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:paddingHorizontal="14dp"
                             android:gravity="center"
+                            android:paddingHorizontal="14dp"
                             android:paddingVertical="6dp"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -319,4 +321,13 @@
                 app:elevation="0dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.loadingindicator.LoadingIndicator
+        android:id="@+id/loadingIndicator"
+        style="@style/Widget.MediSync.LoadingIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:visibility="visible" />
+
+</FrameLayout>

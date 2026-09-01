@@ -26,6 +26,8 @@ import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.util.FileUploadHelper;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
+import com.bca.medisync.util.LoadingHelper;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 import java.io.File;
 import okhttp3.MultipartBody;
 
@@ -33,6 +35,8 @@ public class DoctorProfileFragment extends Fragment {
 
   private SessionManager sessionManager;
   private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
+  private View scrollContent;
+  private LoadingIndicator loadingIndicator;
 
   public DoctorProfileFragment() {}
 
@@ -49,6 +53,8 @@ public class DoctorProfileFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     sessionManager = new SessionManager(requireContext());
+    scrollContent = view.findViewById(R.id.scrollContent);
+    loadingIndicator = view.findViewById(R.id.loadingIndicator);
 
     pickMedia =
         registerForActivityResult(
@@ -123,15 +129,29 @@ public class DoctorProfileFragment extends Fragment {
   }
 
   private void loadProfile() {
+    LoadingHelper.show(loadingIndicator);
+    scrollContent.setVisibility(View.GONE);
+
     DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.getMyProfile(),
         this,
-        profile -> {
-          bindProfile(profile);
-          loadHospitalName(profile.getHospital_id());
-        },
-        ApiCallback.simpleError(requireContext(), "Failed to load profile."));
+        profile ->
+            LoadingHelper.hide(
+                loadingIndicator,
+                () -> {
+                  bindProfile(profile);
+                  loadHospitalName(profile.getHospital_id());
+                  scrollContent.setVisibility(View.VISIBLE);
+                }),
+        (code, msg) ->
+            LoadingHelper.hide(
+                loadingIndicator,
+                () -> {
+                  scrollContent.setVisibility(View.VISIBLE);
+                  ApiCallback.simpleError(requireContext(), "Failed to load profile.")
+                      .run(code, msg);
+                }));
   }
 
   private void loadHospitalName(int hospitalId) {

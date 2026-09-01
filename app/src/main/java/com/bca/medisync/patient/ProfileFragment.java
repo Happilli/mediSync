@@ -28,8 +28,10 @@ import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
+import com.bca.medisync.util.LoadingHelper;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.Calendar;
@@ -38,10 +40,12 @@ public class ProfileFragment extends Fragment implements NotificationCenter.List
 
   private TextView txtName, txtEmergencyContact;
   private View rowAge, rowGender, rowBloodGroup, rowEmail, rowPhone, rowDob, rowAddress;
+  private LoadingIndicator loadingIndicator;
   private MaterialCardView cardVerifiedBadge;
   private TextView txtVerifiedBadge;
   private MaterialSwitch switchNotifications;
   private SessionManager sessionManager;
+  private View scrollContent;
 
   private View securityAnswerForm;
   private TextInputEditText etSecurityAnswer, etCurrentPassword;
@@ -105,15 +109,14 @@ public class ProfileFragment extends Fragment implements NotificationCenter.List
     rowGender = view.findViewById(R.id.rowGender);
     rowBloodGroup = view.findViewById(R.id.rowBloodGroup);
     rowEmail = view.findViewById(R.id.rowEmail);
+    scrollContent = view.findViewById(R.id.scrollContent);
     rowPhone = view.findViewById(R.id.rowPhone);
     rowDob = view.findViewById(R.id.rowDob);
     rowAddress = view.findViewById(R.id.rowAddress);
-
     cardVerifiedBadge = view.findViewById(R.id.cardVerifiedBadge);
     txtVerifiedBadge = view.findViewById(R.id.txtVerifiedBadge);
-
+    loadingIndicator = view.findViewById(R.id.loadingIndicator);
     switchNotifications = view.findViewById(R.id.switchNotifications);
-
     securityAnswerForm = view.findViewById(R.id.securityAnswerForm);
     etSecurityAnswer = view.findViewById(R.id.etSecurityAnswer);
     etCurrentPassword = view.findViewById(R.id.etCurrentPassword);
@@ -286,12 +289,22 @@ public class ProfileFragment extends Fragment implements NotificationCenter.List
   }
 
   private void loadPatientData() {
+    LoadingHelper.show(loadingIndicator);
+    scrollContent.setVisibility(View.GONE);
+
     PatientApi patientApi = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         patientApi.getMyProfile(),
         this,
-        this::bindPatient,
+        p ->
+            LoadingHelper.hide(
+                loadingIndicator,
+                () -> {
+                  bindPatient(p);
+                  scrollContent.setVisibility(View.VISIBLE);
+                }),
         (code, msg) -> {
+          LoadingHelper.hide(loadingIndicator, () -> scrollContent.setVisibility(View.VISIBLE));
           if (code == 403) {
             Toast.makeText(
                     requireContext(), "Your account is pending verification", Toast.LENGTH_LONG)

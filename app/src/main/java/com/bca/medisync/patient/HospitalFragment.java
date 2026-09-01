@@ -46,6 +46,7 @@ public class HospitalFragment extends Fragment {
   private View carouselSection;
   private TextView txtFeaturedLabel;
   private TextView txtAllHospitalsLabel;
+  private View scrollContent;
 
   private final Set<String> expandedHospitalIds = new HashSet<>();
 
@@ -72,6 +73,7 @@ public class HospitalFragment extends Fragment {
   private void initView(View view) {
     rvHospitals = view.findViewById(R.id.rvHospitals);
     rvHospitalsCarousel = view.findViewById(R.id.rvHospitalsCarousel);
+    scrollContent = view.findViewById(R.id.scrollContent);
     toolbar = view.findViewById(R.id.toolbar);
     searchBar = view.findViewById(R.id.searchBar);
     searchView = view.findViewById(R.id.searchView);
@@ -231,7 +233,7 @@ public class HospitalFragment extends Fragment {
   private void loadHospitals(String search) {
     updateCarouselVisibility(search);
     LoadingHelper.show(loadingIndicator);
-    rvHospitals.setVisibility(View.GONE);
+    scrollContent.setVisibility(View.GONE);
 
     HospitalApi api = ApiClient.api(HospitalApi.class);
     ApiCallback.handle(
@@ -241,7 +243,6 @@ public class HospitalFragment extends Fragment {
             LoadingHelper.hide(
                 loadingIndicator,
                 () -> {
-                  rvHospitals.setVisibility(View.VISIBLE);
                   List<Hospital> hospitals = new ArrayList<>();
                   for (HospitalResponse r : body) {
                     hospitals.add(mapToHospital(r));
@@ -249,12 +250,13 @@ public class HospitalFragment extends Fragment {
                   adapter.updateData(hospitals);
                   boolean isSearch = search != null && !search.trim().isEmpty();
                   if (!isSearch) carouselAdapter.updateData(hospitals);
+                  scrollContent.setVisibility(View.VISIBLE);
                 }),
         (code, msg) ->
             LoadingHelper.hide(
                 loadingIndicator,
                 () -> {
-                  rvHospitals.setVisibility(View.VISIBLE);
+                  scrollContent.setVisibility(View.VISIBLE);
                   ApiCallback.simpleError(requireContext(), "Failed to load hospitals.")
                       .run(code, msg);
                 }));
