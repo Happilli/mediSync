@@ -21,19 +21,20 @@ import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.PatientApi;
+import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
-import com.bca.medisync.util.RoundedListStyler;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.Calendar;
 
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements NotificationCenter.Listener {
 
   private TextView txtName, txtEmergencyContact;
   private View rowAge, rowGender, rowBloodGroup, rowEmail, rowPhone, rowDob, rowAddress;
@@ -69,7 +70,31 @@ public class ProfileFragment extends Fragment {
   @Override
   public void onResume() {
     super.onResume();
+    NotificationCenter.get().register(this);
     loadPatientData();
+  }
+
+  @Override
+  public void onHiddenChanged(boolean hidden) {
+    super.onHiddenChanged(hidden);
+    if (!hidden && isAdded()) {
+      loadPatientData();
+    }
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    NotificationCenter.get().unregister(this);
+  }
+
+  @Override
+  public void onNotificationReceived(NotificationResponse notification) {
+    if (!isAdded()) return;
+    if ("patient_verified".equals(notification.getType())
+        || "patient_verification_rejected".equals(notification.getType())) {
+      loadPatientData();
+    }
   }
 
   private void initViews(View view) {
@@ -157,7 +182,8 @@ public class ProfileFragment extends Fragment {
           patient.getAddress()
         });
 
-    bindVerificationBadge(patient.isIs_verified());
+    bindVerificationBadge(
+        patient.isIs_verified(), patient.getCitizenship_number(), patient.getRejection_reason());
     bindProfilePic(patient.getProfile_pic_url());
   }
 
@@ -166,17 +192,37 @@ public class ProfileFragment extends Fragment {
     ImageLoader.loadProfilePic(this, imgProfile, profilePicUrl);
   }
 
-  private void bindVerificationBadge(boolean isVerified) {
+  private void bindVerificationBadge(
+      boolean isVerified, String citizenshipNumber, String rejectionReason) {
     if (isVerified) {
       txtVerifiedBadge.setText("Verified");
       txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_tertiary_container));
       cardVerifiedBadge.setCardBackgroundColor(
           requireContext().getColor(R.color.tertiary_container));
       cardVerifiedBadge.setOnClickListener(null);
+      cardVerifiedBadge.setClickable(false);
+    } else if (citizenshipNumber != null) {
+      txtVerifiedBadge.setText("Pending Review");
+      txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_secondary_container));
+      cardVerifiedBadge.setCardBackgroundColor(
+          requireContext().getColor(R.color.secondary_container));
+      cardVerifiedBadge.setOnClickListener(null);
+      cardVerifiedBadge.setClickable(false);
+    } else if (rejectionReason != null) {
+      txtVerifiedBadge.setText("Rejected - Tap to resubmit");
+      txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_error_container));
+      cardVerifiedBadge.setCardBackgroundColor(requireContext().getColor(R.color.error_container));
+      cardVerifiedBadge.setClickable(true);
+      cardVerifiedBadge.setOnClickListener(
+          v -> {
+            Toast.makeText(requireContext(), rejectionReason, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(requireContext(), VerificationActivity.class));
+          });
     } else {
       txtVerifiedBadge.setText("Not Verified");
       txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_error_container));
       cardVerifiedBadge.setCardBackgroundColor(requireContext().getColor(R.color.error_container));
+      cardVerifiedBadge.setClickable(true);
       cardVerifiedBadge.setOnClickListener(
           v -> startActivity(new Intent(requireContext(), VerificationActivity.class)));
     }

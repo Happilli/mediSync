@@ -3,6 +3,7 @@ package com.bca.medisync.patient;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -22,6 +23,8 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
@@ -35,8 +38,10 @@ import okhttp3.RequestBody;
 public class VerificationActivity extends AppCompatActivity {
   private MaterialToolbar toolbar;
   private ImageView imgPreview;
+  private MaterialCardView cardPreview;
   private MaterialButton btnPickPhoto, btnSubmit;
   private TextInputEditText etCitizenshipNumber;
+  private LoadingIndicator loadingIndicator;
 
   private Uri selectedImageUri;
   private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
@@ -45,6 +50,7 @@ public class VerificationActivity extends AppCompatActivity {
           uri -> {
             if (uri != null) {
               selectedImageUri = uri;
+              cardPreview.setVisibility(View.VISIBLE);
               imgPreview.setImageURI(uri);
             }
           });
@@ -68,9 +74,11 @@ public class VerificationActivity extends AppCompatActivity {
   private void initiViews() {
     toolbar = findViewById(R.id.toolbar);
     imgPreview = findViewById(R.id.imgPreview);
+    cardPreview = findViewById(R.id.cardPreview);
     btnPickPhoto = findViewById(R.id.btnPickPhoto);
     btnSubmit = findViewById(R.id.btnSubmit);
     etCitizenshipNumber = findViewById(R.id.etCitizenshipNumber);
+    loadingIndicator = findViewById(R.id.loadingIndicator);
   }
 
   private void setupListeners() {
@@ -97,16 +105,19 @@ public class VerificationActivity extends AppCompatActivity {
       Toast.makeText(this, "please select a citizenship photo", Toast.LENGTH_SHORT).show();
       return;
     }
-    btnSubmit.setEnabled(false);
-    File cachedFile;
 
+    File cachedFile;
     try {
       cachedFile = copyUriToCache(selectedImageUri);
     } catch (Exception e) {
-      btnSubmit.setEnabled(true);
       Toast.makeText(this, "couldn't read the selected photo!", Toast.LENGTH_SHORT).show();
       return;
     }
+
+    btnSubmit.setEnabled(false);
+    loadingIndicator.setVisibility(View.VISIBLE);
+    loadingIndicator.show();
+
     RequestBody citizenshipBody =
         RequestBody.create(citizenshipNumber, MediaType.parse("text/plain"));
     RequestBody fileBody = RequestBody.create(cachedFile, MediaType.parse("image/*"));
@@ -117,7 +128,6 @@ public class VerificationActivity extends AppCompatActivity {
     ApiCallback.handle(
         patientApi.requestVerification(citizenshipBody, filePart),
         body -> {
-          btnSubmit.setEnabled(true);
           Toast.makeText(
                   VerificationActivity.this,
                   "Verification request submitted, Wait for approval..",
@@ -126,13 +136,17 @@ public class VerificationActivity extends AppCompatActivity {
           finish();
         },
         (code, msg) -> {
+          loadingIndicator.hide();
+          loadingIndicator.setVisibility(View.INVISIBLE);
           btnSubmit.setEnabled(true);
+
           if (code == 400) {
             Toast.makeText(
                     VerificationActivity.this,
                     "Verification already requested...",
                     Toast.LENGTH_SHORT)
                 .show();
+            finish();
           } else if (code == -1) {
             Toast.makeText(VerificationActivity.this, "Network erros: " + msg, Toast.LENGTH_SHORT)
                 .show();

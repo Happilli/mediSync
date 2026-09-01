@@ -13,6 +13,7 @@ public class PatientResponse {
   private String profile_pic_url;
   private String citizenship_photo_url;
   private boolean is_verified;
+  private String rejection_reason;
   private boolean has_security_answer;
 
   public int getId() {
@@ -65,5 +66,9 @@ public class PatientResponse {
 
   public boolean isIs_verified() {
     return is_verified;
+  }
+
+  public String getRejection_reason() {
+    return rejection_reason;
   }
 }
