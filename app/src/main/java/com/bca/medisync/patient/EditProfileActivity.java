@@ -119,7 +119,6 @@ public class EditProfileActivity extends AppCompatActivity {
     String phone = textOf(etPhone);
     String address = textOf(etAddress);
     String emergencyContact = textOf(etEmergencyContact);
-
     if (name.isEmpty()) {
       etName.setError("Name is required");
       return;
@@ -136,11 +135,8 @@ public class EditProfileActivity extends AppCompatActivity {
       etEmergencyContact.setError("Emergency contact is required");
       return;
     }
-
     btnSave.setEnabled(false);
-
     PatientApi api = ApiClient.api(PatientApi.class);
-    ;
     ApiCallback.handle(
         api.updateMyProfile(new PatientUpdateRequest(name, phone, address, emergencyContact)),
         body -> {
