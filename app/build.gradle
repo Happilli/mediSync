@@ -45,4 +45,8 @@ dependencies {
     coreLibraryDesugaring libs.desugar.jdk.libs
     androidTestImplementation libs.espresso.core
     androidTestImplementation libs.ext.junit
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    testCompileOnly libs.lombok
+    testAnnotationProcessor libs.lombok
 }

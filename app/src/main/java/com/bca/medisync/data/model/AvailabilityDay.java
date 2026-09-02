@@ -1,23 +1,12 @@
 package com.bca.medisync.data.model;
 
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+@Getter
+@AllArgsConstructor
 public class AvailabilityDay {
-    private  final  String day, startTime, endtime;
-
-    public AvailabilityDay(String day, String startTime, String endtime) {
-        this.day = day;
-        this.startTime = startTime;
-        this.endtime = endtime;
-    }
-
-    public String getDay() {
-        return day;
-    }
-
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public String getEndtime() {
-        return endtime;
-    }
+  private final String day;
+  private final String startTime;
+  private final String endtime;
 }

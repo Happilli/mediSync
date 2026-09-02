@@ -1,5 +1,10 @@
 package com.bca.medisync.data.model;
 
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+@Getter
+@AllArgsConstructor
 public class Patient {
   private final String id;
   private final String name;
@@ -11,67 +16,4 @@ public class Patient {
   private final String bloodGroup;
   private final String emergencyContact;
   private final String profilePicUrl;
-
-  public Patient(
-      String id,
-      String name,
-      String email,
-      String phone,
-      String address,
-      String dateOfBirth,
-      String gender,
-      String bloodGroup,
-      String emergencyContact,
-      String profilePicUrl) {
-    this.id = id;
-    this.name = name;
-    this.email = email;
-    this.phone = phone;
-    this.address = address;
-    this.dateOfBirth = dateOfBirth;
-    this.gender = gender;
-    this.bloodGroup = bloodGroup;
-    this.emergencyContact = emergencyContact;
-    this.profilePicUrl = profilePicUrl;
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public String getPhone() {
-    return phone;
-  }
-
-  public String getAddress() {
-    return address;
-  }
-
-  public String getDateOfBirth() {
-    return dateOfBirth;
-  }
-
-  public String getGender() {
-    return gender;
-  }
-
-  public String getBloodGroup() {
-    return bloodGroup;
-  }
-
-  public String getEmergencyContact() {
-    return emergencyContact;
-  }
-
-  public String getProfilePicUrl() {
-    return profilePicUrl;
-  }
 }
