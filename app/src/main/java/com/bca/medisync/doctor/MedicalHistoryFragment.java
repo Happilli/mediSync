@@ -61,8 +61,6 @@ public class MedicalHistoryFragment extends Fragment {
     tvHeader = view.findViewById(R.id.tvHeader);
     tvRxDesc = view.findViewById(R.id.tvRxDesc);
     tvRxName = view.findViewById(R.id.tvRxName);
-    tvLabTitle = view.findViewById(R.id.tvLabTitle);
-    tvLabDesc = view.findViewById(R.id.tvLabDesc);
     txtEmptyTimeline = view.findViewById(R.id.txtEmptyTimeline);
     rvTimeline = view.findViewById(R.id.rvTimeline);
 

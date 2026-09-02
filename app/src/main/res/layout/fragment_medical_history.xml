@@ -116,20 +116,6 @@
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
-                android:id="@+id/tvLabTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/tvLabDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:visibility="gone" />
-
-            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
