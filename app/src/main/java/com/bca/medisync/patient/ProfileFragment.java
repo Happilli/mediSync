@@ -162,29 +162,18 @@ public class ProfileFragment extends Fragment implements NotificationCenter.List
   private void bindPatient(PatientResponse patient) {
     txtName.setText(patient.getName());
     txtEmergencyContact.setText(patient.getEmergency_contact());
-
     InfoRowBinder.bind(
-        new View[] {rowAge, rowGender, rowBloodGroup, rowEmail, rowPhone, rowDob, rowAddress},
-        new int[] {
-          R.drawable.age,
-          genderIcon(patient.getGender()),
-          R.drawable.bloodtype,
-          R.drawable.email,
-          R.drawable.phone,
-          R.drawable.birthdate,
-          R.drawable.location
-        },
-        new String[] {"Age", "Gender", "Blood Group", "Email", "Phone", "Date of Birth", "Address"},
-        new String[] {
-          calculateAge(patient.getDate_of_birth()),
-          patient.getGender(),
-          patient.getBlood_group(),
-          sessionManager.getEmail(),
-          patient.getPhone(),
-          patient.getDate_of_birth(),
-          patient.getAddress()
-        });
-
+        new InfoRowBinder.Row(
+            rowAge, R.drawable.age, "Age", calculateAge(patient.getDate_of_birth())),
+        new InfoRowBinder.Row(
+            rowGender, genderIcon(patient.getGender()), "Gender", patient.getGender()),
+        new InfoRowBinder.Row(
+            rowBloodGroup, R.drawable.bloodtype, "Blood Group", patient.getBlood_group()),
+        new InfoRowBinder.Row(rowEmail, R.drawable.email, "Email", sessionManager.getEmail()),
+        new InfoRowBinder.Row(rowPhone, R.drawable.phone, "Phone", patient.getPhone()),
+        new InfoRowBinder.Row(
+            rowDob, R.drawable.birthdate, "Date of Birth", patient.getDate_of_birth()),
+        new InfoRowBinder.Row(rowAddress, R.drawable.location, "Address", patient.getAddress()));
     bindVerificationBadge(
         patient.isIs_verified(), patient.getCitizenship_number(), patient.getRejection_reason());
     bindProfilePic(patient.getProfile_pic_url());
@@ -296,23 +285,20 @@ public class ProfileFragment extends Fragment implements NotificationCenter.List
     ApiCallback.handle(
         patientApi.getMyProfile(),
         this,
-        p ->
-            LoadingHelper.hide(
-                loadingIndicator,
-                () -> {
-                  bindPatient(p);
-                  scrollContent.setVisibility(View.VISIBLE);
-                }),
-        (code, msg) -> {
-          LoadingHelper.hide(loadingIndicator, () -> scrollContent.setVisibility(View.VISIBLE));
-          if (code == 403) {
-            Toast.makeText(
-                    requireContext(), "Your account is pending verification", Toast.LENGTH_LONG)
-                .show();
-          } else {
-            ApiCallback.simpleError(requireContext(), "Failed to load your profile").run(code, msg);
-          }
-        });
+        LoadingHelper.wrapSuccess(loadingIndicator, scrollContent, this::bindPatient),
+        LoadingHelper.wrapError(
+            loadingIndicator,
+            scrollContent,
+            (code, msg) -> {
+              if (code == 403) {
+                Toast.makeText(
+                        requireContext(), "Your account is pending verification", Toast.LENGTH_LONG)
+                    .show();
+              } else {
+                ApiCallback.simpleError(requireContext(), "Failed to load your profile")
+                    .run(code, msg);
+              }
+            }));
   }
 
   public void setupNotificationSwitch() {

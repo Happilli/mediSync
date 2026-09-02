@@ -180,27 +180,20 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
     ApiCallback.handle(
         api.getHospitals(query),
         this,
-        body ->
-            LoadingHelper.hide(
-                loadingIndicator,
-                () -> {
-                  List<Hospital> hospitals = new ArrayList<>();
-                  for (HospitalResponse r : body) {
-                    hospitals.add(mapToHospital(r));
-                  }
-                  adapter.updateData(hospitals);
-                  boolean isSearch = query != null && !query.trim().isEmpty();
-                  if (!isSearch) carouselAdapter.updateData(hospitals);
-                  scrollContent.setVisibility(View.VISIBLE);
-                }),
-        (code, msg) ->
-            LoadingHelper.hide(
-                loadingIndicator,
-                () -> {
-                  scrollContent.setVisibility(View.VISIBLE);
-                  ApiCallback.simpleError(requireContext(), "Failed to load hospitals.")
-                      .run(code, msg);
-                }));
+        LoadingHelper.wrapSuccess(
+            loadingIndicator,
+            scrollContent,
+            body -> {
+              List<Hospital> hospitals = new ArrayList<>();
+              for (HospitalResponse r : body) hospitals.add(mapToHospital(r));
+              adapter.updateData(hospitals);
+              boolean isSearch = query != null && !query.trim().isEmpty();
+              if (!isSearch) carouselAdapter.updateData(hospitals);
+            }),
+        LoadingHelper.wrapError(
+            loadingIndicator,
+            scrollContent,
+            ApiCallback.simpleError(requireContext(), "Failed to load hospitals.")));
   }
 
   private void updateCarouselVisibility(String search) {

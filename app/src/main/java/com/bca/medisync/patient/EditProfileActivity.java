@@ -17,13 +17,11 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
-import com.bca.medisync.util.FileUploadHelper;
 import com.bca.medisync.util.ImageLoader;
+import com.bca.medisync.util.ProfilePicUploader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import java.io.File;
-import okhttp3.MultipartBody;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -103,24 +101,17 @@ public class EditProfileActivity extends AppCompatActivity {
   }
 
   private void uploadProfilePic(Uri uri) {
-    File cachedFile;
-    try {
-      cachedFile = FileUploadHelper.copyUriToCache(this, uri, "profile_pic");
-    } catch (Exception e) {
-      Toast.makeText(this, "Couldn't read the selected photo!", Toast.LENGTH_SHORT).show();
-      return;
-    }
-
-    MultipartBody.Part filePart = FileUploadHelper.toImagePart(cachedFile, "file");
-
     PatientApi api = ApiClient.api(PatientApi.class);
-    ApiCallback.handle(
-        api.updateProfilePic(filePart),
+    ProfilePicUploader.upload(
+        this,
+        null,
+        uri,
+        "profile_pic",
+        api::updateProfilePic,
         p -> {
           Toast.makeText(this, "Profile picture updated.", Toast.LENGTH_SHORT).show();
           bindProfilePic(p.getProfile_pic_url());
-        },
-        ApiCallback.simpleError(this, "Failed to update profile picture."));
+        });
   }
 
   private void attemptSave() {

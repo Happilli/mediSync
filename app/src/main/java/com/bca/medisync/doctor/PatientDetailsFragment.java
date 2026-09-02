@@ -78,29 +78,21 @@ public class PatientDetailsFragment extends Fragment {
     appointmentId = args.getInt("appointment_id", -1);
 
     InfoRowBinder.bind(
-        new View[] {rowGender, rowBlood, rowPhone, rowEmail, rowDob, rowAddress, rowEmergency},
-        new int[] {
-          R.drawable.stethoscope,
-          R.drawable.stethoscope,
-          R.drawable.phone,
-          R.drawable.email,
-          R.drawable.birthdate,
-          R.drawable.location,
-          R.drawable.emergency
-        },
-        new String[] {
-          "Gender", "Blood Group", "Phone", "Email", "Date of Birth", "Address", "Emergency Contact"
-        },
-        new String[] {
-          args.getString("patient_gender"),
-          args.getString("patient_blood"),
-          args.getString("patient_phone"),
-          args.getString("patient_email"),
-          args.getString("patient_dob"),
-          args.getString("patient_address"),
-          args.getString("patient_emergency")
-        });
-
+        new InfoRowBinder.Row(
+            rowGender, R.drawable.stethoscope, "Gender", args.getString("patient_gender")),
+        new InfoRowBinder.Row(
+            rowBlood, R.drawable.stethoscope, "Blood Group", args.getString("patient_blood")),
+        new InfoRowBinder.Row(rowPhone, R.drawable.phone, "Phone", args.getString("patient_phone")),
+        new InfoRowBinder.Row(rowEmail, R.drawable.email, "Email", args.getString("patient_email")),
+        new InfoRowBinder.Row(
+            rowDob, R.drawable.birthdate, "Date of Birth", args.getString("patient_dob")),
+        new InfoRowBinder.Row(
+            rowAddress, R.drawable.location, "Address", args.getString("patient_address")),
+        new InfoRowBinder.Row(
+            rowEmergency,
+            R.drawable.emergency,
+            "Emergency Contact",
+            args.getString("patient_emergency")));
     bindProfilePic(args.getString("patient_pic_url"));
     btnConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
   }

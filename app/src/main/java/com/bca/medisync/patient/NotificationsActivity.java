@@ -105,24 +105,26 @@ public class NotificationsActivity extends AppCompatActivity
     rvNotifications.setAdapter(adapter);
   }
 
-private void bindNotificationRow(android.view.View itemView, Notification n, int posInGroup, int groupSize) {
-  TextView txtTitle = itemView.findViewById(R.id.txtNotifTitle);
-  TextView txtMessage = itemView.findViewById(R.id.txtNotifMessage);
-  TextView txtTime = itemView.findViewById(R.id.txtNotifTime);
-  View unreadDot = itemView.findViewById(R.id.unreadDot);
+  private void bindNotificationRow(
+      android.view.View itemView, Notification n, int posInGroup, int groupSize) {
+    TextView txtTitle = itemView.findViewById(R.id.txtNotifTitle);
+    TextView txtMessage = itemView.findViewById(R.id.txtNotifMessage);
+    TextView txtTime = itemView.findViewById(R.id.txtNotifTime);
+    View unreadDot = itemView.findViewById(R.id.unreadDot);
 
-  txtTitle.setText(n.getTitle());
-  txtMessage.setText(n.getMessage());
-  txtTime.setText(DateTimeUtils.format(n.getCreatedAt(), "dd MMM, hh:mm a"));
+    txtTitle.setText(n.getTitle());
+    txtMessage.setText(n.getMessage());
+    txtTime.setText(DateTimeUtils.format(n.getCreatedAt(), "dd MMM, hh:mm a"));
 
-  if (n.isRead()) {
-    unreadDot.setVisibility(android.view.View.INVISIBLE);
-    itemView.setAlpha(0.6f);
-  } else {
-    unreadDot.setVisibility(android.view.View.VISIBLE);
-    itemView.setAlpha(1f);
+    if (n.isRead()) {
+      unreadDot.setVisibility(android.view.View.INVISIBLE);
+      itemView.setAlpha(0.6f);
+    } else {
+      unreadDot.setVisibility(android.view.View.VISIBLE);
+      itemView.setAlpha(1f);
+    }
   }
-}
+
   private String capitalize(String s) {
     if (s.isEmpty()) return s;
     return s.substring(0, 1).toUpperCase() + s.substring(1);
@@ -149,8 +151,7 @@ private void bindNotificationRow(android.view.View itemView, Notification n, int
           }
           applyFilter();
         },
-        (code, msg) ->
-            Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show());
+        ApiCallback.simpleError(this, "Failed to load notifications"));
   }
 
   private void applyFilter() {

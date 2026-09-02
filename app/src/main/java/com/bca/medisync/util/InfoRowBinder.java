@@ -3,17 +3,31 @@ package com.bca.medisync.util;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bca.medisync.R;
 
 public class InfoRowBinder {
 
-  public static void bind(View[] rows, int[] icons, String[] labels, String[] values) {
+  public static class Row {
+    final View view;
+    final int icon;
+    final String label;
+    final String value;
+
+    public Row(View view, int icon, String label, String value) {
+      this.view = view;
+      this.icon = icon;
+      this.label = label;
+      this.value = value;
+    }
+  }
+
+  public static void bind(Row... rows) {
     for (int i = 0; i < rows.length; i++) {
-      ((ImageView) rows[i].findViewById(R.id.imgRowIcon)).setImageResource(icons[i]);
-      ((TextView) rows[i].findViewById(R.id.txtRowLabel)).setText(labels[i]);
-      ((TextView) rows[i].findViewById(R.id.txtRowValue)).setText(values[i]);
-      RoundedListStyler.apply(rows[i], i, rows.length);
+      Row row = rows[i];
+      ((ImageView) row.view.findViewById(R.id.imgRowIcon)).setImageResource(row.icon);
+      ((TextView) row.view.findViewById(R.id.txtRowLabel)).setText(row.label);
+      ((TextView) row.view.findViewById(R.id.txtRowValue)).setText(row.value);
+      RoundedListStyler.apply(row.view, i, rows.length);
     }
   }
 

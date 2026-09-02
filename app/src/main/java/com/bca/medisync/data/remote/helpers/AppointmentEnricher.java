@@ -63,16 +63,18 @@ public class AppointmentEnricher {
         callback);
   }
 
-  public static Appointment mapToAppointment(AppointmentResponse r, DoctorResponse d) {
-    String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctor_id();
-    String speciality = d != null ? d.getSpeciality() : "";
-    String department = d != null ? d.getDepartment() : "";
+  private static Appointment build(
+      AppointmentResponse r,
+      String patientName,
+      String doctorName,
+      String department,
+      String speciality) {
     Date date = parseIso(r.getAppointment_at());
     String dateStr = date != null ? DATE_FMT.get().format(date) : "";
     String timeStr = date != null ? TIME_FMT.get().format(date) : "";
     return new Appointment(
         String.valueOf(r.getId()),
-        "",
+        patientName,
         doctorName,
         department,
         speciality,
@@ -83,26 +85,25 @@ public class AppointmentEnricher {
         r.getPatient_id());
   }
 
+  public static Appointment mapToAppointment(AppointmentResponse r, DoctorResponse d) {
+    String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctor_id();
+    String speciality = d != null ? d.getSpeciality() : "";
+    String department = d != null ? d.getDepartment() : "";
+    return build(r, "", doctorName, department, speciality);
+  }
+
   public static Appointment mapToAppointmentForDoctor(
       AppointmentResponse r, PatientPublicResponse p) {
     String patientName = r.getPatient_name();
     if (patientName == null || patientName.isEmpty()) {
       patientName = p != null ? p.getName() : "Patient #" + r.getPatient_id();
     }
-    Date date = parseIso(r.getAppointment_at());
-    String dateStr = date != null ? DATE_FMT.get().format(date) : "";
-    String timeStr = date != null ? TIME_FMT.get().format(date) : "";
-    return new Appointment(
-        String.valueOf(r.getId()),
+    return build(
+        r,
         patientName,
         r.getDoctor_name() != null ? r.getDoctor_name() : "",
         r.getDepartment() != null ? r.getDepartment() : "",
-        r.getSpeciality() != null ? r.getSpeciality() : "",
-        dateStr,
-        timeStr,
-        capitalize(r.getStatus()),
-        r.getNotes(),
-        r.getPatient_id());
+        r.getSpeciality() != null ? r.getSpeciality() : "");
   }
 
   public static Date parseIso(String iso) {

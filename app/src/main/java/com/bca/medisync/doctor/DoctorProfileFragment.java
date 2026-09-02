@@ -27,6 +27,7 @@ import com.bca.medisync.util.FileUploadHelper;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
+import com.bca.medisync.util.ProfilePicUploader;
 import com.google.android.material.loadingindicator.LoadingIndicator;
 import java.io.File;
 import okhttp3.MultipartBody;
@@ -98,33 +99,16 @@ public class DoctorProfileFragment extends Fragment {
   }
 
   private void uploadProfilePic(Uri uri) {
-    File cachedFile;
-    try {
-      cachedFile = FileUploadHelper.copyUriToCache(requireContext(), uri, "doctor_profile_pic");
-    } catch (Exception e) {
-      Toast.makeText(requireContext(), "Couldn't read the selected photo!", Toast.LENGTH_SHORT)
-          .show();
-      return;
-    }
-
-    MultipartBody.Part filePart = FileUploadHelper.toImagePart(cachedFile, "file");
-
     DoctorApi api = ApiClient.api(DoctorApi.class);
-    ApiCallback.handle(
-        api.updateProfilePic(filePart),
+    ProfilePicUploader.upload(
+        requireContext(),
         this,
+        uri,
+        "doctor_profile_pic",
+        api::updateProfilePic,
         d -> {
           Toast.makeText(requireContext(), "Profile picture updated.", Toast.LENGTH_SHORT).show();
           bindProfilePic(d.getProfile_pic_url());
-        },
-        (code, msg) -> {
-          if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(
-                    requireContext(), "Failed to update profile picture.", Toast.LENGTH_SHORT)
-                .show();
-          }
         });
   }
 
@@ -136,22 +120,17 @@ public class DoctorProfileFragment extends Fragment {
     ApiCallback.handle(
         api.getMyProfile(),
         this,
-        profile ->
-            LoadingHelper.hide(
-                loadingIndicator,
-                () -> {
-                  bindProfile(profile);
-                  loadHospitalName(profile.getHospital_id());
-                  scrollContent.setVisibility(View.VISIBLE);
-                }),
-        (code, msg) ->
-            LoadingHelper.hide(
-                loadingIndicator,
-                () -> {
-                  scrollContent.setVisibility(View.VISIBLE);
-                  ApiCallback.simpleError(requireContext(), "Failed to load profile.")
-                      .run(code, msg);
-                }));
+        LoadingHelper.wrapSuccess(
+            loadingIndicator,
+            scrollContent,
+            profile -> {
+              bindProfile(profile);
+              loadHospitalName(profile.getHospital_id());
+            }),
+        LoadingHelper.wrapError(
+            loadingIndicator,
+            scrollContent,
+            ApiCallback.simpleError(requireContext(), "Failed to load profile.")));
   }
 
   private void loadHospitalName(int hospitalId) {
@@ -214,24 +193,18 @@ public class DoctorProfileFragment extends Fragment {
     View rowAddress = view.findViewById(R.id.rowAddress);
 
     InfoRowBinder.bind(
-        new View[] {rowSpecialization, rowHospital, rowExperience, rowPhone, rowEmail, rowAddress},
-        new int[] {
-          R.drawable.stethoscope,
-          R.drawable.hospital,
-          R.drawable.ic_nav_calendar,
-          R.drawable.phone,
-          R.drawable.email,
-          R.drawable.location
-        },
-        new String[] {"Specialization", "Hospital", "Experience", "Phone", "Email", "Address"},
-        new String[] {
-          p.getSpeciality(),
-          "Hospital #" + p.getHospital_id(),
-          years > 0 ? years + " years" : "Not specified",
-          p.getPhone(),
-          sessionManager.getEmail(),
-          p.getAddress()
-        });
+        new InfoRowBinder.Row(
+            rowSpecialization, R.drawable.stethoscope, "Specialization", p.getSpeciality()),
+        new InfoRowBinder.Row(
+            rowHospital, R.drawable.hospital, "Hospital", "Hospital #" + p.getHospital_id()),
+        new InfoRowBinder.Row(
+            rowExperience,
+            R.drawable.ic_nav_calendar,
+            "Experience",
+            years > 0 ? years + " years" : "Not specified"),
+        new InfoRowBinder.Row(rowPhone, R.drawable.phone, "Phone", p.getPhone()),
+        new InfoRowBinder.Row(rowEmail, R.drawable.email, "Email", sessionManager.getEmail()),
+        new InfoRowBinder.Row(rowAddress, R.drawable.location, "Address", p.getAddress()));
   }
 
   private void bindProfilePic(String profilePicUrl) {

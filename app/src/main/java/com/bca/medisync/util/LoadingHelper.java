@@ -1,6 +1,8 @@
 package com.bca.medisync.util;
 
 import android.view.View;
+
+import com.bca.medisync.data.remote.ApiCallback;
 import com.google.android.material.loadingindicator.LoadingIndicator;
 
 public class LoadingHelper {
@@ -30,5 +32,27 @@ public class LoadingHelper {
           if (after != null) after.run();
         },
         remaining);
+  }
+
+  public static <T> ApiCallback.OnSuccess<T> wrapSuccess(
+      LoadingIndicator indicator, View contentView, ApiCallback.OnSuccess<T> onSuccess) {
+    return body ->
+        hide(
+            indicator,
+            () -> {
+              contentView.setVisibility(View.VISIBLE);
+              onSuccess.run(body);
+            });
+  }
+
+  public static ApiCallback.OnError wrapError(
+      LoadingIndicator indicator, View contentView, ApiCallback.OnError onError) {
+    return (code, msg) ->
+        hide(
+            indicator,
+            () -> {
+              contentView.setVisibility(View.VISIBLE);
+              onError.run(code, msg);
+            });
   }
 }
