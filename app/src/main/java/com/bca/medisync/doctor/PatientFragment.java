@@ -1,13 +1,10 @@
 package com.bca.medisync.doctor;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
@@ -19,48 +16,23 @@ import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.SearchSuggestionHelper;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.search.SearchBar;
-import com.google.android.material.search.SearchView;
+import com.bca.medisync.util.SearchableListFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PatientFragment extends Fragment {
-
+public class PatientFragment extends SearchableListFragment<Patient> {
   private RecyclerView rvPatients;
-  private RecyclerView rvSearchSuggestions;
-  private MaterialToolbar toolbar;
-  private SearchBar searchBar;
-  private SearchView searchView;
   private SimpleListAdapter<Patient> adapter;
   private List<PatientPublicResponse> currentResponses = new ArrayList<>();
 
-  public PatientFragment() {}
-
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_patient, container, false);
+  protected int getLayoutRes() {
+    return R.layout.fragment_patient;
   }
 
   @Override
-  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-    super.onViewCreated(view, savedInstanceState);
-    initViews(view);
-    setupSearch();
-    loadPatients(null);
-  }
-
-  private void initViews(View view) {
+  protected void setupResultsView(@NonNull View view) {
     rvPatients = view.findViewById(R.id.rvPatients);
-    toolbar = view.findViewById(R.id.toolbar);
-    searchBar = view.findViewById(R.id.searchBar);
-    searchView = view.findViewById(R.id.searchView);
-    rvSearchSuggestions = view.findViewById(R.id.rvSearchSuggestions);
-
     rvPatients.setLayoutManager(new LinearLayoutManager(requireContext()));
 
     adapter =
@@ -83,57 +55,56 @@ public class PatientFragment extends Fragment {
     adapter.setRoundedList(true);
   }
 
-  private void setupSearch() {
-    SearchSuggestionHelper<Patient> searchHelper =
-        new SearchSuggestionHelper<>(
-            this,
-            searchBar,
-            searchView,
-            rvSearchSuggestions,
-            (query, onResult) -> {
-              PatientApi api = ApiClient.api(PatientApi.class);
-              ApiCallback.handle(
-                  api.getTreatedPatients(query),
-                  this,
-                  body -> {
-                    currentResponses = body;
-                    List<Patient> patients = new ArrayList<>();
-                    for (PatientPublicResponse r : body) patients.add(mapToPatient(r));
-                    onResult.onResult(patients);
-                  },
-                  (code, msg) -> onResult.onResult(new ArrayList<>()));
-            },
-            new SearchSuggestionHelper.SuggestionBinder<Patient>() {
-              @Override
-              public String getTitle(Patient item) {
-                return item.getName();
-              }
-
-              @Override
-              public String getSubtitle(Patient item) {
-                return item.getPhone();
-              }
-
-              @Override
-              public String getImageUrl(Patient item) {
-                return ApiClient.mediaUrl(item.getProfilePicUrl());
-              }
-
-              @Override
-              public int getPlaceholderRes() {
-                return R.drawable.ic_nav_profile;
-              }
-            },
-            this::onPatientClicked,
-            query -> loadPatients(query));
-
-    searchHelper.attach();
-  }
-
-  private void loadPatients(String search) {
+  @Override
+  protected void search(String query, SearchSuggestionHelper.OnResult<Patient> onResult) {
     PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
-        api.getTreatedPatients(search),
+        api.getTreatedPatients(query),
+        this,
+        body -> {
+          currentResponses = body;
+          List<Patient> patients = new ArrayList<>();
+          for (PatientPublicResponse r : body) patients.add(mapToPatient(r));
+          onResult.onResult(patients);
+        },
+        (code, msg) -> onResult.onResult(new ArrayList<>()));
+  }
+
+  @Override
+  protected SearchSuggestionHelper.SuggestionBinder<Patient> getSuggestionBinder() {
+    return new SearchSuggestionHelper.SuggestionBinder<Patient>() {
+      @Override
+      public String getTitle(Patient item) {
+        return item.getName();
+      }
+
+      @Override
+      public String getSubtitle(Patient item) {
+        return item.getPhone();
+      }
+
+      @Override
+      public String getImageUrl(Patient item) {
+        return ApiClient.mediaUrl(item.getProfilePicUrl());
+      }
+
+      @Override
+      public int getPlaceholderRes() {
+        return R.drawable.ic_nav_profile;
+      }
+    };
+  }
+
+  @Override
+  protected void onSuggestionSelected(Patient patient) {
+    onPatientClicked(patient);
+  }
+
+  @Override
+  protected void loadResults(@Nullable String query) {
+    PatientApi api = ApiClient.api(PatientApi.class);
+    ApiCallback.handle(
+        api.getTreatedPatients(query),
         this,
         this::bindPatients,
         ApiCallback.simpleError(requireContext(), "Failed to load patients."));

@@ -5,13 +5,10 @@ import android.transition.ChangeBounds;
 import android.transition.Fade;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,9 +22,7 @@ import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.SearchSuggestionHelper;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.search.SearchBar;
-import com.google.android.material.search.SearchView;
+import com.bca.medisync.util.SearchableListFragment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,108 +30,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DoctorFragment extends Fragment {
+public class DoctorFragment extends SearchableListFragment<Doctor> {
   private RecyclerView rvDoctors;
-  private RecyclerView rvSearchSuggestions;
-  private MaterialToolbar toolbar;
-  private SearchBar searchBar;
-  private SearchView searchView;
   private GroupedListAdapter<Doctor> adapter;
 
   private Integer filterHospitalId;
-
   private final Set<String> expandedIds = new HashSet<>();
   private final Map<Integer, String> hospitalNameCache = new HashMap<>();
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_doctor, container, false);
+  protected int getLayoutRes() {
+    return R.layout.fragment_doctor;
   }
 
   @Override
-  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-    super.onViewCreated(view, savedInstanceState);
-    Bundle args = getArguments();
-    if (args != null) {
-      String hospitalIdStr = args.getString("hospital_id");
-      if (hospitalIdStr != null) {
-        try {
-          filterHospitalId = Integer.parseInt(hospitalIdStr);
-        } catch (NumberFormatException ignored) {
-        }
+  protected void onInit(@Nullable Bundle args) {
+    if (args == null) return;
+    String hospitalIdStr = args.getString("hospital_id");
+    if (hospitalIdStr != null) {
+      try {
+        filterHospitalId = Integer.parseInt(hospitalIdStr);
+      } catch (NumberFormatException ignored) {
       }
     }
-    initViews(view);
-    setupToolbar();
-    setupRecyclerView();
-    setupSearch();
-    loadDoctors(null);
   }
 
-  private void initViews(View view) {
+  @Override
+  protected void setupResultsView(@NonNull View view) {
     rvDoctors = view.findViewById(R.id.rvDoctors);
-    toolbar = view.findViewById(R.id.toolbar);
-    searchBar = view.findViewById(R.id.searchBar);
-    searchView = view.findViewById(R.id.searchView);
-    rvSearchSuggestions = view.findViewById(R.id.rvSearchSuggestions);
-  }
-
-  private void setupToolbar() {
-    toolbar.setNavigationOnClickListener(
-        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-  }
-
-  private void setupSearch() {
-    SearchSuggestionHelper<Doctor> searchHelper =
-        new SearchSuggestionHelper<>(
-            this,
-            searchBar,
-            searchView,
-            rvSearchSuggestions,
-            (query, onResult) -> {
-              DoctorApi api = ApiClient.api(DoctorApi.class);
-              ApiCallback.handle(
-                  api.getDoctors(filterHospitalId, null, null, query),
-                  this,
-                  body -> {
-                    List<Doctor> doctors = new ArrayList<>();
-                    for (DoctorResponse r : body) doctors.add(mapToDoctor(r));
-                    onResult.onResult(doctors);
-                  },
-                  (code, msg) -> onResult.onResult(new ArrayList<>()));
-            },
-            new SearchSuggestionHelper.SuggestionBinder<Doctor>() {
-              @Override
-              public String getTitle(Doctor item) {
-                return item.getName();
-              }
-
-              @Override
-              public String getSubtitle(Doctor item) {
-                return item.getSpeciality();
-              }
-
-              @Override
-              public String getImageUrl(Doctor item) {
-                return item.getImageUrl();
-              }
-
-              @Override
-              public int getPlaceholderRes() {
-                return R.drawable.stethoscope;
-              }
-            },
-            doctor -> loadDoctors(doctor.getName()),
-            query -> loadDoctors(query));
-
-    searchHelper.attach();
-  }
-
-  private void setupRecyclerView() {
     rvDoctors.setItemAnimator(null);
 
     adapter =
@@ -148,6 +69,64 @@ public class DoctorFragment extends Fragment {
 
     rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvDoctors.setAdapter(adapter);
+  }
+
+  @Override
+  protected void search(String query, SearchSuggestionHelper.OnResult<Doctor> onResult) {
+    DoctorApi api = ApiClient.api(DoctorApi.class);
+    ApiCallback.handle(
+        api.getDoctors(filterHospitalId, null, null, query),
+        this,
+        body -> {
+          List<Doctor> doctors = new ArrayList<>();
+          for (DoctorResponse r : body) doctors.add(mapToDoctor(r));
+          onResult.onResult(doctors);
+        },
+        (code, msg) -> onResult.onResult(new ArrayList<>()));
+  }
+
+  @Override
+  protected SearchSuggestionHelper.SuggestionBinder<Doctor> getSuggestionBinder() {
+    return new SearchSuggestionHelper.SuggestionBinder<Doctor>() {
+      @Override
+      public String getTitle(Doctor item) {
+        return item.getName();
+      }
+
+      @Override
+      public String getSubtitle(Doctor item) {
+        return item.getSpeciality();
+      }
+
+      @Override
+      public String getImageUrl(Doctor item) {
+        return item.getImageUrl();
+      }
+
+      @Override
+      public int getPlaceholderRes() {
+        return R.drawable.stethoscope;
+      }
+    };
+  }
+
+  @Override
+  protected void onSuggestionSelected(Doctor doctor) {
+    loadResults(doctor.getName());
+  }
+
+  @Override
+  protected void loadResults(@Nullable String query) {
+    DoctorApi api = ApiClient.api(DoctorApi.class);
+    ApiCallback.handle(
+        api.getDoctors(filterHospitalId, null, null, query),
+        this,
+        body -> {
+          List<Doctor> doctors = new ArrayList<>();
+          for (DoctorResponse r : body) doctors.add(mapToDoctor(r));
+          adapter.submitList(doctors);
+        },
+        ApiCallback.simpleError(requireContext(), "Failed to load doctors."));
   }
 
   private void bindDoctorRow(View itemView, Doctor doctor) {
@@ -221,21 +200,6 @@ public class DoctorFragment extends Fragment {
     BookAppointmentFragment fragment = new BookAppointmentFragment();
     fragment.setArguments(args);
     ((MainTabActivity) requireActivity()).pushFragment(fragment);
-  }
-
-  private void loadDoctors(String search) {
-    DoctorApi api = ApiClient.api(DoctorApi.class);
-    ApiCallback.handle(
-        api.getDoctors(filterHospitalId, null, null, search),
-        this,
-        body -> {
-          List<Doctor> doctors = new ArrayList<>();
-          for (DoctorResponse r : body) {
-            doctors.add(mapToDoctor(r));
-          }
-          adapter.submitList(doctors);
-        },
-        ApiCallback.simpleError(requireContext(), "Failed to load doctors."));
   }
 
   private Doctor mapToDoctor(DoctorResponse r) {
