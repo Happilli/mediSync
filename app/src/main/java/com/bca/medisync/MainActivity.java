@@ -3,7 +3,6 @@ package com.bca.medisync;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -21,20 +20,16 @@ import com.bca.medisync.data.remote.NotificationSocketManager;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.login.LoginRequest;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
+import com.bca.medisync.databinding.ActivityLoginBinding;
 import com.bca.medisync.doctor.DoctorTabActivity;
 import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
 import com.bca.medisync.util.LoadingHelper;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.loadingindicator.LoadingIndicator;
-import com.google.android.material.textfield.TextInputEditText;
 
 public class MainActivity extends AppCompatActivity {
-  private MaterialButton btnLogin;
-  private LoadingIndicator loadingIndicator;
-  private TextInputEditText etEmail, etPassword;
+
+  private ActivityLoginBinding binding;
   private SessionManager sessionManager;
-  private TextView goToRegister;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -55,27 +50,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_login);
+    binding = ActivityLoginBinding.inflate(getLayoutInflater());
+    setContentView(binding.getRoot());
+
     ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.mainStuff),
+        binding.mainStuff,
         (v, i) -> {
           Insets systemBars = i.getInsets(WindowInsetsCompat.Type.systemBars());
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return i;
         });
-    loadingIndicator = findViewById(R.id.loadingIndicator);
+
     sessionManager = new SessionManager(this);
-    btnLogin = findViewById(R.id.btnLogin);
-    etEmail = findViewById(R.id.etEmail);
-    etPassword = findViewById(R.id.etPassword);
-    goToRegister = findViewById(R.id.GoToRegister);
-    goToRegister.setText("No Account?\nRegister");
-    goToRegister.setOnClickListener(
+    binding.GoToRegister.setText("No Account?\nRegister");
+    binding.GoToRegister.setOnClickListener(
         v -> startActivity(new Intent(MainActivity.this, RegisterActivity.class)));
-    btnLogin.setOnClickListener(v -> attemptLogin());
-    findViewById(R.id.txtForgotPassword)
-        .setOnClickListener(
-            v -> startActivity(new Intent(MainActivity.this, ForgotPasswordActivity.class)));
+    binding.btnLogin.setOnClickListener(v -> attemptLogin());
+    binding.txtForgotPassword.setOnClickListener(
+        v ->
+            startActivity(
+                new Intent(MainActivity.this, com.bca.medisync.ForgotPasswordActivity.class)));
   }
 
   private final NotificationSocketManager.Listener globalNotificationListener =
@@ -94,29 +88,31 @@ public class MainActivity extends AppCompatActivity {
   private void showSystemNotification(NotificationResponse n) {}
 
   public void attemptLogin() {
-    String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
-    String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
+    String email =
+        binding.etEmail.getText() != null ? binding.etEmail.getText().toString().trim() : "";
+    String password =
+        binding.etPassword.getText() != null ? binding.etPassword.getText().toString().trim() : "";
 
     if (email.isEmpty()) {
-      etEmail.setError("Email is required");
+      binding.etEmail.setError("Email is required");
       return;
     }
     if (password.isEmpty()) {
-      etPassword.setError("Password is required");
+      binding.etPassword.setError("Password is required");
       return;
     }
 
-    btnLogin.setEnabled(false);
-    LoadingHelper.show(loadingIndicator);
+    binding.btnLogin.setEnabled(false);
+    LoadingHelper.show(binding.loadingIndicator);
 
     AuthApi authApi = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
         authApi.login(new LoginRequest(email, password)),
         body -> {
           LoadingHelper.hide(
-              loadingIndicator,
+              binding.loadingIndicator,
               () -> {
-                btnLogin.setEnabled(true);
+                binding.btnLogin.setEnabled(true);
                 sessionManager.saveSession(body.getAccess_token(), body.getRole(), body.getEmail());
                 NotificationSocketHolder.get()
                     .connect(sessionManager.getToken(), globalNotificationListener);
@@ -133,9 +129,9 @@ public class MainActivity extends AppCompatActivity {
         },
         (code, msg) -> {
           LoadingHelper.hide(
-              loadingIndicator,
+              binding.loadingIndicator,
               () -> {
-                btnLogin.setEnabled(true);
+                binding.btnLogin.setEnabled(true);
                 if (code == -1) {
                   Toast.makeText(MainActivity.this, "network error: " + msg, Toast.LENGTH_LONG)
                       .show();

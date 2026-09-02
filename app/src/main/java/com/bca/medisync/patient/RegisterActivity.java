@@ -1,7 +1,7 @@
 package com.bca.medisync.patient;
 
 import android.os.Bundle;
-import android.widget.RadioGroup;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -15,12 +15,10 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.register.PatientRegisterRequest;
+import com.bca.medisync.databinding.ActivityRegisterBinding;
 import com.bca.medisync.util.LoadingHelper;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
@@ -29,20 +27,7 @@ import java.util.Locale;
 
 public class RegisterActivity extends AppCompatActivity {
 
-  private TextInputEditText etName,
-      etEmail,
-      etPassword,
-      etConfirmPassword,
-      etPhone,
-      etAddress,
-      etEmergencyContact,
-      etSecurityAnswer;
-  private RadioGroup radioGroupGender;
-  private MaterialButtonToggleGroup toggleBloodGroupRow1, toggleBloodGroupRow2;
-  private MaterialButton btnSelectDob;
-  private ExtendedFloatingActionButton btnRegister;
-  private LoadingIndicator loadingIndicator;
-  private android.widget.TextView txtSelectedDob, txtPasswordMismatch, goToLogin;
+  private ActivityRegisterBinding binding;
 
   private String selectedDob = "";
   private boolean passwordsMismatched = false;
@@ -51,80 +36,61 @@ public class RegisterActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_register);
+    binding = ActivityRegisterBinding.inflate(getLayoutInflater());
+    setContentView(binding.getRoot());
+
     ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.mainStuff),
+        binding.mainStuff,
         (v, insets) -> {
           Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return insets;
         });
 
-    initViews();
     setupDobPicker();
     setupBloodGroupToggles();
     setupPasswordMatchWatcher();
     setupListeners();
   }
 
-  private void initViews() {
-    etName = findViewById(R.id.etName);
-    etEmail = findViewById(R.id.etEmail);
-    etPassword = findViewById(R.id.etPassword);
-    etConfirmPassword = findViewById(R.id.etConfirmPassword);
-    etPhone = findViewById(R.id.etPhone);
-    etAddress = findViewById(R.id.etAddress);
-    etEmergencyContact = findViewById(R.id.etEmergencyContact);
-    radioGroupGender = findViewById(R.id.radioGroupGender);
-    toggleBloodGroupRow1 = findViewById(R.id.toggleBloodGroupRow1);
-    toggleBloodGroupRow2 = findViewById(R.id.toggleBloodGroupRow2);
-    btnSelectDob = findViewById(R.id.btnSelectDob);
-    txtSelectedDob = findViewById(R.id.txtSelectedDob);
-    txtPasswordMismatch = findViewById(R.id.txtPasswordMismatch);
-    btnRegister = findViewById(R.id.btnRegister);
-    loadingIndicator = findViewById(R.id.loadingIndicator);
-    goToLogin = findViewById(R.id.GoToLogin);
-    etSecurityAnswer = findViewById(R.id.etSecurityAnswer);
-  }
-
   private void setupBloodGroupToggles() {
-    toggleBloodGroupRow1.addOnButtonCheckedListener(
+    binding.toggleBloodGroupRow1.addOnButtonCheckedListener(
         (group, checkedId, isChecked) -> {
-          if (isChecked) toggleBloodGroupRow2.clearChecked();
+          if (isChecked) binding.toggleBloodGroupRow2.clearChecked();
         });
-    toggleBloodGroupRow2.addOnButtonCheckedListener(
+    binding.toggleBloodGroupRow2.addOnButtonCheckedListener(
         (group, checkedId, isChecked) -> {
-          if (isChecked) toggleBloodGroupRow1.clearChecked();
+          if (isChecked) binding.toggleBloodGroupRow1.clearChecked();
         });
   }
 
   private void setupPasswordMatchWatcher() {
-    etConfirmPassword.setOnFocusChangeListener(
+    binding.etConfirmPassword.setOnFocusChangeListener(
         (v, hasFocus) -> {
           if (!hasFocus) checkPasswordsMatch();
         });
-    etPassword.setOnFocusChangeListener(
+    binding.etPassword.setOnFocusChangeListener(
         (v, hasFocus) -> {
-          if (!hasFocus && !textOf(etConfirmPassword).isEmpty()) checkPasswordsMatch();
+          if (!hasFocus && !textOf(binding.etConfirmPassword).isEmpty()) checkPasswordsMatch();
         });
   }
 
   private void checkPasswordsMatch() {
-    String password = textOf(etPassword);
-    String confirmPassword = textOf(etConfirmPassword);
+    String password = textOf(binding.etPassword);
+    String confirmPassword = textOf(binding.etConfirmPassword);
 
     if (confirmPassword.isEmpty() || password.isEmpty()) {
       passwordsMismatched = false;
-      txtPasswordMismatch.setVisibility(android.view.View.GONE);
+      binding.txtPasswordMismatch.setVisibility(View.GONE);
       return;
     }
 
     if (!password.equals(confirmPassword)) {
       passwordsMismatched = true;
-      txtPasswordMismatch.setVisibility(android.view.View.VISIBLE);
+      binding.txtPasswordMismatch.setVisibility(View.VISIBLE);
     } else {
       passwordsMismatched = false;
-      txtPasswordMismatch.setVisibility(android.view.View.GONE);
+      binding.txtPasswordMismatch.setVisibility(View.GONE);
     }
   }
 
@@ -132,7 +98,8 @@ public class RegisterActivity extends AppCompatActivity {
     MaterialDatePicker<Long> picker =
         MaterialDatePicker.Builder.datePicker().setTitleText("Select Date of Birth").build();
 
-    btnSelectDob.setOnClickListener(v -> picker.show(getSupportFragmentManager(), "DOB_PICKER"));
+    binding.btnSelectDob.setOnClickListener(
+        v -> picker.show(getSupportFragmentManager(), "DOB_PICKER"));
 
     picker.addOnPositiveButtonClickListener(
         selection -> {
@@ -140,17 +107,17 @@ public class RegisterActivity extends AppCompatActivity {
               new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(selection));
           String display =
               new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date(selection));
-          txtSelectedDob.setText(display);
+          binding.txtSelectedDob.setText(display);
         });
   }
 
   private void setupListeners() {
-    goToLogin.setOnClickListener(v -> finish());
-    btnRegister.setOnClickListener(v -> attemptRegister());
+    binding.GoToLogin.setOnClickListener(v -> finish());
+    binding.btnRegister.setOnClickListener(v -> attemptRegister());
   }
 
   private String getSelectedGender() {
-    int checkedId = radioGroupGender.getCheckedRadioButtonId();
+    int checkedId = binding.radioGroupGender.getCheckedRadioButtonId();
     if (checkedId == R.id.radioMale) return "male";
     if (checkedId == R.id.radioFemale) return "female";
     if (checkedId == R.id.radioOther) return "other";
@@ -158,59 +125,59 @@ public class RegisterActivity extends AppCompatActivity {
   }
 
   private String getSelectedBloodGroup() {
-    int checkedId1 = toggleBloodGroupRow1.getCheckedButtonId();
-    if (checkedId1 != android.view.View.NO_ID) {
-      MaterialButton btn = findViewById(checkedId1);
+    int checkedId1 = binding.toggleBloodGroupRow1.getCheckedButtonId();
+    if (checkedId1 != View.NO_ID) {
+      MaterialButton btn = binding.getRoot().findViewById(checkedId1);
       return btn.getText().toString().trim().toUpperCase(Locale.ROOT);
     }
-    int checkedId2 = toggleBloodGroupRow2.getCheckedButtonId();
-    if (checkedId2 != android.view.View.NO_ID) {
-      MaterialButton btn = findViewById(checkedId2);
+    int checkedId2 = binding.toggleBloodGroupRow2.getCheckedButtonId();
+    if (checkedId2 != View.NO_ID) {
+      MaterialButton btn = binding.getRoot().findViewById(checkedId2);
       return btn.getText().toString().trim().toUpperCase(Locale.ROOT);
     }
     return "";
   }
 
   private void attemptRegister() {
-    String name = textOf(etName);
-    String email = textOf(etEmail);
-    String password = textOf(etPassword);
-    String confirmPassword = textOf(etConfirmPassword);
-    String phone = textOf(etPhone);
-    String address = textOf(etAddress);
-    String emergencyContact = textOf(etEmergencyContact);
+    String name = textOf(binding.etName);
+    String email = textOf(binding.etEmail);
+    String password = textOf(binding.etPassword);
+    String confirmPassword = textOf(binding.etConfirmPassword);
+    String phone = textOf(binding.etPhone);
+    String address = textOf(binding.etAddress);
+    String emergencyContact = textOf(binding.etEmergencyContact);
     String gender = getSelectedGender();
     String bloodGroup = getSelectedBloodGroup();
-    String securityAnswer = etSecurityAnswer.getText().toString().trim();
+    String securityAnswer = textOf(binding.etSecurityAnswer);
 
     if (name.isEmpty()) {
-      etName.setError("Name is required");
+      binding.etName.setError("Name is required");
       return;
     }
     if (email.isEmpty()) {
-      etEmail.setError("Email is required");
+      binding.etEmail.setError("Email is required");
       return;
     }
     if (password.isEmpty()) {
-      etPassword.setError("Password is required");
+      binding.etPassword.setError("Password is required");
       return;
     }
     if (confirmPassword.isEmpty()) {
-      etConfirmPassword.setError("Please confirm your password");
+      binding.etConfirmPassword.setError("Please confirm your password");
       return;
     }
     if (passwordsMismatched || !password.equals(confirmPassword)) {
-      txtPasswordMismatch.setVisibility(android.view.View.VISIBLE);
+      binding.txtPasswordMismatch.setVisibility(View.VISIBLE);
       Toast.makeText(this, "Passwords don't match. Fix before proceeding.", Toast.LENGTH_SHORT)
           .show();
       return;
     }
     if (phone.isEmpty()) {
-      etPhone.setError("Phone is required");
+      binding.etPhone.setError("Phone is required");
       return;
     }
     if (address.isEmpty()) {
-      etAddress.setError("Address is required");
+      binding.etAddress.setError("Address is required");
       return;
     }
     if (selectedDob.isEmpty()) {
@@ -230,12 +197,12 @@ public class RegisterActivity extends AppCompatActivity {
       return;
     }
     if (emergencyContact.isEmpty()) {
-      etEmergencyContact.setError("Emergency contact is required");
+      binding.etEmergencyContact.setError("Emergency contact is required");
       return;
     }
 
-    btnRegister.setEnabled(false);
-    LoadingHelper.show(loadingIndicator);
+    binding.btnRegister.setEnabled(false);
+    LoadingHelper.show(binding.loadingIndicator);
 
     PatientRegisterRequest request =
         new PatientRegisterRequest(
@@ -254,9 +221,9 @@ public class RegisterActivity extends AppCompatActivity {
         authApi.registerPatient(request),
         body ->
             LoadingHelper.hide(
-                loadingIndicator,
+                binding.loadingIndicator,
                 () -> {
-                  btnRegister.setEnabled(true);
+                  binding.btnRegister.setEnabled(true);
                   Toast.makeText(
                           RegisterActivity.this,
                           body.getMessage() + "\n" + body.getRemarks(),
@@ -266,9 +233,9 @@ public class RegisterActivity extends AppCompatActivity {
                 }),
         (code, msg) ->
             LoadingHelper.hide(
-                loadingIndicator,
+                binding.loadingIndicator,
                 () -> {
-                  btnRegister.setEnabled(true);
+                  binding.btnRegister.setEnabled(true);
                   if (code == -1) {
                     Toast.makeText(
                             RegisterActivity.this, "Network error: " + msg, Toast.LENGTH_LONG)

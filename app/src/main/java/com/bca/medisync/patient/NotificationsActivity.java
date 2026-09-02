@@ -2,9 +2,7 @@ package com.bca.medisync.patient;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,7 +10,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.GroupedListAdapter;
@@ -22,11 +19,9 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
+import com.bca.medisync.databinding.ActivityNotificationsBinding;
 import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +29,7 @@ import java.util.List;
 public class NotificationsActivity extends AppCompatActivity
     implements NotificationCenter.Listener {
 
-  private MaterialToolbar toolbar;
-  private RecyclerView rvNotifications;
-  private android.widget.TextView txtEmpty;
-  private MaterialButton btnMarkAllRead;
-  private MaterialButtonToggleGroup toggleGroup;
+  private ActivityNotificationsBinding binding;
   private GroupedListAdapter<Notification> adapter;
 
   private List<Notification> allNotifications = new ArrayList<>();
@@ -48,15 +39,17 @@ public class NotificationsActivity extends AppCompatActivity
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_notifications);
+    binding = ActivityNotificationsBinding.inflate(getLayoutInflater());
+    setContentView(binding.getRoot());
+
     ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
+        binding.main,
         (v, insets) -> {
           Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return insets;
         });
-    initViews();
+
     setupToolbar();
     setupRecyclerView();
     setupListeners();
@@ -80,16 +73,8 @@ public class NotificationsActivity extends AppCompatActivity
     loadNotifications();
   }
 
-  private void initViews() {
-    toolbar = findViewById(R.id.toolbar);
-    rvNotifications = findViewById(R.id.rvNotifications);
-    txtEmpty = findViewById(R.id.txtEmpty);
-    btnMarkAllRead = findViewById(R.id.btnMarkAllRead);
-    toggleGroup = findViewById(R.id.toggleGroup);
-  }
-
   private void setupToolbar() {
-    toolbar.setNavigationOnClickListener(v -> finish());
+    binding.toolbar.setNavigationOnClickListener(v -> finish());
   }
 
   private void setupRecyclerView() {
@@ -101,12 +86,11 @@ public class NotificationsActivity extends AppCompatActivity
             n -> {
               if (!n.isRead()) markAsRead(n.getId());
             });
-    rvNotifications.setLayoutManager(new LinearLayoutManager(this));
-    rvNotifications.setAdapter(adapter);
+    binding.rvNotifications.setLayoutManager(new LinearLayoutManager(this));
+    binding.rvNotifications.setAdapter(adapter);
   }
 
-  private void bindNotificationRow(
-      android.view.View itemView, Notification n, int posInGroup, int groupSize) {
+  private void bindNotificationRow(View itemView, Notification n, int posInGroup, int groupSize) {
     TextView txtTitle = itemView.findViewById(R.id.txtNotifTitle);
     TextView txtMessage = itemView.findViewById(R.id.txtNotifMessage);
     TextView txtTime = itemView.findViewById(R.id.txtNotifTime);
@@ -117,10 +101,10 @@ public class NotificationsActivity extends AppCompatActivity
     txtTime.setText(DateTimeUtils.format(n.getCreatedAt(), "dd MMM, hh:mm a"));
 
     if (n.isRead()) {
-      unreadDot.setVisibility(android.view.View.INVISIBLE);
+      unreadDot.setVisibility(View.INVISIBLE);
       itemView.setAlpha(0.6f);
     } else {
-      unreadDot.setVisibility(android.view.View.VISIBLE);
+      unreadDot.setVisibility(View.VISIBLE);
       itemView.setAlpha(1f);
     }
   }
@@ -131,8 +115,8 @@ public class NotificationsActivity extends AppCompatActivity
   }
 
   private void setupListeners() {
-    btnMarkAllRead.setOnClickListener(v -> markAllRead());
-    toggleGroup.addOnButtonCheckedListener(
+    binding.btnMarkAllRead.setOnClickListener(v -> markAllRead());
+    binding.toggleGroup.addOnButtonCheckedListener(
         (group, checkedId, isChecked) -> {
           if (!isChecked) return;
           showUnreadOnly = checkedId == R.id.btnUnread;
@@ -160,8 +144,8 @@ public class NotificationsActivity extends AppCompatActivity
       if (!showUnreadOnly || !n.isRead()) filtered.add(n);
     }
     adapter.submitList(filtered);
-    EmptyState.bind(rvNotifications, txtEmpty, filtered.isEmpty());
-    txtEmpty.setText(showUnreadOnly ? "No unread notifications" : "No notifications yet");
+    EmptyState.bind(binding.rvNotifications, binding.txtEmpty, filtered.isEmpty());
+    binding.txtEmpty.setText(showUnreadOnly ? "No unread notifications" : "No notifications yet");
   }
 
   private void markAsRead(int notificationId) {
@@ -177,7 +161,10 @@ public class NotificationsActivity extends AppCompatActivity
     ApiCallback.handle(
         api.markAllRead(),
         body -> loadNotifications(),
-        (code, msg) -> Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show());
+        (code, msg) ->
+            android.widget.Toast.makeText(
+                    this, "Network error: " + msg, android.widget.Toast.LENGTH_LONG)
+                .show());
   }
 
   private Notification mapToNotification(NotificationResponse r) {
