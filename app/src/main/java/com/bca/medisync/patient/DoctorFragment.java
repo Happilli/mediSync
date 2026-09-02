@@ -8,7 +8,6 @@ import android.transition.TransitionSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,14 +16,13 @@ import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.SimpleListAdapter;
+import com.bca.medisync.adapter.DoctorGroupedAdapter;
 import com.bca.medisync.data.model.Doctor;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
-import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.SearchSuggestionHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.search.SearchBar;
@@ -42,7 +40,7 @@ public class DoctorFragment extends Fragment {
   private MaterialToolbar toolbar;
   private SearchBar searchBar;
   private SearchView searchView;
-  private SimpleListAdapter<Doctor> adapter;
+  private DoctorGroupedAdapter adapter;
 
   private Integer filterHospitalId;
 
@@ -141,70 +139,41 @@ public class DoctorFragment extends Fragment {
     rvDoctors.setItemAnimator(null);
 
     adapter =
-        new SimpleListAdapter<>(
-            R.layout.item_doctor,
-            new ArrayList<>(),
-            (itemView, doctor, pos) -> {
-              ((TextView) itemView.findViewById(R.id.txtDoctorName)).setText(doctor.getName());
-              ((TextView) itemView.findViewById(R.id.txtSpeciality))
-                  .setText(doctor.getSpeciality());
-              ((TextView) itemView.findViewById(R.id.txtInfo)).setText(doctor.getInfo());
-              ImageView doctorImage = itemView.findViewById(R.id.imgDoctor);
-              ImageLoader.loadDoctorImage(DoctorFragment.this, doctorImage, doctor.getImageUrl());
+        new DoctorGroupedAdapter(
+            this,
+            expandedIds,
+            new DoctorGroupedAdapter.Callbacks() {
+              @Override
+              public void onToggleExpand(Doctor doctor) {
+                TransitionSet transition =
+                    new TransitionSet()
+                        .addTransition(new ChangeBounds())
+                        .addTransition(new Fade(Fade.IN))
+                        .setDuration(280)
+                        .setInterpolator(new FastOutSlowInInterpolator());
+                TransitionManager.beginDelayedTransition(rvDoctors, transition);
 
-              boolean expanded = expandedIds.contains(doctor.getId());
-              View divider = itemView.findViewById(R.id.dividerExpand);
-              View detail = itemView.findViewById(R.id.detailContainer);
-              divider.setVisibility(expanded ? View.VISIBLE : View.GONE);
-              detail.setVisibility(expanded ? View.VISIBLE : View.GONE);
-
-              ImageView expandArrow = itemView.findViewById(R.id.imgExpandArrow);
-              expandArrow.setImageResource(R.drawable.arrow);
-              expandArrow.setRotation(expanded ? 90f : 0f);
-
-              if (expanded) {
-                TextView txtBio = itemView.findViewById(R.id.txtBio);
-                TextView txtAddress = itemView.findViewById(R.id.txtDoctorAddress);
-                TextView txtHospital = itemView.findViewById(R.id.txtHospitalName);
-                TextView txtPhone = itemView.findViewById(R.id.txtDoctorPhone);
-
-                boolean hasBio = doctor.getBio() != null && !doctor.getBio().isEmpty();
-                txtBio.setVisibility(hasBio ? View.VISIBLE : View.GONE);
-                txtBio.setText(doctor.getBio());
-                txtAddress.setText(doctor.getAddress());
-                txtPhone.setText(doctor.getPhone());
-
-                String cachedHospital = hospitalNameCache.get(doctor.getHospitalId());
-                if (cachedHospital != null) {
-                  txtHospital.setText(cachedHospital);
+                if (expandedIds.contains(doctor.getId())) {
+                  expandedIds.remove(doctor.getId());
                 } else {
-                  txtHospital.setText("Loading hospital...");
-                  loadHospitalName(doctor.getHospitalId(), txtHospital);
+                  expandedIds.add(doctor.getId());
                 }
-
-                itemView.findViewById(R.id.btnBook).setOnClickListener(v -> onBookClicked(doctor));
+                adapter.notifyDataSetChanged();
               }
 
-              itemView.setOnClickListener(
-                  v -> {
-                    TransitionSet transition =
-                        new TransitionSet()
-                            .addTransition(new ChangeBounds())
-                            .addTransition(new Fade(Fade.IN))
-                            .setDuration(280)
-                            .setInterpolator(new FastOutSlowInInterpolator());
-                    TransitionManager.beginDelayedTransition(rvDoctors, transition);
+              @Override
+              public void onBookClicked(Doctor doctor) {
+                DoctorFragment.this.onBookClicked(doctor);
+              }
 
-                    boolean nowExpanded = !expandedIds.contains(doctor.getId());
-                    if (nowExpanded) expandedIds.add(doctor.getId());
-                    else expandedIds.remove(doctor.getId());
-
-                    expandArrow.animate().rotation(nowExpanded ? 90f : 0f).setDuration(280).start();
-
-                    adapter.notifyItemChanged(pos);
-                  });
-            },
-            null);
+              @Override
+              public String getHospitalName(int hospitalId, TextView target) {
+                String cached = hospitalNameCache.get(hospitalId);
+                if (cached != null) return cached;
+                loadHospitalName(hospitalId, target);
+                return "Loading hospital...";
+              }
+            });
 
     rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvDoctors.setAdapter(adapter);
@@ -246,7 +215,7 @@ public class DoctorFragment extends Fragment {
           for (DoctorResponse r : body) {
             doctors.add(mapToDoctor(r));
           }
-          adapter.updateData(doctors);
+          adapter.submitList(doctors);
         },
         ApiCallback.simpleError(requireContext(), "Failed to load doctors."));
   }
