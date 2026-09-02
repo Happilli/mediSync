@@ -4,14 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.TimeSlotAdapter;
 import com.bca.medisync.data.model.TimeSlot;
@@ -21,23 +18,16 @@ import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
+import com.bca.medisync.databinding.FragmentBookAppointmentBinding;
 import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ImageLoader;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookAppointmentFragment extends Fragment {
-  private MaterialToolbar toolbar;
-  private TextView txtDoctorName, txtDoctorSpeciality, txtDoctorInfo;
-  private MaterialButton btnConfirm;
-  private ImageView imgDoctor;
-  private TextInputEditText etNotes;
-  private RecyclerView rvTimeSlots;
-  private TextView txtNoSlots;
+
+  private FragmentBookAppointmentBinding binding;
 
   private TimeSlot selectedTimeSlot;
   private String doctorName, doctorSpeciality, doctorInfo, doctorDepartment;
@@ -49,34 +39,28 @@ public class BookAppointmentFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_book_appointment, container, false);
+    binding = FragmentBookAppointmentBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
+    binding.btnConfirm.setEnabled(false);
     setupToolbar();
     loadDoctorData();
     setupTimeSlots();
     setupConfirmButton();
   }
 
-  private void initViews(View view) {
-    toolbar = view.findViewById(R.id.toolbar);
-    txtDoctorName = view.findViewById(R.id.txtDoctorName);
-    txtDoctorSpeciality = view.findViewById(R.id.txtDoctorSpeciality);
-    txtDoctorInfo = view.findViewById(R.id.txtDoctorInfo);
-    btnConfirm = view.findViewById(R.id.btnConfirm);
-    btnConfirm.setEnabled(false);
-    etNotes = view.findViewById(R.id.etNotes);
-    rvTimeSlots = view.findViewById(R.id.rvTimeSlots);
-    txtNoSlots = view.findViewById(R.id.txtNoSlots);
-    imgDoctor = view.findViewById(R.id.imgDoctor);
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
   }
 
   private void setupToolbar() {
-    toolbar.setNavigationOnClickListener(
+    binding.toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
   }
 
@@ -101,14 +85,12 @@ public class BookAppointmentFragment extends Fragment {
     doctorInfo = args.getString("doctor_info");
     doctorDepartment = args.getString("doctor_department");
 
-    if (doctorName != null) txtDoctorName.setText(doctorName);
-    if (doctorSpeciality != null) txtDoctorSpeciality.setText(doctorSpeciality);
-    if (doctorInfo != null) txtDoctorInfo.setText(doctorInfo);
+    if (doctorName != null) binding.txtDoctorName.setText(doctorName);
+    if (doctorSpeciality != null) binding.txtDoctorSpeciality.setText(doctorSpeciality);
+    if (doctorInfo != null) binding.txtDoctorInfo.setText(doctorInfo);
 
-    if (imgDoctor != null) {
-      ImageLoader.loadTinted(
-          this, imgDoctor, args.getString("doctor_image_url"), R.drawable.stethoscope);
-    }
+    ImageLoader.loadTinted(
+        this, binding.imgDoctor, args.getString("doctor_image_url"), R.drawable.stethoscope);
   }
 
   private void bailNoDoctor(String message) {
@@ -117,13 +99,14 @@ public class BookAppointmentFragment extends Fragment {
   }
 
   private void bindTimeSlots(List<TimeSlot> slots) {
-    EmptyState.bind(rvTimeSlots, txtNoSlots, slots.isEmpty());
-    btnConfirm.setEnabled(!slots.isEmpty());
+    if (binding == null) return;
+    EmptyState.bind(binding.rvTimeSlots, binding.txtNoSlots, slots.isEmpty());
+    binding.btnConfirm.setEnabled(!slots.isEmpty());
     if (slots.isEmpty()) return;
     TimeSlotAdapter adapter =
         new TimeSlotAdapter(requireContext(), slots, slot -> selectedTimeSlot = slot);
-    rvTimeSlots.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-    rvTimeSlots.setAdapter(adapter);
+    binding.rvTimeSlots.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+    binding.rvTimeSlots.setAdapter(adapter);
   }
 
   private TimeSlot mapToTimeSlot(TimeSlotResponse r) {
@@ -148,27 +131,30 @@ public class BookAppointmentFragment extends Fragment {
   }
 
   private void setupConfirmButton() {
-    btnConfirm.setOnClickListener(
+    binding.btnConfirm.setOnClickListener(
         v -> {
           if (selectedTimeSlot == null) {
             Toast.makeText(requireContext(), "Please select a time slot", Toast.LENGTH_SHORT)
                 .show();
             return;
           }
-          String notes = etNotes.getText() != null ? etNotes.getText().toString() : "";
-          btnConfirm.setEnabled(false);
+          String notes =
+              binding.etNotes.getText() != null ? binding.etNotes.getText().toString() : "";
+          binding.btnConfirm.setEnabled(false);
 
           AppointmentApi api = ApiClient.api(AppointmentApi.class);
           ApiCallback.handle(
               api.createAppointment(new AppointmentCreateRequest(selectedTimeSlot.getId(), notes)),
               this,
               body -> {
-                btnConfirm.setEnabled(true);
+                if (binding == null) return;
+                binding.btnConfirm.setEnabled(true);
                 Toast.makeText(requireContext(), "Appointment booked!", Toast.LENGTH_LONG).show();
                 ((MainTabActivity) requireActivity()).popToRootAndRefreshAppointments();
               },
               (code, msg) -> {
-                btnConfirm.setEnabled(true);
+                if (binding == null) return;
+                binding.btnConfirm.setEnabled(true);
                 if (code == 403) {
                   Toast.makeText(
                           requireContext(),

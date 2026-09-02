@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Prescription;
@@ -17,15 +16,14 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
+import com.bca.medisync.databinding.FragmentPrescriptionListBinding;
 import com.bca.medisync.util.EmptyState;
-import com.google.android.material.appbar.MaterialToolbar;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PrescriptionListFragment extends Fragment {
-  private MaterialToolbar toolbar;
-  private RecyclerView rvPrescriptions;
-  private TextView txtEmpty;
+
+  private FragmentPrescriptionListBinding binding;
   private SimpleListAdapter<Prescription> adapter;
 
   @Nullable
@@ -34,24 +32,28 @@ public class PrescriptionListFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_prescription_list, container, false);
+    binding = FragmentPrescriptionListBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
+    initViews();
     loadPrescriptions();
   }
 
-  private void initViews(View view) {
-    toolbar = view.findViewById(R.id.toolbar);
-    toolbar.setNavigationOnClickListener(
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
+
+  private void initViews() {
+    binding.toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
-    rvPrescriptions = view.findViewById(R.id.rvPrescriptions);
-    txtEmpty = view.findViewById(R.id.txtEmpty);
-    rvPrescriptions.setLayoutManager(new LinearLayoutManager(requireContext()));
+    binding.rvPrescriptions.setLayoutManager(new LinearLayoutManager(requireContext()));
 
     adapter =
         new SimpleListAdapter<>(
@@ -72,7 +74,7 @@ public class PrescriptionListFragment extends Fragment {
               ((MainTabActivity) requireActivity()).pushFragment(fragment);
             });
 
-    rvPrescriptions.setAdapter(adapter);
+    binding.rvPrescriptions.setAdapter(adapter);
     adapter.setRoundedList(true);
   }
 
@@ -90,7 +92,7 @@ public class PrescriptionListFragment extends Fragment {
           PrescriptionEnricher.enrichAll(
               body,
               (List<Prescription> enriched) -> {
-                if (!isAdded()) return;
+                if (!isAdded() || binding == null) return;
                 adapter.updateData(enriched);
                 showEmpty(enriched.isEmpty());
               });
@@ -99,6 +101,7 @@ public class PrescriptionListFragment extends Fragment {
   }
 
   private void showEmpty(boolean empty) {
-    EmptyState.bind(rvPrescriptions, txtEmpty, empty);
+    if (binding == null) return;
+    EmptyState.bind(binding.rvPrescriptions, binding.txtEmpty, empty);
   }
 }

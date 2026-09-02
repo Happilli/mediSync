@@ -4,32 +4,21 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.ConsultationApi;
 import com.bca.medisync.data.remote.dto.consultation.ConsultationCreateRequest;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
+import com.bca.medisync.databinding.FragmentConsultationBinding;
 
 public class ConsultationFragment extends Fragment {
-  private TextView tvPatientname;
-  private TextInputEditText etComplaint,
-      etSymptoms,
-      etDiagnosis,
-      etNotes,
-      etBloodPressure,
-      etHeartRate,
-      etTemperature,
-      etWeight;
-  private MaterialButton btnNextPrescription;
+
+  private FragmentConsultationBinding binding;
 
   private String patientName, latestDiagnosis;
   private int appointmentId = -1;
@@ -40,28 +29,21 @@ public class ConsultationFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_consultation, container, false);
+    binding = FragmentConsultationBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
     loadData();
     setupListeners();
   }
 
-  private void initViews(View view) {
-    tvPatientname = view.findViewById(R.id.tvPatientName);
-    etComplaint = view.findViewById(R.id.etComplaint);
-    etSymptoms = view.findViewById(R.id.etSymptoms);
-    etDiagnosis = view.findViewById(R.id.etDiagnosis);
-    etNotes = view.findViewById(R.id.etNotes);
-    etBloodPressure = view.findViewById(R.id.etBloodPressure);
-    etHeartRate = view.findViewById(R.id.etHeartRate);
-    etTemperature = view.findViewById(R.id.etTemperature);
-    etWeight = view.findViewById(R.id.etWeight);
-    btnNextPrescription = view.findViewById(R.id.btnNextPrescription);
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
   }
 
   private void loadData() {
@@ -71,10 +53,10 @@ public class ConsultationFragment extends Fragment {
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
 
     if (patientName != null) {
-      tvPatientname.setText("Consultation - " + patientName);
+      binding.tvPatientName.setText("Consultation - " + patientName);
     }
     if (latestDiagnosis != null) {
-      etDiagnosis.setText(latestDiagnosis);
+      binding.etDiagnosis.setText(latestDiagnosis);
     }
 
     checkExistingConsultation();
@@ -103,23 +85,23 @@ public class ConsultationFragment extends Fragment {
   }
 
   private void setupListeners() {
-    btnNextPrescription.setOnClickListener(
+    binding.btnNextPrescription.setOnClickListener(
         v -> {
-          String complaint = etComplaint.getText().toString().trim();
-          String symptoms = etSymptoms.getText().toString().trim();
-          String diagnosis = etDiagnosis.getText().toString().trim();
-          String notes = etNotes.getText().toString().trim();
-          String bp = etBloodPressure.getText().toString().trim();
-          String hr = etHeartRate.getText().toString().trim();
-          String temp = etTemperature.getText().toString().trim();
-          String weight = etWeight.getText().toString().trim();
+          String complaint = binding.etComplaint.getText().toString().trim();
+          String symptoms = binding.etSymptoms.getText().toString().trim();
+          String diagnosis = binding.etDiagnosis.getText().toString().trim();
+          String notes = binding.etNotes.getText().toString().trim();
+          String bp = binding.etBloodPressure.getText().toString().trim();
+          String hr = binding.etHeartRate.getText().toString().trim();
+          String temp = binding.etTemperature.getText().toString().trim();
+          String weight = binding.etWeight.getText().toString().trim();
 
           if (complaint.isEmpty()) {
-            etComplaint.setError("Chief compliant is required...");
+            binding.etComplaint.setError("Chief compliant is required...");
             return;
           }
           if (diagnosis.isEmpty()) {
-            etDiagnosis.setError("Diagnosis is requierd..");
+            binding.etDiagnosis.setError("Diagnosis is requierd..");
             return;
           }
           if (appointmentId == -1) {
@@ -131,7 +113,7 @@ public class ConsultationFragment extends Fragment {
             return;
           }
 
-          btnNextPrescription.setEnabled(false);
+          binding.btnNextPrescription.setEnabled(false);
 
           ConsultationApi api = ApiClient.api(ConsultationApi.class);
           ApiCallback.handle(
@@ -140,7 +122,8 @@ public class ConsultationFragment extends Fragment {
                       appointmentId, complaint, symptoms, diagnosis, notes, bp, hr, temp, weight)),
               this,
               body -> {
-                btnNextPrescription.setEnabled(true);
+                if (binding == null) return;
+                binding.btnNextPrescription.setEnabled(true);
                 Toast.makeText(requireContext(), "Consultation saved.", Toast.LENGTH_SHORT).show();
 
                 Bundle args = new Bundle();
@@ -155,7 +138,8 @@ public class ConsultationFragment extends Fragment {
                 ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
               },
               (code, msg) -> {
-                btnNextPrescription.setEnabled(true);
+                if (binding == null) return;
+                binding.btnNextPrescription.setEnabled(true);
                 if (code == 403) {
                   Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
                       .show();

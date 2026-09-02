@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
@@ -18,15 +17,14 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
+import com.bca.medisync.databinding.FragmentPatientMedicalHistoryBinding;
 import com.bca.medisync.util.EmptyState;
-import com.google.android.material.appbar.MaterialToolbar;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PatientMedicalHistoryFragment extends Fragment {
-  private MaterialToolbar toolbar;
-  private RecyclerView rvHistory;
-  private android.widget.TextView txtEmpty;
+
+  private FragmentPatientMedicalHistoryBinding binding;
   private SimpleListAdapter<MedicalHistoryEntry> adapter;
 
   @Nullable
@@ -35,23 +33,28 @@ public class PatientMedicalHistoryFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_patient_medical_history, container, false);
+    binding = FragmentPatientMedicalHistoryBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
+    initViews();
     loadHistory();
   }
 
-  private void initViews(View view) {
-    toolbar = view.findViewById(R.id.toolbar);
-    toolbar.setNavigationOnClickListener(
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
+
+  private void initViews() {
+    binding.toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-    rvHistory = view.findViewById(R.id.rvHistory);
-    txtEmpty = view.findViewById(R.id.txtEmpty);
-    rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+    binding.rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
 
     adapter =
         new SimpleListAdapter<>(
@@ -64,7 +67,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
                   .setText(entry.getDescription());
             },
             null);
-    rvHistory.setAdapter(adapter);
+    binding.rvHistory.setAdapter(adapter);
     adapter.setRoundedList(true);
   }
 
@@ -74,6 +77,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
         api.getMyMedicalHistory(),
         this,
         body -> {
+          if (binding == null) return;
           List<MedicalHistoryEntry> entries = new ArrayList<>();
           for (MedicalHistoryResponse r : body) {
             entries.add(
@@ -83,7 +87,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
                     r.getDescription()));
           }
           adapter.updateData(entries);
-          EmptyState.bind(rvHistory, txtEmpty, entries.isEmpty());
+          EmptyState.bind(binding.rvHistory, binding.txtEmpty, entries.isEmpty());
         },
         ApiCallback.simpleError(requireContext(), "Failed to load history."));
   }

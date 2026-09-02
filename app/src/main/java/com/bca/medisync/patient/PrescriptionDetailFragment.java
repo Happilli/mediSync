@@ -20,16 +20,15 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
+import com.bca.medisync.databinding.FragmentPrescriptionDetailBinding;
 import com.bca.medisync.util.RoundedListStyler;
 import com.bca.medisync.util.ViewUtils;
-import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.List;
 
 public class PrescriptionDetailFragment extends Fragment {
-  private MaterialToolbar toolbar;
-  private TextView txtDoctorName, txtDiagnosis, txtInstructions, txtFollowUp, txtNoMeds;
-  private LinearLayout medicationsContainer;
+
+  private FragmentPrescriptionDetailBinding binding;
   private int prescriptionId;
 
   @Nullable
@@ -38,13 +37,15 @@ public class PrescriptionDetailFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_prescription_detail, container, false);
+    binding = FragmentPrescriptionDetailBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
+    binding.toolbar.setNavigationOnClickListener(
+        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
     Bundle args = getArguments();
     prescriptionId = args != null ? args.getInt("prescription_id", -1) : -1;
@@ -56,16 +57,10 @@ public class PrescriptionDetailFragment extends Fragment {
     loadDetail();
   }
 
-  private void initViews(View view) {
-    toolbar = view.findViewById(R.id.toolbar);
-    toolbar.setNavigationOnClickListener(
-        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-    txtDoctorName = view.findViewById(R.id.txtDoctorName);
-    txtDiagnosis = view.findViewById(R.id.txtDiagnosis);
-    txtInstructions = view.findViewById(R.id.txtInstructions);
-    txtFollowUp = view.findViewById(R.id.txtFollowUp);
-    medicationsContainer = view.findViewById(R.id.medicationsContainer);
-    txtNoMeds = view.findViewById(R.id.txtNoMeds);
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
   }
 
   private void loadDetail() {
@@ -92,36 +87,40 @@ public class PrescriptionDetailFragment extends Fragment {
     ApiCallback.handle(
         doctorApi.getDoctorDetail(doctorId),
         this,
-        d -> txtDoctorName.setText(d.getName()),
+        d -> {
+          if (binding != null) binding.txtDoctorName.setText(d.getName());
+        },
         (code, msg) -> {});
   }
 
   private void bind(Prescription p) {
-    txtDiagnosis.setText(p.getDiagnosis());
-    txtInstructions.setText(p.getInstructions());
+    if (binding == null) return;
+
+    binding.txtDiagnosis.setText(p.getDiagnosis());
+    binding.txtInstructions.setText(p.getInstructions());
 
     String followUp = p.getFollowUpDate();
     if (followUp == null || followUp.isEmpty()) {
-      txtFollowUp.setVisibility(View.GONE);
+      binding.txtFollowUp.setVisibility(View.GONE);
     } else {
-      txtFollowUp.setVisibility(View.VISIBLE);
-      txtFollowUp.setText("Follow-up: " + followUp);
+      binding.txtFollowUp.setVisibility(View.VISIBLE);
+      binding.txtFollowUp.setText("Follow-up: " + followUp);
     }
 
-    txtInstructions.setVisibility(
+    binding.txtInstructions.setVisibility(
         p.getInstructions() == null || p.getInstructions().isEmpty() ? View.GONE : View.VISIBLE);
 
-    medicationsContainer.removeAllViews();
+    binding.medicationsContainer.removeAllViews();
     List<Medication> meds = p.getMedications();
     if (meds == null || meds.isEmpty()) {
-      txtNoMeds.setVisibility(View.VISIBLE);
+      binding.txtNoMeds.setVisibility(View.VISIBLE);
       return;
     }
-    txtNoMeds.setVisibility(View.GONE);
+    binding.txtNoMeds.setVisibility(View.GONE);
     for (int i = 0; i < meds.size(); i++) {
       View row = buildMedicationRow(meds.get(i));
       RoundedListStyler.apply(row, i, meds.size());
-      medicationsContainer.addView(row);
+      binding.medicationsContainer.addView(row);
     }
   }
 

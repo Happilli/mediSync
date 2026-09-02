@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
@@ -26,11 +25,11 @@ import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentStatusUpdateRequest;
 import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.databinding.FragmentScheduleBinding;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.SwipeActionHelper;
 import com.bca.medisync.util.ViewUtils;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 import java.text.SimpleDateFormat;
@@ -42,10 +41,7 @@ import java.util.Locale;
 
 public class ScheduleFragment extends Fragment {
 
-  private RecyclerView rvSchedule;
-  private LinearLayout dateStripContainer;
-  private TextView txtNoAppointments;
-  private ExtendedFloatingActionButton fabAddTimeslot;
+  private FragmentScheduleBinding binding;
 
   private List<Appointment> allAppointments = new ArrayList<>();
   private String selectedDate;
@@ -56,14 +52,14 @@ public class ScheduleFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_schedule, container, false);
+    binding = FragmentScheduleBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
-    rvSchedule.setLayoutManager(new LinearLayoutManager(requireContext()));
+    binding.rvSchedule.setLayoutManager(new LinearLayoutManager(requireContext()));
     setupSwipe();
     setupDateStrip();
     setupFab();
@@ -76,22 +72,21 @@ public class ScheduleFragment extends Fragment {
     loadRealSchedule();
   }
 
-  private void initViews(View view) {
-    rvSchedule = view.findViewById(R.id.rvSchedule);
-    dateStripContainer = view.findViewById(R.id.dateStripContainer);
-    txtNoAppointments = view.findViewById(R.id.txtNoAppointments);
-    fabAddTimeslot = view.findViewById(R.id.fabAddTimeslot);
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
   }
 
   private void setupFab() {
-    fabAddTimeslot.setOnClickListener(v -> showAddTimeslotDialog());
+    binding.fabAddTimeslot.setOnClickListener(v -> showAddTimeslotDialog());
   }
 
   private void setupSwipe() {
     new SwipeActionHelper(
             this,
             position -> {
-              AppointmentAdapter adapter = (AppointmentAdapter) rvSchedule.getAdapter();
+              AppointmentAdapter adapter = (AppointmentAdapter) binding.rvSchedule.getAdapter();
               if (adapter == null) return 0;
               Appointment a = adapter.getItemAt(position);
               if (a == null) return 0;
@@ -101,7 +96,7 @@ public class ScheduleFragment extends Fragment {
               return 0;
             },
             (position, direction) -> {
-              AppointmentAdapter adapter = (AppointmentAdapter) rvSchedule.getAdapter();
+              AppointmentAdapter adapter = (AppointmentAdapter) binding.rvSchedule.getAdapter();
               if (adapter == null) return;
               Appointment a = adapter.getItemAt(position);
               if (a == null) return;
@@ -109,7 +104,7 @@ public class ScheduleFragment extends Fragment {
               updateStatus(
                   appointmentId, direction == ItemTouchHelper.RIGHT ? "confirmed" : "cancelled");
             })
-        .attachTo(rvSchedule);
+        .attachTo(binding.rvSchedule);
   }
 
   @Override
@@ -159,15 +154,16 @@ public class ScheduleFragment extends Fragment {
   }
 
   private void filterByDate(String date) {
+    if (binding == null) return;
     List<Appointment> filtered = new ArrayList<>();
     if (date != null) {
       for (Appointment a : allAppointments) {
         if (date.equals(a.getDate())) filtered.add(a);
       }
     }
-    rvSchedule.setAdapter(
+    binding.rvSchedule.setAdapter(
         new AppointmentAdapter(requireContext(), filtered, true, true, this::onAppointmentClicked));
-    EmptyState.bind(rvSchedule, txtNoAppointments, filtered.isEmpty());
+    EmptyState.bind(binding.rvSchedule, binding.txtNoAppointments, filtered.isEmpty());
   }
 
   private void onAppointmentClicked(Appointment appointment) {
@@ -206,7 +202,7 @@ public class ScheduleFragment extends Fragment {
           AppointmentEnricher.enrichForDoctor(
               body,
               enriched -> {
-                if (!isAdded()) return;
+                if (!isAdded() || binding == null) return;
                 allAppointments = enriched;
                 filterByDate(selectedDate);
               });
@@ -333,14 +329,14 @@ public class ScheduleFragment extends Fragment {
             refreshDateStripSelection(item);
           });
 
-      dateStripContainer.addView(item);
+      binding.dateStripContainer.addView(item);
       cal.add(Calendar.DAY_OF_MONTH, 1);
     }
   }
 
   private void refreshDateStripSelection(LinearLayout selected) {
-    for (int i = 0; i < dateStripContainer.getChildCount(); i++) {
-      LinearLayout child = (LinearLayout) dateStripContainer.getChildAt(i);
+    for (int i = 0; i < binding.dateStripContainer.getChildCount(); i++) {
+      LinearLayout child = (LinearLayout) binding.dateStripContainer.getChildAt(i);
       boolean isSelected = child == selected;
       TextView txtDay = (TextView) child.getChildAt(0);
       TextView txtNum = (TextView) child.getChildAt(1);
