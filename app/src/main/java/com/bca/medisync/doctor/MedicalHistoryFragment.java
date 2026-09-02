@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
@@ -21,20 +20,19 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
+import com.bca.medisync.databinding.FragmentMedicalHistoryBinding;
 import com.bca.medisync.util.EmptyState;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MedicalHistoryFragment extends Fragment {
 
-  private ExtendedFloatingActionButton btnStartConsultation;
+  private FragmentMedicalHistoryBinding binding;
+
   private String patientName;
   private int patientId = -1;
   private int appointmentId = -1;
-  private TextView tvHeader, tvRxName, tvRxDesc, tvLabTitle, tvLabDesc, txtEmptyTimeline;
-  private RecyclerView rvTimeline;
   private SimpleListAdapter<MedicalHistoryEntry> adapter;
 
   public MedicalHistoryFragment() {}
@@ -45,26 +43,32 @@ public class MedicalHistoryFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_medical_history, container, false);
+    binding = FragmentMedicalHistoryBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
+    setupToolbar();
+    initViews();
     setupListener();
     loadData();
   }
 
-  private void initViews(View view) {
-    btnStartConsultation = view.findViewById(R.id.fabConsult);
-    tvHeader = view.findViewById(R.id.tvHeader);
-    tvRxDesc = view.findViewById(R.id.tvRxDesc);
-    tvRxName = view.findViewById(R.id.tvRxName);
-    txtEmptyTimeline = view.findViewById(R.id.txtEmptyTimeline);
-    rvTimeline = view.findViewById(R.id.rvTimeline);
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
 
-    rvTimeline.setLayoutManager(new LinearLayoutManager(requireContext()));
+  private void setupToolbar() {
+    binding.toolbar.setNavigationOnClickListener(
+        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+  }
+
+  private void initViews() {
+    binding.rvTimeline.setLayoutManager(new LinearLayoutManager(requireContext()));
     adapter =
         new SimpleListAdapter<>(
             R.layout.item_medical_history,
@@ -76,7 +80,7 @@ public class MedicalHistoryFragment extends Fragment {
                   .setText(entry.getDescription());
             },
             null);
-    rvTimeline.setAdapter(adapter);
+    binding.rvTimeline.setAdapter(adapter);
     adapter.setRoundedList(true);
   }
 
@@ -86,9 +90,10 @@ public class MedicalHistoryFragment extends Fragment {
     patientId = args != null ? args.getInt("patient_id", -1) : -1;
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
 
-    tvHeader.setText(patientName != null ? patientName + "\nOverview" : "Patient\nOverview");
+    binding.tvHeader.setText(
+        patientName != null ? patientName + "\nOverview" : "Patient\nOverview");
 
-    btnStartConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
+    binding.fabConsult.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
 
     if (patientId == -1) {
       Toast.makeText(requireContext(), "Missing patient reference.", Toast.LENGTH_SHORT).show();
@@ -113,8 +118,8 @@ public class MedicalHistoryFragment extends Fragment {
                     r.getTitle(),
                     r.getDescription()));
           }
-          tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
-          tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
+          binding.tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
+          binding.tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
           bindTimeline(entries);
         },
         (code, msg) -> {
@@ -134,11 +139,11 @@ public class MedicalHistoryFragment extends Fragment {
 
   private void bindTimeline(List<MedicalHistoryEntry> timeline) {
     adapter.updateData(timeline);
-    EmptyState.bind(rvTimeline, txtEmptyTimeline, timeline.isEmpty());
+    EmptyState.bind(binding.rvTimeline, binding.txtEmptyTimeline, timeline.isEmpty());
   }
 
   private void setupListener() {
-    btnStartConsultation.setOnClickListener(
+    binding.fabConsult.setOnClickListener(
         v -> {
           Bundle args = new Bundle();
           args.putString("patient_name", patientName);

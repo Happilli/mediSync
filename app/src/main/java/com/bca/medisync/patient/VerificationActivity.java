@@ -3,7 +3,6 @@ package com.bca.medisync.patient;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -15,16 +14,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
+import com.bca.medisync.databinding.ActivityVerificationBinding;
 import com.bca.medisync.util.FileUploadHelper;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.loadingindicator.LoadingIndicator;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 
@@ -33,12 +27,8 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 public class VerificationActivity extends AppCompatActivity {
-  private MaterialToolbar toolbar;
-  private ImageView imgPreview;
-  private MaterialCardView cardPreview;
-  private MaterialButton btnPickPhoto, btnSubmit;
-  private TextInputEditText etCitizenshipNumber;
-  private LoadingIndicator loadingIndicator;
+
+  private ActivityVerificationBinding binding;
 
   private Uri selectedImageUri;
   private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
@@ -47,8 +37,8 @@ public class VerificationActivity extends AppCompatActivity {
           uri -> {
             if (uri != null) {
               selectedImageUri = uri;
-              cardPreview.setVisibility(View.VISIBLE);
-              imgPreview.setImageURI(uri);
+              binding.cardPreview.setVisibility(View.VISIBLE);
+              binding.imgPreview.setImageURI(uri);
             }
           });
 
@@ -56,46 +46,38 @@ public class VerificationActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_verification);
+    binding = ActivityVerificationBinding.inflate(getLayoutInflater());
+    setContentView(binding.getRoot());
+
     ViewCompat.setOnApplyWindowInsetsListener(
-        findViewById(R.id.main),
+        binding.main,
         (v, insets) -> {
           Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return insets;
         });
-    initiViews();
+
     setupListeners();
   }
 
-  private void initiViews() {
-    toolbar = findViewById(R.id.toolbar);
-    imgPreview = findViewById(R.id.imgPreview);
-    cardPreview = findViewById(R.id.cardPreview);
-    btnPickPhoto = findViewById(R.id.btnPickPhoto);
-    btnSubmit = findViewById(R.id.btnSubmit);
-    etCitizenshipNumber = findViewById(R.id.etCitizenshipNumber);
-    loadingIndicator = findViewById(R.id.loadingIndicator);
-  }
-
   private void setupListeners() {
-    toolbar.setNavigationOnClickListener(v -> finish());
-    btnPickPhoto.setOnClickListener(
+    binding.toolbar.setNavigationOnClickListener(v -> finish());
+    binding.btnPickPhoto.setOnClickListener(
         v ->
             pickMedia.launch(
                 new PickVisualMediaRequest.Builder()
                     .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
                     .build()));
-    btnSubmit.setOnClickListener(v -> submitVerification());
+    binding.btnSubmit.setOnClickListener(v -> submitVerification());
   }
 
   private void submitVerification() {
     String citizenshipNumber =
-        etCitizenshipNumber.getText() != null
-            ? etCitizenshipNumber.getText().toString().trim()
+        binding.etCitizenshipNumber.getText() != null
+            ? binding.etCitizenshipNumber.getText().toString().trim()
             : "";
     if (citizenshipNumber.isEmpty()) {
-      etCitizenshipNumber.setError("Citizenship number is required..");
+      binding.etCitizenshipNumber.setError("Citizenship number is required..");
       return;
     }
     if (selectedImageUri == null) {
@@ -111,9 +93,9 @@ public class VerificationActivity extends AppCompatActivity {
       return;
     }
 
-    btnSubmit.setEnabled(false);
-    loadingIndicator.setVisibility(View.VISIBLE);
-    loadingIndicator.show();
+    binding.btnSubmit.setEnabled(false);
+    binding.loadingIndicator.setVisibility(View.VISIBLE);
+    binding.loadingIndicator.show();
 
     RequestBody citizenshipBody =
         RequestBody.create(citizenshipNumber, MediaType.parse("text/plain"));
@@ -131,9 +113,9 @@ public class VerificationActivity extends AppCompatActivity {
           finish();
         },
         (code, msg) -> {
-          loadingIndicator.hide();
-          loadingIndicator.setVisibility(View.INVISIBLE);
-          btnSubmit.setEnabled(true);
+          binding.loadingIndicator.hide();
+          binding.loadingIndicator.setVisibility(View.INVISIBLE);
+          binding.btnSubmit.setEnabled(true);
 
           if (code == 400) {
             Toast.makeText(

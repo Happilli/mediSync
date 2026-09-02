@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -20,19 +19,19 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
+import com.bca.medisync.databinding.FragmentDoctorProfileBinding;
 import com.bca.medisync.util.AuthUtils;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.ProfilePicUploader;
-import com.google.android.material.loadingindicator.LoadingIndicator;
 
 public class DoctorProfileFragment extends Fragment {
 
+  private FragmentDoctorProfileBinding binding;
+
   private SessionManager sessionManager;
   private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
-  private View scrollContent;
-  private LoadingIndicator loadingIndicator;
 
   public DoctorProfileFragment() {}
 
@@ -42,15 +41,14 @@ public class DoctorProfileFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_doctor_profile, container, false);
+    binding = FragmentDoctorProfileBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     sessionManager = new SessionManager(requireContext());
-    scrollContent = view.findViewById(R.id.scrollContent);
-    loadingIndicator = view.findViewById(R.id.loadingIndicator);
 
     pickMedia =
         registerForActivityResult(
@@ -61,7 +59,7 @@ public class DoctorProfileFragment extends Fragment {
               }
             });
 
-    setupListeners(view);
+    setupListeners();
     loadProfile();
   }
 
@@ -71,18 +69,22 @@ public class DoctorProfileFragment extends Fragment {
     loadProfile();
   }
 
-  private void setupListeners(View view) {
-    view.findViewById(R.id.imgDoctorProfile)
-        .setOnClickListener(
-            v ->
-                pickMedia.launch(
-                    new PickVisualMediaRequest.Builder()
-                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
-                        .build()));
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
 
-    view.findViewById(R.id.btnLogoutDoctor)
-        .setOnClickListener(
-            v -> AuthUtils.logout((androidx.appcompat.app.AppCompatActivity) requireActivity()));
+  private void setupListeners() {
+    binding.imgDoctorProfile.setOnClickListener(
+        v ->
+            pickMedia.launch(
+                new PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                    .build()));
+
+    binding.btnLogoutDoctor.setOnClickListener(
+        v -> AuthUtils.logout((androidx.appcompat.app.AppCompatActivity) requireActivity()));
   }
 
   private void uploadProfilePic(Uri uri) {
@@ -100,23 +102,23 @@ public class DoctorProfileFragment extends Fragment {
   }
 
   private void loadProfile() {
-    LoadingHelper.show(loadingIndicator);
-    scrollContent.setVisibility(View.GONE);
+    LoadingHelper.show(binding.loadingIndicator);
+    binding.scrollContent.setVisibility(View.GONE);
 
     DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.getMyProfile(),
         this,
         LoadingHelper.wrapSuccess(
-            loadingIndicator,
-            scrollContent,
+            binding.loadingIndicator,
+            binding.scrollContent,
             profile -> {
               bindProfile(profile);
               loadHospitalName(profile.getHospital_id());
             }),
         LoadingHelper.wrapError(
-            loadingIndicator,
-            scrollContent,
+            binding.loadingIndicator,
+            binding.scrollContent,
             ApiCallback.simpleError(requireContext(), "Failed to load profile.")));
   }
 
@@ -126,77 +128,74 @@ public class DoctorProfileFragment extends Fragment {
         api.getHospitalDetail(hospitalId),
         this,
         h -> {
-          View view = getView();
-          if (view == null) return;
-          InfoRowBinder.setValue(view.findViewById(R.id.rowHospital), h.getName());
+          if (binding == null) return;
+          InfoRowBinder.setValue(binding.rowHospital.getRoot(), h.getName());
         },
         (code, msg) -> {
-          View view = getView();
-          if (view == null) return;
-          InfoRowBinder.setValue(view.findViewById(R.id.rowHospital), "Hospital #" + hospitalId);
+          if (binding == null) return;
+          InfoRowBinder.setValue(binding.rowHospital.getRoot(), "Hospital #" + hospitalId);
         });
   }
 
   private void bindProfile(DoctorProfileResponse p) {
-    View view = getView();
-    if (view == null) return;
+    if (binding == null) return;
 
     int years = p.getYears_experience() != null ? p.getYears_experience() : 0;
 
-    ((TextView) view.findViewById(R.id.txtDoctorName)).setText("Dr. " + p.getName());
-    ((TextView) view.findViewById(R.id.txtRole)).setText(p.getSpeciality());
+    binding.txtDoctorName.setText("Dr. " + p.getName());
+    binding.txtRole.setText(p.getSpeciality());
 
-    TextView badge = view.findViewById(R.id.txtRegistrationBadge);
     if (p.is_verified()) {
-      badge.setText("Verified");
-      badge.setTextColor(requireContext().getColor(R.color.on_tertiary_container));
-      badge.setBackgroundColor(requireContext().getColor(R.color.tertiary_container));
+      binding.txtRegistrationBadge.setText("Verified");
+      binding.txtRegistrationBadge.setTextColor(
+          requireContext().getColor(R.color.on_tertiary_container));
+      binding.txtRegistrationBadge.setBackgroundColor(
+          requireContext().getColor(R.color.tertiary_container));
     } else {
-      badge.setText("Pending Verification");
-      badge.setTextColor(requireContext().getColor(R.color.on_error_container));
-      badge.setBackgroundColor(requireContext().getColor(R.color.error_container));
+      binding.txtRegistrationBadge.setText("Pending Verification");
+      binding.txtRegistrationBadge.setTextColor(
+          requireContext().getColor(R.color.on_error_container));
+      binding.txtRegistrationBadge.setBackgroundColor(
+          requireContext().getColor(R.color.error_container));
     }
 
-    TextView txtBio = view.findViewById(R.id.txtBio);
     if (p.getBio() != null && !p.getBio().trim().isEmpty()) {
-      txtBio.setVisibility(View.VISIBLE);
-      txtBio.setText(p.getBio());
+      binding.txtBio.setVisibility(View.VISIBLE);
+      binding.txtBio.setText(p.getBio());
     } else {
-      txtBio.setVisibility(View.GONE);
+      binding.txtBio.setVisibility(View.GONE);
     }
 
     bindProfilePic(p.getProfile_pic_url());
 
-    ((TextView) view.findViewById(R.id.statPatientsMonthValue))
-        .setText(String.valueOf(p.getPatients_this_month()));
-    ((TextView) view.findViewById(R.id.statPatientsTotalValue))
-        .setText(String.valueOf(p.getTotal_patients()));
-
-    View rowSpecialization = view.findViewById(R.id.rowSpecialization);
-    View rowHospital = view.findViewById(R.id.rowHospital);
-    View rowExperience = view.findViewById(R.id.rowExperience);
-    View rowPhone = view.findViewById(R.id.rowPhone);
-    View rowEmail = view.findViewById(R.id.rowEmail);
-    View rowAddress = view.findViewById(R.id.rowAddress);
+    binding.statPatientsMonthValue.setText(String.valueOf(p.getPatients_this_month()));
+    binding.statPatientsTotalValue.setText(String.valueOf(p.getTotal_patients()));
 
     InfoRowBinder.bind(
         new InfoRowBinder.Row(
-            rowSpecialization, R.drawable.stethoscope, "Specialization", p.getSpeciality()),
+            binding.rowSpecialization.getRoot(),
+            R.drawable.stethoscope,
+            "Specialization",
+            p.getSpeciality()),
         new InfoRowBinder.Row(
-            rowHospital, R.drawable.hospital, "Hospital", "Hospital #" + p.getHospital_id()),
+            binding.rowHospital.getRoot(),
+            R.drawable.hospital,
+            "Hospital",
+            "Hospital #" + p.getHospital_id()),
         new InfoRowBinder.Row(
-            rowExperience,
+            binding.rowExperience.getRoot(),
             R.drawable.ic_nav_calendar,
             "Experience",
             years > 0 ? years + " years" : "Not specified"),
-        new InfoRowBinder.Row(rowPhone, R.drawable.phone, "Phone", p.getPhone()),
-        new InfoRowBinder.Row(rowEmail, R.drawable.email, "Email", sessionManager.getEmail()),
-        new InfoRowBinder.Row(rowAddress, R.drawable.location, "Address", p.getAddress()));
+        new InfoRowBinder.Row(binding.rowPhone.getRoot(), R.drawable.phone, "Phone", p.getPhone()),
+        new InfoRowBinder.Row(
+            binding.rowEmail.getRoot(), R.drawable.email, "Email", sessionManager.getEmail()),
+        new InfoRowBinder.Row(
+            binding.rowAddress.getRoot(), R.drawable.location, "Address", p.getAddress()));
   }
 
   private void bindProfilePic(String profilePicUrl) {
-    View view = getView();
-    if (view == null) return;
-    ImageLoader.loadProfilePic(this, view.findViewById(R.id.imgDoctorProfile), profilePicUrl);
+    if (binding == null) return;
+    ImageLoader.loadProfilePic(this, binding.imgDoctorProfile, profilePicUrl);
   }
 }
