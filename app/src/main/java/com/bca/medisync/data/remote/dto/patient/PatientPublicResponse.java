@@ -1,5 +1,8 @@
 package com.bca.medisync.data.remote.dto.patient;
 
+import lombok.Getter;
+
+@Getter
 public class PatientPublicResponse {
   private int id;
   private String name;
@@ -11,44 +14,4 @@ public class PatientPublicResponse {
   private String email;
   private String address;
   private String date_of_birth;
-
-  public int getId() {
-    return id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getPhone() {
-    return phone;
-  }
-
-  public String getGender() {
-    return gender;
-  }
-
-  public String getBlood_group() {
-    return blood_group;
-  }
-
-  public String getEmergency_contact() {
-    return emergency_contact;
-  }
-
-  public String getProfile_pic_url() {
-    return profile_pic_url;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public String getAddress() {
-    return address;
-  }
-
-  public String getDate_of_birth() {
-    return date_of_birth;
-  }
 }

@@ -61,7 +61,7 @@ public class PrescriptionEnricher {
         displayTime,
         m.getLabel(),
         m.getDuration_days() + " Days",
-        m.isIs_taken(),
+        m.is_taken(),
         m.getInstruction(),
         m.getDoctor_name());
   }

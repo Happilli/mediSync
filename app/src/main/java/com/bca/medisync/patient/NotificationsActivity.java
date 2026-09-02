@@ -188,7 +188,7 @@ public class NotificationsActivity extends AppCompatActivity
         r.getMessage(),
         r.getRelated_id(),
         r.getRelated_type(),
-        r.isIs_read(),
+        r.is_read(),
         r.getCreated_at());
   }
 }

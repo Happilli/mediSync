@@ -175,7 +175,7 @@ public class MedicationFragment extends Fragment {
           r.getDosage(),
           r.getDosage_time(),
           endDate,
-          r.isIs_taken());
+          r.is_taken());
     }
   }
 

@@ -174,7 +174,7 @@ public class ProfileFragment extends Fragment implements NotificationCenter.List
             rowDob, R.drawable.birthdate, "Date of Birth", patient.getDate_of_birth()),
         new InfoRowBinder.Row(rowAddress, R.drawable.location, "Address", patient.getAddress()));
     bindVerificationBadge(
-        patient.isIs_verified(), patient.getCitizenship_number(), patient.getRejection_reason());
+        patient.is_verified(), patient.getCitizenship_number(), patient.getRejection_reason());
     bindProfilePic(patient.getProfile_pic_url());
   }
 

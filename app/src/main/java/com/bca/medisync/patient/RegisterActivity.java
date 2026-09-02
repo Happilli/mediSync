@@ -246,9 +246,9 @@ public class RegisterActivity extends AppCompatActivity {
             address,
             selectedDob,
             gender,
-            securityAnswer,
             bloodGroup,
-            emergencyContact);
+            emergencyContact,
+            securityAnswer);
     AuthApi authApi = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
         authApi.registerPatient(request),

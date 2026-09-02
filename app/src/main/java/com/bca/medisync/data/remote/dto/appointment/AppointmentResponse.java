@@ -1,5 +1,8 @@
 package com.bca.medisync.data.remote.dto.appointment;
 
+import lombok.Getter;
+
+@Getter
 public class AppointmentResponse {
   private int id;
   private int doctor_id;
@@ -12,48 +15,4 @@ public class AppointmentResponse {
   private String doctor_name;
   private String speciality;
   private String department;
-
-  public int getId() {
-    return id;
-  }
-
-  public int getDoctor_id() {
-    return doctor_id;
-  }
-
-  public int getPatient_id() {
-    return patient_id;
-  }
-
-  public int getHospital_id() {
-    return hospital_id;
-  }
-
-  public String getAppointment_at() {
-    return appointment_at;
-  }
-
-  public String getStatus() {
-    return status;
-  }
-
-  public String getNotes() {
-    return notes;
-  }
-
-  public String getPatient_name() {
-    return patient_name;
-  }
-
-  public String getDoctor_name() {
-    return doctor_name;
-  }
-
-  public String getSpeciality() {
-    return speciality;
-  }
-
-  public String getDepartment() {
-    return department;
-  }
 }

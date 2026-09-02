@@ -1,5 +1,8 @@
 package com.bca.medisync.data.remote.dto.medicalhistory;
 
+import lombok.Getter;
+
+@Getter
 public class MedicalHistoryResponse {
   private int id;
   private int doctor_id;
@@ -7,28 +10,4 @@ public class MedicalHistoryResponse {
   private String title;
   private String description;
   private String date;
-
-  public int getId() {
-    return id;
-  }
-
-  public int getDoctor_id() {
-    return doctor_id;
-  }
-
-  public int getPatient_id() {
-    return patient_id;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public String getDate() {
-    return date;
-  }
 }

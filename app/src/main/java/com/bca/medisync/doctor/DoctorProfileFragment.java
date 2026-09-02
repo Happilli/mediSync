@@ -147,7 +147,7 @@ public class DoctorProfileFragment extends Fragment {
     ((TextView) view.findViewById(R.id.txtRole)).setText(p.getSpeciality());
 
     TextView badge = view.findViewById(R.id.txtRegistrationBadge);
-    if (p.isIs_verified()) {
+    if (p.is_verified()) {
       badge.setText("Verified");
       badge.setTextColor(requireContext().getColor(R.color.on_tertiary_container));
       badge.setBackgroundColor(requireContext().getColor(R.color.tertiary_container));

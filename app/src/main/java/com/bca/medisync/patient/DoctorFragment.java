@@ -219,6 +219,6 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
         r.getAddress(),
         r.getHospital_id(),
         r.getYears_experience(),
-        r.isIs_verified());
+        r.is_verified());
   }
 }

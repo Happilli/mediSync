@@ -128,7 +128,7 @@ public class BookAppointmentFragment extends Fragment {
 
   private TimeSlot mapToTimeSlot(TimeSlotResponse r) {
     String displayTime = DateTimeUtils.format(r.getAppointment_at(), "dd MMM, hh:mm a");
-    return new TimeSlot(r.getId(), r.getAppointment_at(), displayTime, r.isIs_available());
+    return new TimeSlot(r.getId(), r.getAppointment_at(), displayTime, r.is_available());
   }
 
   private void setupTimeSlots() {
