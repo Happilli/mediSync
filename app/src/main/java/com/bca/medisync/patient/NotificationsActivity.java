@@ -1,6 +1,9 @@
 package com.bca.medisync.patient;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -12,13 +15,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.NotificationAdapter;
+import com.bca.medisync.adapter.GroupedListAdapter;
 import com.bca.medisync.data.model.Notification;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
+import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
@@ -35,7 +39,7 @@ public class NotificationsActivity extends AppCompatActivity
   private android.widget.TextView txtEmpty;
   private MaterialButton btnMarkAllRead;
   private MaterialButtonToggleGroup toggleGroup;
-  private NotificationAdapter adapter;
+  private GroupedListAdapter<Notification> adapter;
 
   private List<Notification> allNotifications = new ArrayList<>();
   private boolean showUnreadOnly = true;
@@ -90,14 +94,38 @@ public class NotificationsActivity extends AppCompatActivity
 
   private void setupRecyclerView() {
     adapter =
-        new NotificationAdapter(
-            notification -> {
-              if (!notification.isRead()) {
-                markAsRead(notification.getId());
-              }
+        new GroupedListAdapter<>(
+            R.layout.item_notification,
+            n -> n.getType() == null ? "Other" : capitalize(n.getType()),
+            this::bindNotificationRow,
+            n -> {
+              if (!n.isRead()) markAsRead(n.getId());
             });
     rvNotifications.setLayoutManager(new LinearLayoutManager(this));
     rvNotifications.setAdapter(adapter);
+  }
+
+private void bindNotificationRow(android.view.View itemView, Notification n, int posInGroup, int groupSize) {
+  TextView txtTitle = itemView.findViewById(R.id.txtNotifTitle);
+  TextView txtMessage = itemView.findViewById(R.id.txtNotifMessage);
+  TextView txtTime = itemView.findViewById(R.id.txtNotifTime);
+  View unreadDot = itemView.findViewById(R.id.unreadDot);
+
+  txtTitle.setText(n.getTitle());
+  txtMessage.setText(n.getMessage());
+  txtTime.setText(DateTimeUtils.format(n.getCreatedAt(), "dd MMM, hh:mm a"));
+
+  if (n.isRead()) {
+    unreadDot.setVisibility(android.view.View.INVISIBLE);
+    itemView.setAlpha(0.6f);
+  } else {
+    unreadDot.setVisibility(android.view.View.VISIBLE);
+    itemView.setAlpha(1f);
+  }
+}
+  private String capitalize(String s) {
+    if (s.isEmpty()) return s;
+    return s.substring(0, 1).toUpperCase() + s.substring(1);
   }
 
   private void setupListeners() {

@@ -16,13 +16,14 @@ import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.DoctorGroupedAdapter;
+import com.bca.medisync.adapter.GroupedListAdapter;
 import com.bca.medisync.data.model.Doctor;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
+import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.SearchSuggestionHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.search.SearchBar;
@@ -40,7 +41,7 @@ public class DoctorFragment extends Fragment {
   private MaterialToolbar toolbar;
   private SearchBar searchBar;
   private SearchView searchView;
-  private DoctorGroupedAdapter adapter;
+  private GroupedListAdapter<Doctor> adapter;
 
   private Integer filterHospitalId;
 
@@ -139,44 +140,61 @@ public class DoctorFragment extends Fragment {
     rvDoctors.setItemAnimator(null);
 
     adapter =
-        new DoctorGroupedAdapter(
-            this,
-            expandedIds,
-            new DoctorGroupedAdapter.Callbacks() {
-              @Override
-              public void onToggleExpand(Doctor doctor) {
-                TransitionSet transition =
-                    new TransitionSet()
-                        .addTransition(new ChangeBounds())
-                        .addTransition(new Fade(Fade.IN))
-                        .setDuration(280)
-                        .setInterpolator(new FastOutSlowInInterpolator());
-                TransitionManager.beginDelayedTransition(rvDoctors, transition);
-
-                if (expandedIds.contains(doctor.getId())) {
-                  expandedIds.remove(doctor.getId());
-                } else {
-                  expandedIds.add(doctor.getId());
-                }
-                adapter.notifyDataSetChanged();
-              }
-
-              @Override
-              public void onBookClicked(Doctor doctor) {
-                DoctorFragment.this.onBookClicked(doctor);
-              }
-
-              @Override
-              public String getHospitalName(int hospitalId, TextView target) {
-                String cached = hospitalNameCache.get(hospitalId);
-                if (cached != null) return cached;
-                loadHospitalName(hospitalId, target);
-                return "Loading hospital...";
-              }
-            });
+        new GroupedListAdapter<>(
+            R.layout.item_doctor_row,
+            Doctor::getDepartment,
+            (itemView, doctor, posInGroup, groupSize) -> bindDoctorRow(itemView, doctor),
+            this::onRowClicked);
 
     rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvDoctors.setAdapter(adapter);
+  }
+
+  private void bindDoctorRow(View itemView, Doctor doctor) {
+    ((TextView) itemView.findViewById(R.id.txtDoctorName)).setText(doctor.getName());
+    ((TextView) itemView.findViewById(R.id.txtSpeciality)).setText(doctor.getSpeciality());
+    ((TextView) itemView.findViewById(R.id.txtInfo)).setText(doctor.getInfo());
+    ImageLoader.loadDoctorImage(this, itemView.findViewById(R.id.imgDoctor), doctor.getImageUrl());
+
+    boolean expanded = expandedIds.contains(doctor.getId());
+    View divider = itemView.findViewById(R.id.dividerExpand);
+    View detail = itemView.findViewById(R.id.detailContainer);
+    divider.setVisibility(expanded ? View.VISIBLE : View.GONE);
+    detail.setVisibility(expanded ? View.VISIBLE : View.GONE);
+    itemView.findViewById(R.id.imgExpandArrow).setRotation(expanded ? 90f : 0f);
+
+    if (expanded) {
+      TextView txtBio = itemView.findViewById(R.id.txtBio);
+      boolean hasBio = doctor.getBio() != null && !doctor.getBio().isEmpty();
+      txtBio.setVisibility(hasBio ? View.VISIBLE : View.GONE);
+      txtBio.setText(doctor.getBio());
+      ((TextView) itemView.findViewById(R.id.txtDoctorAddress)).setText(doctor.getAddress());
+      ((TextView) itemView.findViewById(R.id.txtDoctorPhone)).setText(doctor.getPhone());
+
+      TextView txtHospital = itemView.findViewById(R.id.txtHospitalName);
+      String cached = hospitalNameCache.get(doctor.getHospitalId());
+      if (cached != null) {
+        txtHospital.setText(cached);
+      } else {
+        txtHospital.setText("Loading hospital...");
+        loadHospitalName(doctor.getHospitalId(), txtHospital);
+      }
+      itemView.findViewById(R.id.btnBook).setOnClickListener(v -> onBookClicked(doctor));
+    }
+  }
+
+  private void onRowClicked(Doctor doctor) {
+    TransitionSet transition =
+        new TransitionSet()
+            .addTransition(new ChangeBounds())
+            .addTransition(new Fade(Fade.IN))
+            .setDuration(280)
+            .setInterpolator(new FastOutSlowInInterpolator());
+    TransitionManager.beginDelayedTransition(rvDoctors, transition);
+
+    if (expandedIds.contains(doctor.getId())) expandedIds.remove(doctor.getId());
+    else expandedIds.add(doctor.getId());
+    adapter.notifyDataSetChanged();
   }
 
   private void loadHospitalName(int hospitalId, TextView target) {

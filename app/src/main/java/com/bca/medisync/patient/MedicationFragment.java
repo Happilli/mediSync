@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
-import com.bca.medisync.adapter.MedicationAdapter;
+import com.bca.medisync.adapter.GroupedListAdapter;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -24,6 +24,7 @@ import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class MedicationFragment extends Fragment {
   private CircularProgressIndicator progressAdherence;
   private TextView tvAdherenceCount;
 
-  private MedicationAdapter adapter;
+  private GroupedListAdapter<Medication> adapter;
   private Medication activeMedication;
 
   public MedicationFragment() {}
@@ -97,15 +98,47 @@ public class MedicationFragment extends Fragment {
 
   private void setUpRecyclerView() {
     adapter =
-        new MedicationAdapter(
+        new GroupedListAdapter<>(
+            R.layout.item_medication,
+            med -> med.getDoctorName() == null ? "Unknown" : "Dr. " + med.getDoctorName(),
+            this::bindMedicationRow,
             med -> {
               if (!med.isTaken()) {
                 Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show();
               }
-            },
-            (med, taken) -> markTaken(med));
+            });
     rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvMedications.setAdapter(adapter);
+  }
+
+  private void bindMedicationRow(View itemView, Medication m, int posInGroup, int groupSize) {
+    TextView tvMedName = itemView.findViewById(R.id.tvMedName);
+    TextView tvMedFrequency = itemView.findViewById(R.id.tvMedFrequency);
+    TextView tvMedTime = itemView.findViewById(R.id.tvMedTime);
+    MaterialCheckBox cbTaken = itemView.findViewById(R.id.cbTaken);
+
+    tvMedName.setText(m.getName() + " " + m.getDosage());
+    tvMedFrequency.setText(m.getFrequency());
+
+    cbTaken.setOnCheckedChangeListener(null);
+    cbTaken.setChecked(m.isTaken());
+    cbTaken.setEnabled(!m.isTaken());
+    cbTaken.setClickable(!m.isTaken());
+
+    if (!m.isTaken()) {
+      cbTaken.setOnCheckedChangeListener(
+          (buttonView, isChecked) -> {
+            if (isChecked) markTaken(m);
+          });
+    }
+
+    if (m.isTaken()) {
+      tvMedTime.setText("Taken");
+      itemView.setAlpha(0.6f);
+    } else {
+      tvMedTime.setText(m.getTime());
+      itemView.setAlpha(1f);
+    }
   }
 
   private void loadMedications() {
