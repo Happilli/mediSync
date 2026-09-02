@@ -16,16 +16,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
-import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
+import com.bca.medisync.util.AuthUtils;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
@@ -334,14 +333,6 @@ public class ProfileFragment extends Fragment implements NotificationCenter.List
     requireView()
         .findViewById(R.id.btnLogout)
         .setOnClickListener(
-            v -> {
-              sessionManager.clearSession();
-              NotificationSocketHolder.get().disconnect();
-              NotificationSocketHolder.reset();
-              Intent intent = new Intent(requireContext(), MainActivity.class);
-              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-              startActivity(intent);
-              requireActivity().finish();
-            });
+            v -> AuthUtils.logout((androidx.appcompat.app.AppCompatActivity) requireActivity()));
   }
 }

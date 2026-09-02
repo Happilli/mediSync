@@ -1,6 +1,5 @@
 package com.bca.medisync.doctor;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,23 +13,19 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
-import com.bca.medisync.data.remote.NotificationSocketHolder;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
-import com.bca.medisync.util.FileUploadHelper;
+import com.bca.medisync.util.AuthUtils;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.ProfilePicUploader;
 import com.google.android.material.loadingindicator.LoadingIndicator;
-import java.io.File;
-import okhttp3.MultipartBody;
 
 public class DoctorProfileFragment extends Fragment {
 
@@ -87,15 +82,7 @@ public class DoctorProfileFragment extends Fragment {
 
     view.findViewById(R.id.btnLogoutDoctor)
         .setOnClickListener(
-            v -> {
-              sessionManager.clearSession();
-              NotificationSocketHolder.get().disconnect();
-              NotificationSocketHolder.reset();
-              Intent intent = new Intent(requireContext(), MainActivity.class);
-              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-              startActivity(intent);
-              requireActivity().finish();
-            });
+            v -> AuthUtils.logout((androidx.appcompat.app.AppCompatActivity) requireActivity()));
   }
 
   private void uploadProfilePic(Uri uri) {
