@@ -12,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.adapter.SimpleListAdapter;
@@ -24,9 +23,9 @@ import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.databinding.FragmentHomeBinding;
 import com.bca.medisync.util.NotificationBadgeHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,11 +34,7 @@ import java.util.List;
 
 public class HomeFragment extends Fragment implements NotificationCenter.Listener {
 
-  private RecyclerView rvDashboard;
-  private TextView txtPatientName;
-  private MaterialButton btnNotification;
-  private RecyclerView rvUpcomingHome;
-  private TextView txtNoUpcoming;
+  private FragmentHomeBinding binding;
 
   public HomeFragment() {}
 
@@ -49,13 +44,14 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_home, container, false);
+    binding = FragmentHomeBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
+    initViews();
     setupDashboard();
   }
 
@@ -75,25 +71,21 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
   }
 
   @Override
-  public void onNotificationReceived(NotificationResponse notification) {
-    if (!isAdded()) {
-      return;
-    }
-    NotificationBadgeHelper.showUnread(this, btnNotification);
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
   }
 
-  private void initViews(View view) {
-    txtPatientName = view.findViewById(R.id.txtPatientName);
-    rvDashboard = view.findViewById(R.id.rvDashboard);
-    rvUpcomingHome = view.findViewById(R.id.rvUpcomingHome);
-    txtNoUpcoming = view.findViewById(R.id.txtNoUpcoming);
-    btnNotification = view.findViewById(R.id.btnNotification);
+  @Override
+  public void onNotificationReceived(NotificationResponse notification) {
+    if (!isAdded() || binding == null) return;
+    NotificationBadgeHelper.showUnread(this, binding.btnNotification);
+  }
 
-    rvUpcomingHome.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-    view.findViewById(R.id.btnNotification)
-        .setOnClickListener(
-            v -> startActivity(new Intent(requireContext(), NotificationsActivity.class)));
+  private void initViews() {
+    binding.rvUpcomingHome.setLayoutManager(new LinearLayoutManager(requireContext()));
+    binding.btnNotification.setOnClickListener(
+        v -> startActivity(new Intent(requireContext(), NotificationsActivity.class)));
   }
 
   private void goToTab(int navItemId) {
@@ -106,7 +98,9 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
     ApiCallback.handle(
         api.getMyProfile(),
         this,
-        body -> txtPatientName.setText(body.getName()),
+        body -> {
+          if (binding != null) binding.txtPatientName.setText(body.getName());
+        },
         ApiCallback.simpleError(requireContext(), "Failed to load profile."));
   }
 
@@ -120,7 +114,7 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
   }
 
   private void loadUnreadCount() {
-    NotificationBadgeHelper.refresh(this, btnNotification);
+    NotificationBadgeHelper.refresh(this, binding.btnNotification);
   }
 
   private void loadUpcomingAppointment() {
@@ -129,6 +123,7 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
         api.getMyAppointments(null, null),
         this,
         body -> {
+          if (binding == null) return;
           List<AppointmentResponse> upcoming = new ArrayList<>();
           for (AppointmentResponse a : body) {
             String status = a.getStatus();
@@ -141,19 +136,18 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
           List<AppointmentResponse> top3 = upcoming.subList(0, Math.min(3, upcoming.size()));
 
           if (top3.isEmpty()) {
-            if (!isAdded()) return;
-            rvUpcomingHome.setVisibility(View.GONE);
-            txtNoUpcoming.setVisibility(View.VISIBLE);
+            binding.rvUpcomingHome.setVisibility(View.GONE);
+            binding.txtNoUpcoming.setVisibility(View.VISIBLE);
             return;
           }
 
           AppointmentEnricher.enrichAll(
               top3,
               appointments -> {
-                if (!isAdded()) return;
-                rvUpcomingHome.setVisibility(View.VISIBLE);
-                txtNoUpcoming.setVisibility(View.GONE);
-                rvUpcomingHome.setAdapter(
+                if (!isAdded() || binding == null) return;
+                binding.rvUpcomingHome.setVisibility(View.VISIBLE);
+                binding.txtNoUpcoming.setVisibility(View.GONE);
+                binding.rvUpcomingHome.setAdapter(
                     new AppointmentAdapter(
                         requireContext(),
                         appointments,
@@ -218,7 +212,7 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
                   break;
               }
             });
-    rvDashboard.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-    rvDashboard.setAdapter(adapter);
+    binding.rvDashboard.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+    binding.rvDashboard.setAdapter(adapter);
   }
 }

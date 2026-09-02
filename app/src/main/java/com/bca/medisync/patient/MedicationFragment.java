@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.GroupedListAdapter;
 import com.bca.medisync.data.model.Medication;
@@ -23,19 +22,15 @@ import com.bca.medisync.data.remote.api.MedicationApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
-import com.google.android.material.button.MaterialButton;
+import com.bca.medisync.databinding.FragmentMedicationBinding;
 import com.google.android.material.checkbox.MaterialCheckBox;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MedicationFragment extends Fragment {
-  private RecyclerView rvMedications;
-  private TextView tvActiveTime, tvActiveName, tvActiveDosage;
-  private MaterialButton btnMarkTaken;
-  private CircularProgressIndicator progressAdherence;
-  private TextView tvAdherenceCount;
+
+  private FragmentMedicationBinding binding;
 
   private GroupedListAdapter<Medication> adapter;
   private Medication activeMedication;
@@ -48,13 +43,19 @@ public class MedicationFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_medication, container, false);
+    binding = FragmentMedicationBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
+    binding.btnMarkTaken.setOnClickListener(
+        v -> {
+          if (activeMedication != null && !activeMedication.isTaken()) {
+            markTaken(activeMedication);
+          }
+        });
     setUpRecyclerView();
     maybeRequestExactAlarmPermission();
     loadMedications();
@@ -66,21 +67,10 @@ public class MedicationFragment extends Fragment {
     loadMedications();
   }
 
-  private void initViews(View view) {
-    rvMedications = view.findViewById(R.id.rvMedications);
-    tvActiveTime = view.findViewById(R.id.tvActiveTime);
-    tvActiveName = view.findViewById(R.id.tvActiveName);
-    tvActiveDosage = view.findViewById(R.id.tvActiveDosage);
-    btnMarkTaken = view.findViewById(R.id.btnMarkTaken);
-    progressAdherence = view.findViewById(R.id.progressAdherence);
-    tvAdherenceCount = view.findViewById(R.id.tvAdherenceCount);
-
-    btnMarkTaken.setOnClickListener(
-        v -> {
-          if (activeMedication != null && !activeMedication.isTaken()) {
-            markTaken(activeMedication);
-          }
-        });
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
   }
 
   private void maybeRequestExactAlarmPermission() {
@@ -107,8 +97,8 @@ public class MedicationFragment extends Fragment {
                 Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show();
               }
             });
-    rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
-    rvMedications.setAdapter(adapter);
+    binding.rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
+    binding.rvMedications.setAdapter(adapter);
   }
 
   private void bindMedicationRow(View itemView, Medication m, int posInGroup, int groupSize) {
@@ -147,6 +137,7 @@ public class MedicationFragment extends Fragment {
         api.getMyMedications(),
         this,
         body -> {
+          if (binding == null) return;
           List<Medication> meds = new ArrayList<>();
           for (MedicationResponse r : body) {
             meds.add(PrescriptionEnricher.mapMedication(r));
@@ -200,6 +191,7 @@ public class MedicationFragment extends Fragment {
   }
 
   private void bindMedications(List<Medication> meds) {
+    if (binding == null) return;
     adapter.submitList(meds);
 
     int total = meds.size();
@@ -207,9 +199,9 @@ public class MedicationFragment extends Fragment {
     for (Medication m : meds) {
       if (m.isTaken()) taken++;
     }
-    tvAdherenceCount.setText(taken + "/" + total);
+    binding.tvAdherenceCount.setText(taken + "/" + total);
     int percent = total == 0 ? 0 : (int) ((taken / (float) total) * 100);
-    progressAdherence.setProgressCompat(percent, true);
+    binding.progressAdherence.setProgressCompat(percent, true);
 
     activeMedication = null;
     for (Medication m : meds) {
@@ -220,17 +212,17 @@ public class MedicationFragment extends Fragment {
     }
 
     if (activeMedication != null) {
-      tvActiveName.setText(activeMedication.getName() + " " + activeMedication.getDosage());
-      tvActiveDosage.setText(activeMedication.getFrequency());
-      tvActiveTime.setText(activeMedication.getTime());
-      btnMarkTaken.setEnabled(true);
-      btnMarkTaken.setText("Mark as Taken");
+      binding.tvActiveName.setText(activeMedication.getName() + " " + activeMedication.getDosage());
+      binding.tvActiveDosage.setText(activeMedication.getFrequency());
+      binding.tvActiveTime.setText(activeMedication.getTime());
+      binding.btnMarkTaken.setEnabled(true);
+      binding.btnMarkTaken.setText("Mark as Taken");
     } else {
-      tvActiveName.setText(meds.isEmpty() ? "No medications" : "All medications taken");
-      tvActiveDosage.setText("");
-      tvActiveTime.setText("--");
-      btnMarkTaken.setEnabled(false);
-      btnMarkTaken.setText("Nothing Pending");
+      binding.tvActiveName.setText(meds.isEmpty() ? "No medications" : "All medications taken");
+      binding.tvActiveDosage.setText("");
+      binding.tvActiveTime.setText("--");
+      binding.btnMarkTaken.setEnabled(false);
+      binding.btnMarkTaken.setText("Nothing Pending");
     }
   }
 }

@@ -5,14 +5,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
@@ -26,11 +24,11 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.databinding.FragmentDoctorHomeBinding;
 import com.bca.medisync.patient.NotificationsActivity;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.NotificationBadgeHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,17 +39,7 @@ import java.util.Locale;
 
 public class DoctorHomeFragment extends Fragment implements NotificationCenter.Listener {
 
-  private RecyclerView rvAppointments;
-  private MaterialButton btnNotification;
-  private TextView txtGreeting,
-      txtDoctorName,
-      txtPending,
-      txtCompleted,
-      txtFollowUps,
-      txtScheduledCount,
-      txtPatientsMonth,
-      txtTotalPatients,
-      txtNoAppointments;
+  private FragmentDoctorHomeBinding binding;
   private SessionManager sessionManager;
 
   @Nullable
@@ -60,14 +48,15 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_doctor_home, container, false);
+    binding = FragmentDoctorHomeBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     sessionManager = new SessionManager(requireContext());
-    initViews(view);
+    initViews();
     setGreeting();
     setupListeners();
   }
@@ -86,39 +75,33 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   }
 
   @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
+
+  @Override
   public void onNotificationReceived(NotificationResponse notification) {
-    if (isAdded()) NotificationBadgeHelper.showUnread(this, btnNotification);
+    if (isAdded() && binding != null)
+      NotificationBadgeHelper.showUnread(this, binding.btnNotification);
   }
 
   public void refresh() {
-    if (!isAdded()) return;
+    if (!isAdded() || binding == null) return;
     loadDashboardData();
     loadTodayAppointments();
     loadUnreadCount();
   }
 
-  private void initViews(View view) {
-    rvAppointments = view.findViewById(R.id.rvAppointments);
-    btnNotification = view.findViewById(R.id.btnNotification);
-    txtGreeting = view.findViewById(R.id.txtGreeting);
-    txtDoctorName = view.findViewById(R.id.txtDoctorName);
-    txtPending = view.findViewById(R.id.txtPending);
-    txtCompleted = view.findViewById(R.id.txtCompleted);
-    txtFollowUps = view.findViewById(R.id.txtFollowUps);
-    txtScheduledCount = view.findViewById(R.id.txtScheduledCount);
-    txtPatientsMonth = view.findViewById(R.id.txtPatientsMonth);
-    txtTotalPatients = view.findViewById(R.id.txtTotalPatients);
-    txtNoAppointments = view.findViewById(R.id.txtNoAppointments);
-    View cardTodaySchedule = view.findViewById(R.id.cardTodaySchedule);
-    cardTodaySchedule.setOnClickListener(v -> BottomNavGoTo(R.id.nav_doctor_schedule));
-
-    rvAppointments.setLayoutManager(new LinearLayoutManager(requireContext()));
-    rvAppointments.setAdapter(
+  private void initViews() {
+    binding.rvAppointments.setLayoutManager(new LinearLayoutManager(requireContext()));
+    binding.rvAppointments.setAdapter(
         new AppointmentAdapter(
             requireContext(),
             new ArrayList<>(),
             true,
             a -> BottomNavGoTo(R.id.nav_doctor_schedule)));
+    binding.cardTodaySchedule.setOnClickListener(v -> BottomNavGoTo(R.id.nav_doctor_schedule));
   }
 
   private void setGreeting() {
@@ -127,11 +110,11 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
     if (hour < 12) greeting = "Good morning,";
     else if (hour < 17) greeting = "Good afternoon,";
     else greeting = "Good evening,";
-    txtGreeting.setText(greeting);
+    binding.txtGreeting.setText(greeting);
   }
 
   private void loadUnreadCount() {
-    NotificationBadgeHelper.refresh(this, btnNotification);
+    NotificationBadgeHelper.refresh(this, binding.btnNotification);
   }
 
   private void loadDashboardData() {
@@ -140,10 +123,11 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
         api.getMyProfile(),
         this,
         p -> {
-          txtDoctorName.setText("Dr. " + p.getName() + " !");
-          txtPatientsMonth.setText(String.valueOf(p.getPatients_this_month()));
-          txtTotalPatients.setText(String.valueOf(p.getTotal_patients()));
-          txtFollowUps.setText(String.valueOf(p.getUpcoming_followups()));
+          if (binding == null) return;
+          binding.txtDoctorName.setText("Dr. " + p.getName() + " !");
+          binding.txtPatientsMonth.setText(String.valueOf(p.getPatients_this_month()));
+          binding.txtTotalPatients.setText(String.valueOf(p.getTotal_patients()));
+          binding.txtFollowUps.setText(String.valueOf(p.getUpcoming_followups()));
         },
         (code, msg) -> {
           if (code == 401) handleUnauthorized();
@@ -158,6 +142,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
         api.getMyAppointmentsAsDoctor(null, null),
         this,
         all -> {
+          if (binding == null) return;
           String todayStr =
               new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
           List<AppointmentResponse> todayAppointments = new ArrayList<>();
@@ -168,18 +153,19 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
             if (todayStr.equals(apptDate)) todayAppointments.add(r);
           }
 
-          txtScheduledCount.setText(
+          binding.txtScheduledCount.setText(
               todayAppointments.size()
                   + (todayAppointments.size() == 1 ? " appointment today" : " appointments today"));
           updateStats(todayAppointments);
-          EmptyState.bind(rvAppointments, txtNoAppointments, todayAppointments.isEmpty());
+          EmptyState.bind(
+              binding.rvAppointments, binding.txtNoAppointments, todayAppointments.isEmpty());
 
           if (!todayAppointments.isEmpty()) {
             AppointmentEnricher.enrichForDoctor(
                 todayAppointments,
                 appointments -> {
-                  if (!isAdded()) return;
-                  rvAppointments.setAdapter(
+                  if (!isAdded() || binding == null) return;
+                  binding.rvAppointments.setAdapter(
                       new AppointmentAdapter(
                           requireContext(),
                           appointments,
@@ -217,7 +203,7 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   }
 
   private void updateStats(List<AppointmentResponse> appointments) {
-    int pendingCount = 0, completedCount = 0, followUpCount = 0;
+    int pendingCount = 0, completedCount = 0;
     for (AppointmentResponse a : appointments) {
       String status = a.getStatus() != null ? a.getStatus().toLowerCase() : "";
       if (status.contains("pending")
@@ -225,12 +211,12 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
           || status.contains("confirmed")) pendingCount++;
       else if (status.contains("completed") || status.contains("treated")) completedCount++;
     }
-    txtPending.setText(String.valueOf(pendingCount));
-    txtCompleted.setText(String.valueOf(completedCount));
+    binding.txtPending.setText(String.valueOf(pendingCount));
+    binding.txtCompleted.setText(String.valueOf(completedCount));
   }
 
   private void setupListeners() {
-    btnNotification.setOnClickListener(
+    binding.btnNotification.setOnClickListener(
         v -> startActivity(new Intent(requireContext(), NotificationsActivity.class)));
   }
 }
