@@ -19,12 +19,10 @@ import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationCreateRequest;
 import com.bca.medisync.data.remote.dto.medication.MedicationTimeCreateRequest;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionCreateRequest;
+import com.bca.medisync.databinding.FragmentPrescriptionBinding;
 import com.bca.medisync.util.ViewUtils;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
@@ -36,16 +34,8 @@ import java.util.Locale;
 
 public class PrescriptionFragment extends Fragment {
 
-  private TextView tvPatientName, tvDiagnosis;
-  private TextInputEditText etMedicine, etDosage, etDuration, etInstructions;
-  private MaterialButton btnAddDosageTime,
-      btnAddMedicine,
-      btnSelectFollowUp,
-      btnSavePrescription,
-      btnClearFollowUp;
-  private ChipGroup chipDosageTimes;
-  private LinearLayout addedMedicinesContainer;
-  private TextView txtSelectedFollowUp, txtNoMedicinesAdded;
+  private FragmentPrescriptionBinding binding;
+
   private String patientName, diagnosis, notes;
   private int appointmentId = -1;
 
@@ -62,34 +52,22 @@ public class PrescriptionFragment extends Fragment {
       @NonNull LayoutInflater inflater,
       @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_prescription, container, false);
+    binding = FragmentPrescriptionBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
     loadData();
     setupListeners();
     refreshAddedMedicinesUi();
   }
 
-  private void initViews(View view) {
-    tvPatientName = view.findViewById(R.id.tvPatientName);
-    tvDiagnosis = view.findViewById(R.id.tvDiagnosis);
-    etMedicine = view.findViewById(R.id.etMedicine);
-    etDosage = view.findViewById(R.id.etDosage);
-    etDuration = view.findViewById(R.id.etDuration);
-    etInstructions = view.findViewById(R.id.etInstructions);
-    btnAddDosageTime = view.findViewById(R.id.btnSelectDosageTime);
-    chipDosageTimes = view.findViewById(R.id.chipDosageTimes);
-    btnAddMedicine = view.findViewById(R.id.btnAddMedicine);
-    addedMedicinesContainer = view.findViewById(R.id.addedMedicinesContainer);
-    txtNoMedicinesAdded = view.findViewById(R.id.txtNoMedicinesAdded);
-    btnSelectFollowUp = view.findViewById(R.id.btnSelectFollowUp);
-    txtSelectedFollowUp = view.findViewById(R.id.txtSelectedFollowUp);
-    btnClearFollowUp = view.findViewById(R.id.btnClearFollowUp);
-    btnSavePrescription = view.findViewById(R.id.btnSavePrescription);
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
   }
 
   private void loadData() {
@@ -99,16 +77,17 @@ public class PrescriptionFragment extends Fragment {
     notes = args != null ? args.getString("notes") : null;
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
 
-    if (patientName != null) tvPatientName.setText("Prescription -> " + patientName);
-    if (diagnosis != null && !diagnosis.isEmpty()) tvDiagnosis.setText("Diagnosis: " + diagnosis);
+    if (patientName != null) binding.tvPatientName.setText("Prescription -> " + patientName);
+    if (diagnosis != null && !diagnosis.isEmpty())
+      binding.tvDiagnosis.setText("Diagnosis: " + diagnosis);
   }
 
   private void setupListeners() {
-    btnAddDosageTime.setOnClickListener(v -> showAddDosageTimePicker());
-    btnAddMedicine.setOnClickListener(v -> attemptAddMedicine());
-    btnSelectFollowUp.setOnClickListener(v -> showFollowUpDatePicker());
-    btnClearFollowUp.setOnClickListener(v -> clearFollowUp());
-    btnSavePrescription.setOnClickListener(v -> attemptSavePrescription());
+    binding.btnSelectDosageTime.setOnClickListener(v -> showAddDosageTimePicker());
+    binding.btnAddMedicine.setOnClickListener(v -> attemptAddMedicine());
+    binding.btnSelectFollowUp.setOnClickListener(v -> showFollowUpDatePicker());
+    binding.btnClearFollowUp.setOnClickListener(v -> clearFollowUp());
+    binding.btnSavePrescription.setOnClickListener(v -> attemptSavePrescription());
   }
 
   private void showAddDosageTimePicker() {
@@ -148,31 +127,31 @@ public class PrescriptionFragment extends Fragment {
     chip.setCloseIconVisible(true);
     chip.setOnCloseIconClickListener(
         v -> {
-          int index = chipDosageTimes.indexOfChild(chip);
-          chipDosageTimes.removeView(chip);
+          int index = binding.chipDosageTimes.indexOfChild(chip);
+          binding.chipDosageTimes.removeView(chip);
           if (index >= 0 && index < draftDosageTimes.size()) {
             draftDosageTimes.remove(index);
           }
         });
-    chipDosageTimes.addView(chip);
+    binding.chipDosageTimes.addView(chip);
   }
 
   private void attemptAddMedicine() {
-    String medicine = etMedicine.getText().toString().trim();
-    String dosage = etDosage.getText().toString().trim();
-    String durationStr = etDuration.getText().toString().trim();
-    String instructions = etInstructions.getText().toString().trim();
+    String medicine = binding.etMedicine.getText().toString().trim();
+    String dosage = binding.etDosage.getText().toString().trim();
+    String durationStr = binding.etDuration.getText().toString().trim();
+    String instructions = binding.etInstructions.getText().toString().trim();
 
     if (medicine.isEmpty()) {
-      etMedicine.setError("Medicine name is required");
+      binding.etMedicine.setError("Medicine name is required");
       return;
     }
     if (dosage.isEmpty()) {
-      etDosage.setError("Dosage is required");
+      binding.etDosage.setError("Dosage is required");
       return;
     }
     if (durationStr.isEmpty()) {
-      etDuration.setError("Duration is required");
+      binding.etDuration.setError("Duration is required");
       return;
     }
     if (draftDosageTimes.isEmpty()) {
@@ -188,7 +167,7 @@ public class PrescriptionFragment extends Fragment {
       return;
     }
     if (durationDays < 1) {
-      etDuration.setError("Duration must be at least 1 day");
+      binding.etDuration.setError("Duration must be at least 1 day");
       return;
     }
 
@@ -218,25 +197,25 @@ public class PrescriptionFragment extends Fragment {
   }
 
   private void clearDraftForm() {
-    etMedicine.setText("");
-    etDosage.setText("");
-    etDuration.setText("");
-    etInstructions.setText("");
+    binding.etMedicine.setText("");
+    binding.etDosage.setText("");
+    binding.etDuration.setText("");
+    binding.etInstructions.setText("");
     draftDosageTimes.clear();
-    chipDosageTimes.removeAllViews();
+    binding.chipDosageTimes.removeAllViews();
   }
 
   private void refreshAddedMedicinesUi() {
-    addedMedicinesContainer.removeAllViews();
+    binding.addedMedicinesContainer.removeAllViews();
 
     if (medications.isEmpty()) {
-      txtNoMedicinesAdded.setVisibility(View.VISIBLE);
+      binding.txtNoMedicinesAdded.setVisibility(View.VISIBLE);
       return;
     }
-    txtNoMedicinesAdded.setVisibility(View.GONE);
+    binding.txtNoMedicinesAdded.setVisibility(View.GONE);
 
     for (int i = 0; i < medications.size(); i++) {
-      addedMedicinesContainer.addView(buildAddedMedicineRow(i));
+      binding.addedMedicinesContainer.addView(buildAddedMedicineRow(i));
     }
   }
 
@@ -288,16 +267,16 @@ public class PrescriptionFragment extends Fragment {
                   .format(cal.getTime());
           String display =
               new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(cal.getTime());
-          txtSelectedFollowUp.setText(display);
-          btnClearFollowUp.setVisibility(View.VISIBLE);
+          binding.txtSelectedFollowUp.setText(display);
+          binding.btnClearFollowUp.setVisibility(View.VISIBLE);
         });
     picker.show(getParentFragmentManager(), "FOLLOWUP_DATE_PICKER");
   }
 
   private void clearFollowUp() {
     selectedFollowUpIso = null;
-    txtSelectedFollowUp.setText("No follow-up needed");
-    btnClearFollowUp.setVisibility(View.GONE);
+    binding.txtSelectedFollowUp.setText("No follow-up needed");
+    binding.btnClearFollowUp.setVisibility(View.GONE);
   }
 
   private void attemptSavePrescription() {
@@ -314,7 +293,7 @@ public class PrescriptionFragment extends Fragment {
       return;
     }
 
-    String instructions = etInstructions.getText().toString().trim();
+    String instructions = binding.etInstructions.getText().toString().trim();
 
     PrescriptionCreateRequest request =
         new PrescriptionCreateRequest(
@@ -324,19 +303,20 @@ public class PrescriptionFragment extends Fragment {
             selectedFollowUpIso,
             new ArrayList<>(medications));
 
-    btnSavePrescription.setEnabled(false);
+    binding.btnSavePrescription.setEnabled(false);
 
     PrescriptionApi api = ApiClient.api(PrescriptionApi.class);
     ApiCallback.handle(
         api.createPrescription(request),
         this,
         body -> {
-          btnSavePrescription.setEnabled(true);
+          if (binding != null) binding.btnSavePrescription.setEnabled(true);
           Toast.makeText(requireContext(), "Prescription saved.", Toast.LENGTH_SHORT).show();
           ((DoctorTabActivity) requireActivity()).popToRoot();
         },
         (code, msg) -> {
-          btnSavePrescription.setEnabled(true);
+          if (binding == null) return;
+          binding.btnSavePrescription.setEnabled(true);
           if (code == 403) {
             Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT).show();
           } else if (code == 400) {
