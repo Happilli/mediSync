@@ -2,15 +2,12 @@ package com.bca.medisync.patient;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.GroupedListAdapter;
 import com.bca.medisync.data.model.Notification;
@@ -20,18 +17,16 @@ import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.databinding.ActivityNotificationsBinding;
+import com.bca.medisync.databinding.ItemNotificationBinding;
 import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationsActivity extends AppCompatActivity
     implements NotificationCenter.Listener {
-
   private ActivityNotificationsBinding binding;
-  private GroupedListAdapter<Notification> adapter;
-
+  private GroupedListAdapter<Notification, ItemNotificationBinding> adapter;
   private List<Notification> allNotifications = new ArrayList<>();
   private boolean showUnreadOnly = true;
 
@@ -41,7 +36,6 @@ public class NotificationsActivity extends AppCompatActivity
     EdgeToEdge.enable(this);
     binding = ActivityNotificationsBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
-
     ViewCompat.setOnApplyWindowInsetsListener(
         binding.main,
         (v, insets) -> {
@@ -49,7 +43,6 @@ public class NotificationsActivity extends AppCompatActivity
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return insets;
         });
-
     setupToolbar();
     setupRecyclerView();
     setupListeners();
@@ -80,7 +73,7 @@ public class NotificationsActivity extends AppCompatActivity
   private void setupRecyclerView() {
     adapter =
         new GroupedListAdapter<>(
-            R.layout.item_notification,
+            ItemNotificationBinding::inflate,
             n -> n.getType() == null ? "Other" : capitalize(n.getType()),
             this::bindNotificationRow,
             n -> {
@@ -90,22 +83,17 @@ public class NotificationsActivity extends AppCompatActivity
     binding.rvNotifications.setAdapter(adapter);
   }
 
-  private void bindNotificationRow(View itemView, Notification n, int posInGroup, int groupSize) {
-    TextView txtTitle = itemView.findViewById(R.id.txtNotifTitle);
-    TextView txtMessage = itemView.findViewById(R.id.txtNotifMessage);
-    TextView txtTime = itemView.findViewById(R.id.txtNotifTime);
-    View unreadDot = itemView.findViewById(R.id.unreadDot);
-
-    txtTitle.setText(n.getTitle());
-    txtMessage.setText(n.getMessage());
-    txtTime.setText(DateTimeUtils.format(n.getCreatedAt(), "dd MMM, hh:mm a"));
-
+  private void bindNotificationRow(
+      ItemNotificationBinding rowBinding, Notification n, int posInGroup, int groupSize) {
+    rowBinding.txtNotifTitle.setText(n.getTitle());
+    rowBinding.txtNotifMessage.setText(n.getMessage());
+    rowBinding.txtNotifTime.setText(DateTimeUtils.format(n.getCreatedAt(), "dd MMM, hh:mm a"));
     if (n.isRead()) {
-      unreadDot.setVisibility(View.INVISIBLE);
-      itemView.setAlpha(0.6f);
+      rowBinding.unreadDot.setVisibility(View.INVISIBLE);
+      rowBinding.getRoot().setAlpha(0.6f);
     } else {
-      unreadDot.setVisibility(View.VISIBLE);
-      itemView.setAlpha(1f);
+      rowBinding.unreadDot.setVisibility(View.VISIBLE);
+      rowBinding.getRoot().setAlpha(1f);
     }
   }
 

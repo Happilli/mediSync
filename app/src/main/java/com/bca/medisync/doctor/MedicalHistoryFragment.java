@@ -4,15 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -21,19 +17,18 @@ import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentMedicalHistoryBinding;
+import com.bca.medisync.databinding.ItemMedicalHistoryBinding;
 import com.bca.medisync.util.EmptyState;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class MedicalHistoryFragment extends Fragment {
-
   private FragmentMedicalHistoryBinding binding;
 
   private String patientName;
   private int patientId = -1;
   private int appointmentId = -1;
-  private SimpleListAdapter<MedicalHistoryEntry> adapter;
+  private SimpleListAdapter<MedicalHistoryEntry, ItemMedicalHistoryBinding> adapter;
 
   public MedicalHistoryFragment() {}
 
@@ -71,13 +66,12 @@ public class MedicalHistoryFragment extends Fragment {
     binding.rvTimeline.setLayoutManager(new LinearLayoutManager(requireContext()));
     adapter =
         new SimpleListAdapter<>(
-            R.layout.item_medical_history,
+            ItemMedicalHistoryBinding::inflate,
             new ArrayList<>(),
-            (itemView, entry, pos) -> {
-              ((TextView) itemView.findViewById(R.id.txtDate)).setText(entry.getDate());
-              ((TextView) itemView.findViewById(R.id.txtTitle)).setText(entry.getTitle());
-              ((TextView) itemView.findViewById(R.id.txtDescription))
-                  .setText(entry.getDescription());
+            (rowBinding, entry, pos) -> {
+              rowBinding.txtDate.setText(entry.getDate());
+              rowBinding.txtTitle.setText(entry.getTitle());
+              rowBinding.txtDescription.setText(entry.getDescription());
             },
             null);
     binding.rvTimeline.setAdapter(adapter);
@@ -89,18 +83,14 @@ public class MedicalHistoryFragment extends Fragment {
     patientName = args != null ? args.getString("patient_name") : null;
     patientId = args != null ? args.getInt("patient_id", -1) : -1;
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
-
     binding.tvHeader.setText(
         patientName != null ? patientName + "\nOverview" : "Patient\nOverview");
-
     binding.fabConsult.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
-
     if (patientId == -1) {
       Toast.makeText(requireContext(), "Missing patient reference.", Toast.LENGTH_SHORT).show();
       requireActivity().getOnBackPressedDispatcher().onBackPressed();
       return;
     }
-
     loadRealHistory();
   }
 

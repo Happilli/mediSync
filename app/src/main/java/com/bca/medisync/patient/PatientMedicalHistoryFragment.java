@@ -4,12 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -18,14 +16,14 @@ import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPatientMedicalHistoryBinding;
+import com.bca.medisync.databinding.ItemMedicalHistoryBinding;
 import com.bca.medisync.util.EmptyState;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PatientMedicalHistoryFragment extends Fragment {
-
   private FragmentPatientMedicalHistoryBinding binding;
-  private SimpleListAdapter<MedicalHistoryEntry> adapter;
+  private SimpleListAdapter<MedicalHistoryEntry, ItemMedicalHistoryBinding> adapter;
 
   @Nullable
   @Override
@@ -53,18 +51,15 @@ public class PatientMedicalHistoryFragment extends Fragment {
   private void initViews() {
     binding.toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-
     binding.rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
-
     adapter =
         new SimpleListAdapter<>(
-            R.layout.item_medical_history,
+            ItemMedicalHistoryBinding::inflate,
             new ArrayList<>(),
-            (itemView, entry, pos) -> {
-              ((TextView) itemView.findViewById(R.id.txtDate)).setText(entry.getDate());
-              ((TextView) itemView.findViewById(R.id.txtTitle)).setText(entry.getTitle());
-              ((TextView) itemView.findViewById(R.id.txtDescription))
-                  .setText(entry.getDescription());
+            (rowBinding, entry, pos) -> {
+              rowBinding.txtDate.setText(entry.getDate());
+              rowBinding.txtTitle.setText(entry.getTitle());
+              rowBinding.txtDescription.setText(entry.getDescription());
             },
             null);
     binding.rvHistory.setAdapter(adapter);

@@ -2,7 +2,6 @@ package com.bca.medisync.doctor;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,6 +13,7 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
+import com.bca.medisync.databinding.ItemPatientBinding;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.SearchSuggestionHelper;
 import com.bca.medisync.util.SearchableListFragment;
@@ -22,7 +22,7 @@ import java.util.List;
 
 public class PatientFragment extends SearchableListFragment<Patient> {
   private RecyclerView rvPatients;
-  private SimpleListAdapter<Patient> adapter;
+  private SimpleListAdapter<Patient, ItemPatientBinding> adapter;
   private List<PatientPublicResponse> currentResponses = new ArrayList<>();
 
   @Override
@@ -37,20 +37,16 @@ public class PatientFragment extends SearchableListFragment<Patient> {
 
     adapter =
         new SimpleListAdapter<>(
-            R.layout.item_patient,
+            ItemPatientBinding::inflate,
             new ArrayList<>(),
-            (itemView, patient, pos) -> {
-              ((TextView) itemView.findViewById(R.id.txtPatientName)).setText(patient.getName());
-              ((TextView) itemView.findViewById(R.id.txtBloodGroup))
-                  .setText(patient.getBloodGroup());
-              ((TextView) itemView.findViewById(R.id.txtPhone)).setText(patient.getPhone());
+            (binding, patient, pos) -> {
+              binding.txtPatientName.setText(patient.getName());
+              binding.txtBloodGroup.setText(patient.getBloodGroup());
+              binding.txtPhone.setText(patient.getPhone());
               ImageLoader.loadProfilePic(
-                  PatientFragment.this,
-                  itemView.findViewById(R.id.imgPatientPic),
-                  patient.getProfilePicUrl());
+                  PatientFragment.this, binding.imgPatientPic, patient.getProfilePicUrl());
             },
             this::onPatientClicked);
-
     rvPatients.setAdapter(adapter);
     adapter.setRoundedList(true);
   }

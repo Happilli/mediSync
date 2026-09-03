@@ -1,29 +1,32 @@
 package com.bca.medisync.adapter;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bca.medisync.R;
+import androidx.viewbinding.ViewBinding;
+import com.bca.medisync.databinding.ItemMedicationGroupHeaderBinding;
 import com.bca.medisync.util.RoundedListStyler;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GroupedListAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
+public class GroupedListAdapter<T, VB extends ViewBinding>
+    extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
   private static final int TYPE_HEADER = 0;
   private static final int TYPE_ITEM = 1;
+
+  public interface Inflater<VB extends ViewBinding> {
+    VB inflate(LayoutInflater inflater, ViewGroup parent, boolean attachToParent);
+  }
 
   public interface KeyExtractor<T> {
     String getKey(T item);
   }
 
-  public interface ItemBinder<T> {
-    void bind(View itemView, T item, int positionInGroup, int groupSize);
+  public interface ItemBinder<T, VB> {
+    void bind(VB binding, T item, int positionInGroup, int groupSize);
   }
 
   public interface OnItemClick<T> {
@@ -54,18 +57,18 @@ public class GroupedListAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vie
     }
   }
 
-  private final int itemLayoutRes;
+  private final Inflater<VB> inflater;
   private final KeyExtractor<T> keyExtractor;
-  private final ItemBinder<T> binder;
+  private final ItemBinder<T, VB> binder;
   private final OnItemClick<T> listener;
   private final List<Row<T>> rows = new ArrayList<>();
 
   public GroupedListAdapter(
-      int itemLayoutRes,
+      Inflater<VB> inflater,
       KeyExtractor<T> keyExtractor,
-      ItemBinder<T> binder,
+      ItemBinder<T, VB> binder,
       OnItemClick<T> listener) {
-    this.itemLayoutRes = itemLayoutRes;
+    this.inflater = inflater;
     this.keyExtractor = keyExtractor;
     this.binder = binder;
     this.listener = listener;
@@ -98,28 +101,26 @@ public class GroupedListAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vie
   @NonNull
   @Override
   public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    LayoutInflater li = LayoutInflater.from(parent.getContext());
     if (viewType == TYPE_HEADER) {
-      View v =
-          LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.item_medication_group_header, parent, false);
-      return new HeaderVH(v);
+      return new HeaderVH(ItemMedicationGroupHeaderBinding.inflate(li, parent, false));
     }
-    View v = LayoutInflater.from(parent.getContext()).inflate(itemLayoutRes, parent, false);
-    return new ItemVH(v);
+    return new ItemVH<>(inflater.inflate(li, parent, false));
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
     Row<T> row = rows.get(position);
     if (row.isHeader) {
-      ((HeaderVH) holder).txtHeader.setText(row.headerLabel);
+      ((HeaderVH) holder).binding.txtGroupHeader.setText(row.headerLabel);
       return;
     }
-    View itemView = holder.itemView;
-    binder.bind(itemView, row.item, row.positionInGroup, row.groupSize);
-    RoundedListStyler.apply(itemView, row.positionInGroup, row.groupSize);
+    ItemVH<VB> itemHolder = (ItemVH<VB>) holder;
+    binder.bind(itemHolder.binding, row.item, row.positionInGroup, row.groupSize);
+    RoundedListStyler.apply(itemHolder.itemView, row.positionInGroup, row.groupSize);
     if (listener != null) {
-      itemView.setOnClickListener(v -> listener.onClick(row.item));
+      itemHolder.itemView.setOnClickListener(v -> listener.onClick(row.item));
     }
   }
 
@@ -129,17 +130,20 @@ public class GroupedListAdapter<T> extends RecyclerView.Adapter<RecyclerView.Vie
   }
 
   static class HeaderVH extends RecyclerView.ViewHolder {
-    TextView txtHeader;
+    final ItemMedicationGroupHeaderBinding binding;
 
-    HeaderVH(View v) {
-      super(v);
-      txtHeader = v.findViewById(R.id.txtGroupHeader);
+    HeaderVH(ItemMedicationGroupHeaderBinding binding) {
+      super(binding.getRoot());
+      this.binding = binding;
     }
   }
 
-  static class ItemVH extends RecyclerView.ViewHolder {
-    ItemVH(View v) {
-      super(v);
+  static class ItemVH<VB extends ViewBinding> extends RecyclerView.ViewHolder {
+    final VB binding;
+
+    ItemVH(VB binding) {
+      super(binding.getRoot());
+      this.binding = binding;
     }
   }
 }

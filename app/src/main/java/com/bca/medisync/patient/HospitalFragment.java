@@ -2,8 +2,6 @@ package com.bca.medisync.patient;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +13,8 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
+import com.bca.medisync.databinding.ItemHospitalBinding;
+import com.bca.medisync.databinding.ItemHospitalCarouselBinding;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.SearchSuggestionHelper;
@@ -31,11 +31,10 @@ import java.util.Set;
 public class HospitalFragment extends SearchableListFragment<Hospital> {
   private RecyclerView rvHospitals;
   private RecyclerView rvHospitalsCarousel;
-  private SimpleListAdapter<Hospital> adapter;
-  private SimpleListAdapter<Hospital> carouselAdapter;
+  private SimpleListAdapter<Hospital, ItemHospitalBinding> adapter;
+  private SimpleListAdapter<Hospital, ItemHospitalCarouselBinding> carouselAdapter;
   private LoadingIndicator loadingIndicator;
   private View scrollContent;
-
   private final Set<String> expandedHospitalIds = new HashSet<>();
 
   @Override
@@ -49,78 +48,61 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
     rvHospitalsCarousel = view.findViewById(R.id.rvHospitalsCarousel);
     scrollContent = view.findViewById(R.id.scrollContent);
     loadingIndicator = view.findViewById(R.id.loadingIndicator);
-
     setupCarousel();
     setupRecycleView();
   }
 
   private void setupCarousel() {
     rvHospitalsCarousel.setLayoutManager(new CarouselLayoutManager(new HeroCarouselStrategy()));
-
     carouselAdapter =
         new SimpleListAdapter<>(
-            R.layout.item_hospital_carousel,
+            ItemHospitalCarouselBinding::inflate,
             new ArrayList<>(),
-            (itemView, hospital, pos) -> {
-              ((TextView) itemView.findViewById(R.id.txtHospitalName)).setText(hospital.getName());
-              ((TextView) itemView.findViewById(R.id.txtHospitalAddress))
-                  .setText(hospital.getAddress());
-              TextView rating = itemView.findViewById(R.id.txtHospitalRating);
-              rating.setText(
+            (rowBinding, hospital, pos) -> {
+              rowBinding.txtHospitalName.setText(hospital.getName());
+              rowBinding.txtHospitalAddress.setText(hospital.getAddress());
+              rowBinding.txtHospitalRating.setText(
                   hospital.getRating() > 0
                       ? "\u2605 " + String.format(Locale.getDefault(), "%.1f", hospital.getRating())
                       : "");
-
-              ImageView imgHospital = itemView.findViewById(R.id.imgHospital);
               ImageLoader.loadHospitalImage(
-                  HospitalFragment.this, imgHospital, hospital.getImageUrl());
-
-              View overlay = itemView.findViewById(R.id.overlayScrim);
-              View textContainer = itemView.findViewById(R.id.textContainer);
+                  HospitalFragment.this, rowBinding.imgHospital, hospital.getImageUrl());
               boolean expanded = expandedHospitalIds.contains(hospital.getId());
-              overlay.setVisibility(expanded ? View.VISIBLE : View.GONE);
-              textContainer.setVisibility(expanded ? View.VISIBLE : View.GONE);
-
-              itemView.setOnClickListener(
-                  v -> {
-                    if (expandedHospitalIds.contains(hospital.getId())) {
-                      onHospitalClicked(hospital);
-                    } else {
-                      expandedHospitalIds.clear();
-                      expandedHospitalIds.add(hospital.getId());
-                      carouselAdapter.notifyDataSetChanged();
-                    }
-                  });
-
-              itemView
-                  .findViewById(R.id.btnViewMore)
-                  .setOnClickListener(v -> onHospitalClicked(hospital));
+              rowBinding.overlayScrim.setVisibility(expanded ? View.VISIBLE : View.GONE);
+              rowBinding.textContainer.setVisibility(expanded ? View.VISIBLE : View.GONE);
+              rowBinding
+                  .getRoot()
+                  .setOnClickListener(
+                      v -> {
+                        if (expandedHospitalIds.contains(hospital.getId())) {
+                          onHospitalClicked(hospital);
+                        } else {
+                          expandedHospitalIds.clear();
+                          expandedHospitalIds.add(hospital.getId());
+                          carouselAdapter.notifyDataSetChanged();
+                        }
+                      });
+              rowBinding.btnViewMore.setOnClickListener(v -> onHospitalClicked(hospital));
             },
             null);
-
     rvHospitalsCarousel.setAdapter(carouselAdapter);
   }
 
   private void setupRecycleView() {
     adapter =
         new SimpleListAdapter<>(
-            R.layout.item_hospital,
+            ItemHospitalBinding::inflate,
             new ArrayList<>(),
-            (itemView, hospital, pos) -> {
-              ((TextView) itemView.findViewById(R.id.txtHospitalName)).setText(hospital.getName());
-              ((TextView) itemView.findViewById(R.id.txtHospitalAddress))
-                  .setText(hospital.getAddress());
-              TextView rating = itemView.findViewById(R.id.txtHospitalRating);
-              rating.setText(
+            (rowBinding, hospital, pos) -> {
+              rowBinding.txtHospitalName.setText(hospital.getName());
+              rowBinding.txtHospitalAddress.setText(hospital.getAddress());
+              rowBinding.txtHospitalRating.setText(
                   hospital.getRating() > 0
                       ? "\u2605 " + String.format(Locale.getDefault(), "%.1f", hospital.getRating())
                       : "");
-              itemView
-                  .findViewById(R.id.btnViewMore)
-                  .setOnClickListener(v -> onHospitalClicked(hospital));
+              rowBinding.btnViewMore.setOnClickListener(v -> onHospitalClicked(hospital));
             },
             null);
-
     rvHospitals.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvHospitals.setAdapter(adapter);
     adapter.setRoundedList(true);
@@ -175,7 +157,6 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
     updateCarouselVisibility(query);
     LoadingHelper.show(loadingIndicator);
     scrollContent.setVisibility(View.GONE);
-
     HospitalApi api = ApiClient.api(HospitalApi.class);
     ApiCallback.handle(
         api.getHospitals(query),
@@ -216,7 +197,6 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
     args.putString("hospital_description", hospital.getDescription());
     args.putDouble("hospital_rating", hospital.getRating());
     args.putString("hospital_image_url", hospital.getImageUrl());
-
     HospitalDetailFragment fragment = new HospitalDetailFragment();
     fragment.setArguments(args);
     ((MainTabActivity) requireActivity()).pushFragment(fragment);

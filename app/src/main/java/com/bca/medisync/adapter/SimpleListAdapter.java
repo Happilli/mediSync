@@ -1,20 +1,25 @@
 package com.bca.medisync.adapter;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewbinding.ViewBinding;
 
 import com.bca.medisync.util.RoundedListStyler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleListAdapter<T> extends RecyclerView.Adapter<SimpleListAdapter.VH> {
+public class SimpleListAdapter<T, VB extends ViewBinding>
+    extends RecyclerView.Adapter<SimpleListAdapter.VH<VB>> {
 
-  public interface Binder<T> {
-    void bind(View itemView, T item, int position);
+  public interface Inflater<VB extends ViewBinding> {
+    VB inflate(LayoutInflater inflater, ViewGroup parent, boolean attachToParent);
+  }
+
+  public interface Binder<T, VB> {
+    void bind(VB binding, T item, int position);
   }
 
   public interface OnItemClick<T> {
@@ -25,22 +30,26 @@ public class SimpleListAdapter<T> extends RecyclerView.Adapter<SimpleListAdapter
     boolean matches(T item, String lowerCaseQuery);
   }
 
-  private final int layoutRes;
+  private final Inflater<VB> inflater;
   private List<T> items;
   private List<T> unfiltered;
-  private final Binder<T> binder;
+  private final Binder<T, VB> binder;
   private final OnItemClick<T> listener;
   private final Matcher<T> matcher;
   private boolean roundedList = false;
 
   public SimpleListAdapter(
-      int layoutRes, List<T> items, Binder<T> binder, OnItemClick<T> listener) {
-    this(layoutRes, items, binder, listener, null);
+      Inflater<VB> inflater, List<T> items, Binder<T, VB> binder, OnItemClick<T> listener) {
+    this(inflater, items, binder, listener, null);
   }
 
   public SimpleListAdapter(
-      int layoutRes, List<T> items, Binder<T> binder, OnItemClick<T> listener, Matcher<T> matcher) {
-    this.layoutRes = layoutRes;
+      Inflater<VB> inflater,
+      List<T> items,
+      Binder<T, VB> binder,
+      OnItemClick<T> listener,
+      Matcher<T> matcher) {
+    this.inflater = inflater;
     this.items = items;
     this.unfiltered = new ArrayList<>(items);
     this.binder = binder;
@@ -80,15 +89,15 @@ public class SimpleListAdapter<T> extends RecyclerView.Adapter<SimpleListAdapter
 
   @NonNull
   @Override
-  public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View v = LayoutInflater.from(parent.getContext()).inflate(layoutRes, parent, false);
-    return new VH(v);
+  public VH<VB> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    VB binding = inflater.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+    return new VH<>(binding);
   }
 
   @Override
-  public void onBindViewHolder(@NonNull VH holder, int position) {
+  public void onBindViewHolder(@NonNull VH<VB> holder, int position) {
     T item = items.get(position);
-    binder.bind(holder.itemView, item, position);
+    binder.bind(holder.binding, item, position);
     if (listener != null) {
       holder.itemView.setOnClickListener(v -> listener.onClick(item));
     }
@@ -102,9 +111,12 @@ public class SimpleListAdapter<T> extends RecyclerView.Adapter<SimpleListAdapter
     return items.size();
   }
 
-  static class VH extends RecyclerView.ViewHolder {
-    VH(View itemView) {
-      super(itemView);
+  static class VH<VB extends ViewBinding> extends RecyclerView.ViewHolder {
+    final VB binding;
+
+    VH(VB binding) {
+      super(binding.getRoot());
+      this.binding = binding;
     }
   }
 }

@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -24,6 +22,7 @@ import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.databinding.FragmentHomeBinding;
+import com.bca.medisync.databinding.ItemDashboardBinding;
 import com.bca.medisync.util.NotificationBadgeHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import java.util.Comparator;
 import java.util.List;
 
 public class HomeFragment extends Fragment implements NotificationCenter.Listener {
-
   private FragmentHomeBinding binding;
 
   public HomeFragment() {}
@@ -134,13 +132,11 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
           }
           Collections.sort(upcoming, Comparator.comparing(AppointmentResponse::getAppointment_at));
           List<AppointmentResponse> top3 = upcoming.subList(0, Math.min(3, upcoming.size()));
-
           if (top3.isEmpty()) {
             binding.rvUpcomingHome.setVisibility(View.GONE);
             binding.txtNoUpcoming.setVisibility(View.VISIBLE);
             return;
           }
-
           AppointmentEnricher.enrichAll(
               top3,
               appointments -> {
@@ -175,18 +171,15 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
             R.drawable.ic_nav_profile,
             R.drawable.record,
             R.drawable.hospital);
-
     List<Integer> positions = new ArrayList<>();
     for (int i = 0; i < titles.size(); i++) positions.add(i);
-
-    SimpleListAdapter<Integer> adapter =
+    SimpleListAdapter<Integer, ItemDashboardBinding> adapter =
         new SimpleListAdapter<>(
-            R.layout.item_dashboard,
+            ItemDashboardBinding::inflate,
             positions,
-            (itemView, position, pos) -> {
-              ((TextView) itemView.findViewById(R.id.txtFeature)).setText(titles.get(position));
-              ((ImageView) itemView.findViewById(R.id.imgFeature))
-                  .setImageResource(icons.get(position));
+            (rowBinding, position, pos) -> {
+              rowBinding.txtFeature.setText(titles.get(position));
+              rowBinding.imgFeature.setImageResource(icons.get(position));
             },
             position -> {
               switch (position) {

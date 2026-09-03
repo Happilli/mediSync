@@ -7,13 +7,11 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.bca.medisync.R;
 import com.bca.medisync.adapter.GroupedListAdapter;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -23,16 +21,14 @@ import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
 import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentMedicationBinding;
-import com.google.android.material.checkbox.MaterialCheckBox;
+import com.bca.medisync.databinding.ItemMedicationBinding;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MedicationFragment extends Fragment {
-
   private FragmentMedicationBinding binding;
-
-  private GroupedListAdapter<Medication> adapter;
+  private GroupedListAdapter<Medication, ItemMedicationBinding> adapter;
   private Medication activeMedication;
 
   public MedicationFragment() {}
@@ -89,7 +85,7 @@ public class MedicationFragment extends Fragment {
   private void setUpRecyclerView() {
     adapter =
         new GroupedListAdapter<>(
-            R.layout.item_medication,
+            ItemMedicationBinding::inflate,
             med -> med.getDoctorName() == null ? "Unknown" : "Dr. " + med.getDoctorName(),
             this::bindMedicationRow,
             med -> {
@@ -101,33 +97,26 @@ public class MedicationFragment extends Fragment {
     binding.rvMedications.setAdapter(adapter);
   }
 
-  private void bindMedicationRow(View itemView, Medication m, int posInGroup, int groupSize) {
-    TextView tvMedName = itemView.findViewById(R.id.tvMedName);
-    TextView tvMedFrequency = itemView.findViewById(R.id.tvMedFrequency);
-    TextView tvMedTime = itemView.findViewById(R.id.tvMedTime);
-    MaterialCheckBox cbTaken = itemView.findViewById(R.id.cbTaken);
-
-    tvMedName.setText(m.getName() + " " + m.getDosage());
-    tvMedFrequency.setText(m.getFrequency());
-
-    cbTaken.setOnCheckedChangeListener(null);
-    cbTaken.setChecked(m.isTaken());
-    cbTaken.setEnabled(!m.isTaken());
-    cbTaken.setClickable(!m.isTaken());
-
+  private void bindMedicationRow(
+      ItemMedicationBinding rowBinding, Medication m, int posInGroup, int groupSize) {
+    rowBinding.tvMedName.setText(m.getName() + " " + m.getDosage());
+    rowBinding.tvMedFrequency.setText(m.getFrequency());
+    rowBinding.cbTaken.setOnCheckedChangeListener(null);
+    rowBinding.cbTaken.setChecked(m.isTaken());
+    rowBinding.cbTaken.setEnabled(!m.isTaken());
+    rowBinding.cbTaken.setClickable(!m.isTaken());
     if (!m.isTaken()) {
-      cbTaken.setOnCheckedChangeListener(
+      rowBinding.cbTaken.setOnCheckedChangeListener(
           (buttonView, isChecked) -> {
             if (isChecked) markTaken(m);
           });
     }
-
     if (m.isTaken()) {
-      tvMedTime.setText("Taken");
-      itemView.setAlpha(0.6f);
+      rowBinding.tvMedTime.setText("Taken");
+      rowBinding.getRoot().setAlpha(0.6f);
     } else {
-      tvMedTime.setText(m.getTime());
-      itemView.setAlpha(1f);
+      rowBinding.tvMedTime.setText(m.getTime());
+      rowBinding.getRoot().setAlpha(1f);
     }
   }
 
@@ -193,7 +182,6 @@ public class MedicationFragment extends Fragment {
   private void bindMedications(List<Medication> meds) {
     if (binding == null) return;
     adapter.submitList(meds);
-
     int total = meds.size();
     int taken = 0;
     for (Medication m : meds) {
@@ -202,7 +190,6 @@ public class MedicationFragment extends Fragment {
     binding.tvAdherenceCount.setText(taken + "/" + total);
     int percent = total == 0 ? 0 : (int) ((taken / (float) total) * 100);
     binding.progressAdherence.setProgressCompat(percent, true);
-
     activeMedication = null;
     for (Medication m : meds) {
       if (!m.isTaken()) {
@@ -210,7 +197,6 @@ public class MedicationFragment extends Fragment {
         break;
       }
     }
-
     if (activeMedication != null) {
       binding.tvActiveName.setText(activeMedication.getName() + " " + activeMedication.getDosage());
       binding.tvActiveDosage.setText(activeMedication.getFrequency());

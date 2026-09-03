@@ -4,13 +4,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.widget.ImageView;
-import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
+import com.bca.medisync.databinding.ItemSearchSuggestionBinding;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import java.util.ArrayList;
@@ -45,7 +43,6 @@ public class SearchSuggestionHelper<T> {
   }
 
   private static final long DEBOUNCE_MS = 350;
-
   private final Fragment fragment;
   private final SearchBar searchBar;
   private final SearchView searchView;
@@ -57,7 +54,7 @@ public class SearchSuggestionHelper<T> {
 
   private final Handler debounceHandler = new Handler(Looper.getMainLooper());
   private Runnable pendingSearch;
-  private SimpleListAdapter<T> suggestionsAdapter;
+  private SimpleListAdapter<T, ItemSearchSuggestionBinding> suggestionsAdapter;
 
   public SearchSuggestionHelper(
       Fragment fragment,
@@ -81,7 +78,7 @@ public class SearchSuggestionHelper<T> {
   public void attach() {
     suggestionsAdapter =
         new SimpleListAdapter<>(
-            R.layout.item_search_suggestion,
+            ItemSearchSuggestionBinding::inflate,
             new ArrayList<>(),
             this::bindRow,
             item -> {
@@ -89,10 +86,8 @@ public class SearchSuggestionHelper<T> {
               searchView.hide();
               onSelected.onSelected(item);
             });
-
     recyclerView.setLayoutManager(new LinearLayoutManager(fragment.requireContext()));
     recyclerView.setAdapter(suggestionsAdapter);
-
     searchView
         .getEditText()
         .setOnEditorActionListener(
@@ -104,7 +99,6 @@ public class SearchSuggestionHelper<T> {
               onSubmit.onSubmit(query.isEmpty() ? null : query);
               return false;
             });
-
     searchView
         .getEditText()
         .addTextChangedListener(
@@ -125,16 +119,14 @@ public class SearchSuggestionHelper<T> {
             });
   }
 
-  private void bindRow(android.view.View itemView, T item, int pos) {
-    ((TextView) itemView.findViewById(R.id.txtSuggestionTitle)).setText(binder.getTitle(item));
-    TextView subtitle = itemView.findViewById(R.id.txtSuggestionSubtitle);
+  private void bindRow(ItemSearchSuggestionBinding binding, T item, int pos) {
+    binding.txtSuggestionTitle.setText(binder.getTitle(item));
     String sub = binder.getSubtitle(item);
-    subtitle.setText(sub);
-    subtitle.setVisibility(
+    binding.txtSuggestionSubtitle.setText(sub);
+    binding.txtSuggestionSubtitle.setVisibility(
         sub == null || sub.isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE);
-
-    ImageView icon = itemView.findViewById(R.id.imgSuggestionIcon);
-    ImageLoader.load(fragment, icon, binder.getImageUrl(item), binder.getPlaceholderRes());
+    ImageLoader.load(
+        fragment, binding.imgSuggestionIcon, binder.getImageUrl(item), binder.getPlaceholderRes());
   }
 
   private void runSearch(String query) {

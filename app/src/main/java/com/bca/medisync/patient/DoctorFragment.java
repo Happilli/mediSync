@@ -20,6 +20,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
+import com.bca.medisync.databinding.ItemDoctorRowBinding;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.SearchSuggestionHelper;
 import com.bca.medisync.util.SearchableListFragment;
@@ -32,8 +33,7 @@ import java.util.Set;
 
 public class DoctorFragment extends SearchableListFragment<Doctor> {
   private RecyclerView rvDoctors;
-  private GroupedListAdapter<Doctor> adapter;
-
+  private GroupedListAdapter<Doctor, ItemDoctorRowBinding> adapter;
   private Integer filterHospitalId;
   private final Set<String> expandedIds = new HashSet<>();
   private final Map<Integer, String> hospitalNameCache = new HashMap<>();
@@ -59,14 +59,12 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
   protected void setupResultsView(@NonNull View view) {
     rvDoctors = view.findViewById(R.id.rvDoctors);
     rvDoctors.setItemAnimator(null);
-
     adapter =
         new GroupedListAdapter<>(
-            R.layout.item_doctor_row,
+            ItemDoctorRowBinding::inflate,
             Doctor::getDepartment,
-            (itemView, doctor, posInGroup, groupSize) -> bindDoctorRow(itemView, doctor),
+            (rowBinding, doctor, posInGroup, groupSize) -> bindDoctorRow(rowBinding, doctor),
             this::onRowClicked);
-
     rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
     rvDoctors.setAdapter(adapter);
   }
@@ -129,36 +127,29 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
         ApiCallback.simpleError(requireContext(), "Failed to load doctors."));
   }
 
-  private void bindDoctorRow(View itemView, Doctor doctor) {
-    ((TextView) itemView.findViewById(R.id.txtDoctorName)).setText(doctor.getName());
-    ((TextView) itemView.findViewById(R.id.txtSpeciality)).setText(doctor.getSpeciality());
-    ((TextView) itemView.findViewById(R.id.txtInfo)).setText(doctor.getInfo());
-    ImageLoader.loadDoctorImage(this, itemView.findViewById(R.id.imgDoctor), doctor.getImageUrl());
-
+  private void bindDoctorRow(ItemDoctorRowBinding binding, Doctor doctor) {
+    binding.txtDoctorName.setText(doctor.getName());
+    binding.txtSpeciality.setText(doctor.getSpeciality());
+    binding.txtInfo.setText(doctor.getInfo());
+    ImageLoader.loadDoctorImage(this, binding.imgDoctor, doctor.getImageUrl());
     boolean expanded = expandedIds.contains(doctor.getId());
-    View divider = itemView.findViewById(R.id.dividerExpand);
-    View detail = itemView.findViewById(R.id.detailContainer);
-    divider.setVisibility(expanded ? View.VISIBLE : View.GONE);
-    detail.setVisibility(expanded ? View.VISIBLE : View.GONE);
-    itemView.findViewById(R.id.imgExpandArrow).setRotation(expanded ? 90f : 0f);
-
+    binding.dividerExpand.setVisibility(expanded ? View.VISIBLE : View.GONE);
+    binding.detailContainer.setVisibility(expanded ? View.VISIBLE : View.GONE);
+    binding.imgExpandArrow.setRotation(expanded ? 90f : 0f);
     if (expanded) {
-      TextView txtBio = itemView.findViewById(R.id.txtBio);
       boolean hasBio = doctor.getBio() != null && !doctor.getBio().isEmpty();
-      txtBio.setVisibility(hasBio ? View.VISIBLE : View.GONE);
-      txtBio.setText(doctor.getBio());
-      ((TextView) itemView.findViewById(R.id.txtDoctorAddress)).setText(doctor.getAddress());
-      ((TextView) itemView.findViewById(R.id.txtDoctorPhone)).setText(doctor.getPhone());
-
-      TextView txtHospital = itemView.findViewById(R.id.txtHospitalName);
+      binding.txtBio.setVisibility(hasBio ? View.VISIBLE : View.GONE);
+      binding.txtBio.setText(doctor.getBio());
+      binding.txtDoctorAddress.setText(doctor.getAddress());
+      binding.txtDoctorPhone.setText(doctor.getPhone());
       String cached = hospitalNameCache.get(doctor.getHospitalId());
       if (cached != null) {
-        txtHospital.setText(cached);
+        binding.txtHospitalName.setText(cached);
       } else {
-        txtHospital.setText("Loading hospital...");
-        loadHospitalName(doctor.getHospitalId(), txtHospital);
+        binding.txtHospitalName.setText("Loading hospital...");
+        loadHospitalName(doctor.getHospitalId(), binding.txtHospitalName);
       }
-      itemView.findViewById(R.id.btnBook).setOnClickListener(v -> onBookClicked(doctor));
+      binding.btnBook.setOnClickListener(v -> onBookClicked(doctor));
     }
   }
 
@@ -196,7 +187,6 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
     args.putString("doctor_info", doctor.getInfo());
     args.putString("doctor_department", doctor.getDepartment());
     args.putString("doctor_image_url", doctor.getImageUrl());
-
     BookAppointmentFragment fragment = new BookAppointmentFragment();
     fragment.setArguments(args);
     ((MainTabActivity) requireActivity()).pushFragment(fragment);

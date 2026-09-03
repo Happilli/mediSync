@@ -4,12 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.bca.medisync.R;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Prescription;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -17,14 +15,14 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPrescriptionListBinding;
+import com.bca.medisync.databinding.ItemPrescriptionBinding;
 import com.bca.medisync.util.EmptyState;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PrescriptionListFragment extends Fragment {
-
   private FragmentPrescriptionListBinding binding;
-  private SimpleListAdapter<Prescription> adapter;
+  private SimpleListAdapter<Prescription, ItemPrescriptionBinding> adapter;
 
   @Nullable
   @Override
@@ -52,19 +50,15 @@ public class PrescriptionListFragment extends Fragment {
   private void initViews() {
     binding.toolbar.setNavigationOnClickListener(
         v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-
     binding.rvPrescriptions.setLayoutManager(new LinearLayoutManager(requireContext()));
-
     adapter =
         new SimpleListAdapter<>(
-            R.layout.item_prescription,
+            ItemPrescriptionBinding::inflate,
             new ArrayList<>(),
-            (itemView, prescription, pos) -> {
-              ((TextView) itemView.findViewById(R.id.txtDiagnosis))
-                  .setText(prescription.getDiagnosis());
-              ((TextView) itemView.findViewById(R.id.txtDoctorName))
-                  .setText(prescription.getDoctor_name());
-              ((TextView) itemView.findViewById(R.id.txtDate)).setText(prescription.getCreatedAt());
+            (rowBinding, prescription, pos) -> {
+              rowBinding.txtDiagnosis.setText(prescription.getDiagnosis());
+              rowBinding.txtDoctorName.setText(prescription.getDoctor_name());
+              rowBinding.txtDate.setText(prescription.getCreatedAt());
             },
             prescription -> {
               Bundle args = new Bundle();
@@ -73,7 +67,6 @@ public class PrescriptionListFragment extends Fragment {
               fragment.setArguments(args);
               ((MainTabActivity) requireActivity()).pushFragment(fragment);
             });
-
     binding.rvPrescriptions.setAdapter(adapter);
     adapter.setRoundedList(true);
   }
