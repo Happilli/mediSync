@@ -65,6 +65,13 @@
         <item name="cornerSizeBottomRight">18dp</item>
     </style>
 
+    <style name="Widget.MediSync.TextInputLayout.Rounded" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+    </style>
+
     <style name="ShapeAppearanceOverlay.MediSync.DosageBadge" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">12dp</item>

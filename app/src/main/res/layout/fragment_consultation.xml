@@ -100,15 +100,11 @@
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:hint="Chief Complaint"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Chief Complaint">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etComplaint"
@@ -119,15 +115,11 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:hint="Symptoms"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Symptoms">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etSymptoms"
@@ -138,15 +130,11 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:hint="Diagnosis"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Diagnosis">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etDiagnosis"
@@ -187,16 +175,12 @@
                         android:orientation="horizontal">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            style="@style/Widget.MediSync.TextInputLayout.Rounded"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:hint="Blood Pressure"
-                            app:boxCornerRadiusBottomEnd="14dp"
-                            app:boxCornerRadiusBottomStart="14dp"
-                            app:boxCornerRadiusTopEnd="14dp"
-                            app:boxCornerRadiusTopStart="14dp">
+                            android:hint="Blood Pressure">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etBloodPressure"
@@ -206,15 +190,11 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            style="@style/Widget.MediSync.TextInputLayout.Rounded"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="Heart Rate"
-                            app:boxCornerRadiusBottomEnd="14dp"
-                            app:boxCornerRadiusBottomStart="14dp"
-                            app:boxCornerRadiusTopEnd="14dp"
-                            app:boxCornerRadiusTopStart="14dp">
+                            android:hint="Heart Rate">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etHeartRate"
@@ -231,16 +211,12 @@
                         android:orientation="horizontal">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            style="@style/Widget.MediSync.TextInputLayout.Rounded"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:hint="Temperature"
-                            app:boxCornerRadiusBottomEnd="14dp"
-                            app:boxCornerRadiusBottomStart="14dp"
-                            app:boxCornerRadiusTopEnd="14dp"
-                            app:boxCornerRadiusTopStart="14dp">
+                            android:hint="Temperature">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etTemperature"
@@ -250,15 +226,11 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            style="@style/Widget.MediSync.TextInputLayout.Rounded"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="Weight (kg)"
-                            app:boxCornerRadiusBottomEnd="14dp"
-                            app:boxCornerRadiusBottomStart="14dp"
-                            app:boxCornerRadiusTopEnd="14dp"
-                            app:boxCornerRadiusTopStart="14dp">
+                            android:hint="Weight (kg)">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etWeight"
@@ -292,15 +264,11 @@
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:hint="Notes"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Notes">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etNotes"

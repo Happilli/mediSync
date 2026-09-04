@@ -15,7 +15,6 @@ import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 
 public abstract class SearchableListFragment<T> extends Fragment {
-
   protected MaterialToolbar toolbar;
   protected SearchBar searchBar;
   protected SearchView searchView;
@@ -49,19 +48,14 @@ public abstract class SearchableListFragment<T> extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     onInit(getArguments());
-
     toolbar = view.findViewById(R.id.toolbar);
     searchBar = view.findViewById(R.id.searchBar);
     searchView = view.findViewById(R.id.searchView);
     rvSearchSuggestions = view.findViewById(R.id.rvSearchSuggestions);
-
     if (toolbar != null) {
-      toolbar.setNavigationOnClickListener(
-          v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+      ViewUtils.setupBackNav(this, toolbar);
     }
-
     setupResultsView(view);
-
     new SearchSuggestionHelper<>(
             this,
             searchBar,

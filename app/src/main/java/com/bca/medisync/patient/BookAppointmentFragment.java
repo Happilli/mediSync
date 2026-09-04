@@ -22,13 +22,13 @@ import com.bca.medisync.databinding.FragmentBookAppointmentBinding;
 import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ImageLoader;
+import com.bca.medisync.util.ViewUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookAppointmentFragment extends Fragment {
-
   private FragmentBookAppointmentBinding binding;
-
   private TimeSlot selectedTimeSlot;
   private String doctorName, doctorSpeciality, doctorInfo, doctorDepartment;
   private int doctorId = -1;
@@ -47,7 +47,7 @@ public class BookAppointmentFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     binding.btnConfirm.setEnabled(false);
-    setupToolbar();
+    ViewUtils.setupBackNav(this, binding.toolbar);
     loadDoctorData();
     setupTimeSlots();
     setupConfirmButton();
@@ -59,36 +59,26 @@ public class BookAppointmentFragment extends Fragment {
     binding = null;
   }
 
-  private void setupToolbar() {
-    binding.toolbar.setNavigationOnClickListener(
-        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-  }
-
   private void loadDoctorData() {
     Bundle args = getArguments();
     String doctorIdStr = args != null ? args.getString("doctor_id") : null;
-
     if (args == null || doctorIdStr == null) {
       bailNoDoctor("Doctor not specified");
       return;
     }
-
     try {
       doctorId = Integer.parseInt(doctorIdStr);
     } catch (NumberFormatException e) {
       bailNoDoctor("Invalid doctor reference");
       return;
     }
-
     doctorName = args.getString("doctor_name");
     doctorSpeciality = args.getString("doctor_speciality");
     doctorInfo = args.getString("doctor_info");
     doctorDepartment = args.getString("doctor_department");
-
     if (doctorName != null) binding.txtDoctorName.setText(doctorName);
     if (doctorSpeciality != null) binding.txtDoctorSpeciality.setText(doctorSpeciality);
     if (doctorInfo != null) binding.txtDoctorInfo.setText(doctorInfo);
-
     ImageLoader.loadTinted(
         this, binding.imgDoctor, args.getString("doctor_image_url"), R.drawable.stethoscope);
   }
@@ -141,7 +131,6 @@ public class BookAppointmentFragment extends Fragment {
           String notes =
               binding.etNotes.getText() != null ? binding.etNotes.getText().toString() : "";
           binding.btnConfirm.setEnabled(false);
-
           AppointmentApi api = ApiClient.api(AppointmentApi.class);
           ApiCallback.handle(
               api.createAppointment(new AppointmentCreateRequest(selectedTimeSlot.getId(), notes)),

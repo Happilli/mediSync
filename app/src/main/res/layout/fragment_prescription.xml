@@ -90,15 +90,11 @@
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:hint="Medicine Name"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Medicine Name">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etMedicine"
@@ -108,15 +104,11 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:hint="Dosage (e.g. 500mg)"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Dosage (mg)">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etDosage"
@@ -126,15 +118,11 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:hint="Duration (days)"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Duration (days)">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etDuration"
@@ -159,15 +147,11 @@
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:hint="Special Instructions"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Special Instructions">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etInstructions"

@@ -4,19 +4,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import com.bca.medisync.databinding.FragmentPatientDetailsBinding;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
+import com.bca.medisync.util.ViewUtils;
 
 public class PatientDetailsFragment extends Fragment {
-
   private FragmentPatientDetailsBinding binding;
-
   private int patientId = -1;
   private String patientName;
   private int appointmentId = -1;
@@ -34,7 +31,7 @@ public class PatientDetailsFragment extends Fragment {
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    setupToolbar();
+    ViewUtils.setupBackNav(this, binding.toolbar);
     loadData();
     setupListener();
   }
@@ -45,21 +42,14 @@ public class PatientDetailsFragment extends Fragment {
     binding = null;
   }
 
-  private void setupToolbar() {
-    binding.toolbar.setNavigationOnClickListener(
-        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-  }
-
   private void loadData() {
     Bundle args = getArguments();
     if (args == null) return;
-
     patientId = args.getInt("patient_id", -1);
     patientName = args.getString("patient_name");
     binding.toolbar.setTitle(patientName);
     binding.txtPatientName.setText(patientName);
     appointmentId = args.getInt("appointment_id", -1);
-
     InfoRowBinder.bind(
         new InfoRowBinder.Row(
             binding.rowGender.getRoot(),
@@ -96,7 +86,6 @@ public class PatientDetailsFragment extends Fragment {
             com.bca.medisync.R.drawable.emergency,
             "Emergency Contact",
             args.getString("patient_emergency")));
-
     bindProfilePic(args.getString("patient_pic_url"));
     binding.btnConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
   }

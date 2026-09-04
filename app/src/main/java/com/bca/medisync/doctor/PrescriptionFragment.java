@@ -7,11 +7,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -25,7 +23,6 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,17 +30,12 @@ import java.util.List;
 import java.util.Locale;
 
 public class PrescriptionFragment extends Fragment {
-
   private FragmentPrescriptionBinding binding;
-
   private String patientName, diagnosis, notes;
   private int appointmentId = -1;
-
   private final List<MedicationTimeCreateRequest> draftDosageTimes = new ArrayList<>();
-
   private final List<MedicationCreateRequest> medications = new ArrayList<>();
   private final List<String> medicationSummaries = new ArrayList<>();
-
   private String selectedFollowUpIso;
 
   @Nullable
@@ -76,7 +68,6 @@ public class PrescriptionFragment extends Fragment {
     diagnosis = args != null ? args.getString("diagnosis") : null;
     notes = args != null ? args.getString("notes") : null;
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
-
     if (patientName != null) binding.tvPatientName.setText("Prescription -> " + patientName);
     if (diagnosis != null && !diagnosis.isEmpty())
       binding.tvDiagnosis.setText("Diagnosis: " + diagnosis);
@@ -102,7 +93,6 @@ public class PrescriptionFragment extends Fragment {
           int minute = picker.getMinute();
           String time24 = String.format(Locale.US, "%02d:%02d:00", hour, minute);
           String label = inferLabel(hour);
-
           draftDosageTimes.add(new MedicationTimeCreateRequest(time24, label));
           addDosageTimeChip(label, hour, minute);
         });
@@ -121,7 +111,6 @@ public class PrescriptionFragment extends Fragment {
     cal.set(Calendar.HOUR_OF_DAY, hour);
     cal.set(Calendar.MINUTE, minute);
     String display = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(cal.getTime());
-
     Chip chip = new Chip(requireContext());
     chip.setText(label + " \u2022 " + display);
     chip.setCloseIconVisible(true);
@@ -141,7 +130,6 @@ public class PrescriptionFragment extends Fragment {
     String dosage = binding.etDosage.getText().toString().trim();
     String durationStr = binding.etDuration.getText().toString().trim();
     String instructions = binding.etInstructions.getText().toString().trim();
-
     if (medicine.isEmpty()) {
       binding.etMedicine.setError("Medicine name is required");
       return;
@@ -158,7 +146,6 @@ public class PrescriptionFragment extends Fragment {
       Toast.makeText(requireContext(), "Add at least one dosage time", Toast.LENGTH_SHORT).show();
       return;
     }
-
     int durationDays;
     try {
       durationDays = Integer.parseInt(durationStr);
@@ -170,7 +157,6 @@ public class PrescriptionFragment extends Fragment {
       binding.etDuration.setError("Duration must be at least 1 day");
       return;
     }
-
     MedicationCreateRequest medication =
         new MedicationCreateRequest(
             medicine,
@@ -178,7 +164,6 @@ public class PrescriptionFragment extends Fragment {
             instructions.isEmpty() ? "" : instructions,
             durationDays,
             new ArrayList<>(draftDosageTimes));
-
     medications.add(medication);
     medicationSummaries.add(
         medicine
@@ -192,7 +177,6 @@ public class PrescriptionFragment extends Fragment {
 
     refreshAddedMedicinesUi();
     clearDraftForm();
-
     Toast.makeText(requireContext(), medicine + " added.", Toast.LENGTH_SHORT).show();
   }
 
@@ -207,13 +191,11 @@ public class PrescriptionFragment extends Fragment {
 
   private void refreshAddedMedicinesUi() {
     binding.addedMedicinesContainer.removeAllViews();
-
     if (medications.isEmpty()) {
       binding.txtNoMedicinesAdded.setVisibility(View.VISIBLE);
       return;
     }
     binding.txtNoMedicinesAdded.setVisibility(View.GONE);
-
     for (int i = 0; i < medications.size(); i++) {
       binding.addedMedicinesContainer.addView(buildAddedMedicineRow(i));
     }
@@ -223,8 +205,11 @@ public class PrescriptionFragment extends Fragment {
     LinearLayout row = new LinearLayout(requireContext());
     row.setOrientation(LinearLayout.HORIZONTAL);
     row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-    row.setPadding(dp(16), dp(12), dp(16), dp(12));
-
+    row.setPadding(
+        ViewUtils.dp(requireContext(), 16),
+        ViewUtils.dp(requireContext(), 12),
+        ViewUtils.dp(requireContext(), 16),
+        ViewUtils.dp(requireContext(), 12));
     TextView txt = new TextView(requireContext());
     txt.setText(medicationSummaries.get(index));
     txt.setTextColor(requireContext().getColor(R.color.on_surface));
@@ -232,13 +217,16 @@ public class PrescriptionFragment extends Fragment {
     LinearLayout.LayoutParams txtLp =
         new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
     txt.setLayoutParams(txtLp);
-
     TextView remove = new TextView(requireContext());
     remove.setText("Remove");
     remove.setTextColor(requireContext().getColor(R.color.error));
     remove.setTextSize(12);
     remove.setTypeface(null, android.graphics.Typeface.BOLD);
-    remove.setPadding(dp(8), dp(4), dp(8), dp(4));
+    remove.setPadding(
+        ViewUtils.dp(requireContext(), 8),
+        ViewUtils.dp(requireContext(), 4),
+        ViewUtils.dp(requireContext(), 8),
+        ViewUtils.dp(requireContext(), 4));
     remove.setOnClickListener(
         v -> {
           medications.remove(index);
@@ -249,10 +237,6 @@ public class PrescriptionFragment extends Fragment {
     row.addView(txt);
     row.addView(remove);
     return row;
-  }
-
-  private int dp(int v) {
-    return ViewUtils.dp(requireContext(), v);
   }
 
   private void showFollowUpDatePicker() {
@@ -292,9 +276,7 @@ public class PrescriptionFragment extends Fragment {
           .show();
       return;
     }
-
     String instructions = binding.etInstructions.getText().toString().trim();
-
     PrescriptionCreateRequest request =
         new PrescriptionCreateRequest(
             appointmentId,
@@ -302,9 +284,7 @@ public class PrescriptionFragment extends Fragment {
             instructions.isEmpty() ? (notes != null ? notes : "") : instructions,
             selectedFollowUpIso,
             new ArrayList<>(medications));
-
     binding.btnSavePrescription.setEnabled(false);
-
     PrescriptionApi api = ApiClient.api(PrescriptionApi.class);
     ApiCallback.handle(
         api.createPrescription(request),

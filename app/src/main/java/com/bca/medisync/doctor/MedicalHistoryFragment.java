@@ -19,12 +19,12 @@ import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentMedicalHistoryBinding;
 import com.bca.medisync.databinding.ItemMedicalHistoryBinding;
 import com.bca.medisync.util.EmptyState;
+import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MedicalHistoryFragment extends Fragment {
   private FragmentMedicalHistoryBinding binding;
-
   private String patientName;
   private int patientId = -1;
   private int appointmentId = -1;
@@ -45,7 +45,7 @@ public class MedicalHistoryFragment extends Fragment {
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    setupToolbar();
+    ViewUtils.setupBackNav(this, binding.toolbar);
     initViews();
     setupListener();
     loadData();
@@ -55,11 +55,6 @@ public class MedicalHistoryFragment extends Fragment {
   public void onDestroyView() {
     super.onDestroyView();
     binding = null;
-  }
-
-  private void setupToolbar() {
-    binding.toolbar.setNavigationOnClickListener(
-        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
   }
 
   private void initViews() {

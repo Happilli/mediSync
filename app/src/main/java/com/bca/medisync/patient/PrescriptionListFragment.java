@@ -17,6 +17,7 @@ import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPrescriptionListBinding;
 import com.bca.medisync.databinding.ItemPrescriptionBinding;
 import com.bca.medisync.util.EmptyState;
+import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +49,7 @@ public class PrescriptionListFragment extends Fragment {
   }
 
   private void initViews() {
-    binding.toolbar.setNavigationOnClickListener(
-        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+    ViewUtils.setupBackNav(this, binding.toolbar);
     binding.rvPrescriptions.setLayoutManager(new LinearLayoutManager(requireContext()));
     adapter =
         new SimpleListAdapter<>(

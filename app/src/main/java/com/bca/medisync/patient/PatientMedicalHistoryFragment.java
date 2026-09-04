@@ -18,6 +18,7 @@ import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPatientMedicalHistoryBinding;
 import com.bca.medisync.databinding.ItemMedicalHistoryBinding;
 import com.bca.medisync.util.EmptyState;
+import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,8 +50,7 @@ public class PatientMedicalHistoryFragment extends Fragment {
   }
 
   private void initViews() {
-    binding.toolbar.setNavigationOnClickListener(
-        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+    ViewUtils.setupBackNav(this, binding.toolbar);
     binding.rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
     adapter =
         new SimpleListAdapter<>(

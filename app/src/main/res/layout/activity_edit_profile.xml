@@ -46,14 +46,13 @@
                     android:id="@+id/imgProfilePreview"
                     android:layout_width="96dp"
                     android:layout_height="96dp"
-                    android:background="?attr/colorSurfaceContainerHighest"
                     android:clickable="true"
                     android:contentDescription=""
                     android:focusable="true"
                     android:foreground="?attr/selectableItemBackgroundBorderless"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_nav_profile"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Tile"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Avatar"
                     app:strokeColor="?attr/colorOutline"
                     app:strokeWidth="1dp" />
 
@@ -66,23 +65,12 @@
                     android:textSize="13sp" />
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="10dp"
-                android:letterSpacing="0.08"
-                android:text="PERSONAL INFO"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="20dp"
-                app:cardBackgroundColor="?attr/colorSurfaceContainer"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp">
 
@@ -117,15 +105,11 @@
                     </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:hint="Full Name"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Full Name">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etName"
@@ -166,15 +150,11 @@
                     </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:hint="Phone Number"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Phone Number">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPhone"
@@ -186,23 +166,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="10dp"
-                android:letterSpacing="0.08"
-                android:text="ADDRESS &amp; SAFETY"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="28dp"
-                app:cardBackgroundColor="?attr/colorSurfaceContainer"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp">
 
@@ -237,15 +205,11 @@
                     </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:hint="Address"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Address">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etAddress"
@@ -286,15 +250,11 @@
                     </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:hint="Emergency Contact"
-                        app:boxCornerRadiusBottomEnd="14dp"
-                        app:boxCornerRadiusBottomStart="14dp"
-                        app:boxCornerRadiusTopEnd="14dp"
-                        app:boxCornerRadiusTopStart="14dp">
+                        android:hint="Emergency Contact">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etEmergencyContact"

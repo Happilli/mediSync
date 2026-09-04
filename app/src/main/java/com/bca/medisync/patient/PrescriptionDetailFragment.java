@@ -7,11 +7,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import com.bca.medisync.R;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.model.Prescription;
@@ -23,11 +21,9 @@ import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPrescriptionDetailBinding;
 import com.bca.medisync.util.RoundedListStyler;
 import com.bca.medisync.util.ViewUtils;
-
 import java.util.List;
 
 public class PrescriptionDetailFragment extends Fragment {
-
   private FragmentPrescriptionDetailBinding binding;
   private int prescriptionId;
 
@@ -44,9 +40,7 @@ public class PrescriptionDetailFragment extends Fragment {
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    binding.toolbar.setNavigationOnClickListener(
-        v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-
+    ViewUtils.setupBackNav(this, binding.toolbar);
     Bundle args = getArguments();
     prescriptionId = args != null ? args.getInt("prescription_id", -1) : -1;
     if (prescriptionId == -1) {
@@ -95,10 +89,8 @@ public class PrescriptionDetailFragment extends Fragment {
 
   private void bind(Prescription p) {
     if (binding == null) return;
-
     binding.txtDiagnosis.setText(p.getDiagnosis());
     binding.txtInstructions.setText(p.getInstructions());
-
     String followUp = p.getFollowUpDate();
     if (followUp == null || followUp.isEmpty()) {
       binding.txtFollowUp.setVisibility(View.GONE);
@@ -106,10 +98,8 @@ public class PrescriptionDetailFragment extends Fragment {
       binding.txtFollowUp.setVisibility(View.VISIBLE);
       binding.txtFollowUp.setText("Follow-up: " + followUp);
     }
-
     binding.txtInstructions.setVisibility(
         p.getInstructions() == null || p.getInstructions().isEmpty() ? View.GONE : View.VISIBLE);
-
     binding.medicationsContainer.removeAllViews();
     List<Medication> meds = p.getMedications();
     if (meds == null || meds.isEmpty()) {
@@ -127,14 +117,16 @@ public class PrescriptionDetailFragment extends Fragment {
   private View buildMedicationRow(Medication m) {
     LinearLayout row = new LinearLayout(requireContext());
     row.setOrientation(LinearLayout.VERTICAL);
-    row.setPadding(dp(16), dp(14), dp(16), dp(14));
-
+    row.setPadding(
+        ViewUtils.dp(requireContext(), 16),
+        ViewUtils.dp(requireContext(), 14),
+        ViewUtils.dp(requireContext(), 16),
+        ViewUtils.dp(requireContext(), 14));
     TextView name = new TextView(requireContext());
     name.setText(m.getName() + " " + m.getDosage());
     name.setTextSize(15);
     name.setTypeface(null, android.graphics.Typeface.BOLD);
     name.setTextColor(requireContext().getColor(R.color.on_surface));
-
     TextView freq = new TextView(requireContext());
     freq.setText(m.getFrequency() + " \u2022 " + m.getTime());
     freq.setTextSize(12);
@@ -142,12 +134,10 @@ public class PrescriptionDetailFragment extends Fragment {
     LinearLayout.LayoutParams freqLp =
         new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-    freqLp.topMargin = dp(2);
+    freqLp.topMargin = ViewUtils.dp(requireContext(), 2);
     freq.setLayoutParams(freqLp);
-
     row.addView(name);
     row.addView(freq);
-
     if (m.getInstruction() != null && !m.getInstruction().isEmpty()) {
       TextView instr = new TextView(requireContext());
       instr.setText(m.getInstruction());
@@ -156,15 +146,10 @@ public class PrescriptionDetailFragment extends Fragment {
       LinearLayout.LayoutParams instrLp =
           new LinearLayout.LayoutParams(
               LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-      instrLp.topMargin = dp(6);
+      instrLp.topMargin = ViewUtils.dp(requireContext(), 6);
       instr.setLayoutParams(instrLp);
       row.addView(instr);
     }
-
     return row;
-  }
-
-  private int dp(int v) {
-    return ViewUtils.dp(requireContext(), v);
   }
 }
