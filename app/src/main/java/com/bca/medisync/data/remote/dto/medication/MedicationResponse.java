@@ -22,4 +22,5 @@ public class MedicationResponse {
   private boolean is_active;
   private int doctor_id;
   private String doctor_name;
+  private String dispense_status;
 }

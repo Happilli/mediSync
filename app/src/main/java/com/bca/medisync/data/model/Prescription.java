@@ -2,7 +2,6 @@ package com.bca.medisync.data.model;
 
 import lombok.Getter;
 import lombok.AllArgsConstructor;
-
 import java.util.List;
 
 @Getter
@@ -14,5 +13,6 @@ public class Prescription {
   private final String instructions;
   private final String createdAt;
   private final String followUpDate;
+  private final String dispenseStatus;
   private final List<Medication> medications;
 }

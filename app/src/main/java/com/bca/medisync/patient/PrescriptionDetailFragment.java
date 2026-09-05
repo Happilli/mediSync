@@ -15,15 +15,17 @@ import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.model.Prescription;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
+import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPrescriptionDetailBinding;
 import com.bca.medisync.util.RoundedListStyler;
 import com.bca.medisync.util.ViewUtils;
 import java.util.List;
 
-public class PrescriptionDetailFragment extends Fragment {
+public class PrescriptionDetailFragment extends Fragment implements NotificationCenter.Listener {
   private FragmentPrescriptionDetailBinding binding;
   private int prescriptionId;
 
@@ -52,9 +54,30 @@ public class PrescriptionDetailFragment extends Fragment {
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+    NotificationCenter.get().register(this);
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    NotificationCenter.get().unregister(this);
+  }
+
+  @Override
   public void onDestroyView() {
     super.onDestroyView();
     binding = null;
+  }
+
+  @Override
+  public void onNotificationReceived(NotificationResponse n) {
+    if (!isAdded() || binding == null) return;
+    if (n.getRelated_id() == null || n.getRelated_id() != prescriptionId) return;
+    if ("prescription_ready".equals(n.getType()) || "prescription_collected".equals(n.getType())) {
+      loadDetail();
+    }
   }
 
   private void loadDetail() {
@@ -100,6 +123,9 @@ public class PrescriptionDetailFragment extends Fragment {
     }
     binding.txtInstructions.setVisibility(
         p.getInstructions() == null || p.getInstructions().isEmpty() ? View.GONE : View.VISIBLE);
+
+    bindDispenseStatus(p.getDispenseStatus());
+
     binding.medicationsContainer.removeAllViews();
     List<Medication> meds = p.getMedications();
     if (meds == null || meds.isEmpty()) {
@@ -111,6 +137,31 @@ public class PrescriptionDetailFragment extends Fragment {
       View row = buildMedicationRow(meds.get(i));
       RoundedListStyler.apply(row, i, meds.size());
       binding.medicationsContainer.addView(row);
+    }
+  }
+
+  private void bindDispenseStatus(String status) {
+    if (binding == null) return;
+    if (status == null) {
+      binding.cardDispense.setVisibility(View.GONE);
+      return;
+    }
+    switch (status) {
+      case "pending":
+        binding.cardDispense.setVisibility(View.VISIBLE);
+        binding.progressDispense.setVisibility(View.VISIBLE);
+        binding.txtDispenseStatus.setText("Your medicines are being prepared...");
+        break;
+      case "ready":
+        binding.cardDispense.setVisibility(View.VISIBLE);
+        binding.progressDispense.setVisibility(View.VISIBLE);
+        binding.txtDispenseStatus.setText("Ready! Come collect your medicines at the hospital.");
+        break;
+      case "collected":
+      case "not_required":
+      default:
+        binding.cardDispense.setVisibility(View.GONE);
+        break;
     }
   }
 

@@ -12,12 +12,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.bca.medisync.R;
 import com.bca.medisync.adapter.GroupedListAdapter;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.api.MedicationApi;
 import com.bca.medisync.data.remote.dto.medication.MedicationResponse;
+import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentMedicationBinding;
@@ -26,7 +29,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MedicationFragment extends Fragment {
+public class MedicationFragment extends Fragment implements NotificationCenter.Listener {
   private FragmentMedicationBinding binding;
   private GroupedListAdapter<Medication, ItemMedicationBinding> adapter;
   private Medication activeMedication;
@@ -60,13 +63,30 @@ public class MedicationFragment extends Fragment {
   @Override
   public void onResume() {
     super.onResume();
+    NotificationCenter.get().register(this);
     loadMedications();
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    NotificationCenter.get().unregister(this);
   }
 
   @Override
   public void onDestroyView() {
     super.onDestroyView();
     binding = null;
+  }
+
+  @Override
+  public void onNotificationReceived(NotificationResponse n) {
+    if (!isAdded() || binding == null) return;
+    if ("prescription_ready".equals(n.getType())
+        || "prescription_collected".equals(n.getType())
+        || "prescription_created".equals(n.getType())) {
+      loadMedications();
+    }
   }
 
   private void maybeRequestExactAlarmPermission() {
@@ -89,12 +109,25 @@ public class MedicationFragment extends Fragment {
             med -> med.getDoctorName() == null ? "Unknown" : "Dr. " + med.getDoctorName(),
             this::bindMedicationRow,
             med -> {
-              if (!med.isTaken()) {
+              if (isCollected(med) && !med.isTaken()) {
                 Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show();
+              } else if (!isCollected(med)) {
+                Toast.makeText(requireContext(), statusMessage(med), Toast.LENGTH_SHORT).show();
               }
             });
     binding.rvMedications.setLayoutManager(new LinearLayoutManager(requireContext()));
     binding.rvMedications.setAdapter(adapter);
+  }
+
+  private boolean isCollected(Medication m) {
+    return "collected".equals(m.getDispenseStatus());
+  }
+
+  private String statusMessage(Medication m) {
+    if ("ready".equals(m.getDispenseStatus())) {
+      return "Ready! Come collect your medicine at the hospital.";
+    }
+    return "Your medicine is being prepared at the hospital.";
   }
 
   private void bindMedicationRow(
@@ -102,6 +135,18 @@ public class MedicationFragment extends Fragment {
     rowBinding.tvMedName.setText(m.getName() + " " + m.getDosage());
     rowBinding.tvMedFrequency.setText(m.getFrequency());
     rowBinding.cbTaken.setOnCheckedChangeListener(null);
+
+    if (!isCollected(m)) {
+      rowBinding.cbTaken.setVisibility(View.GONE);
+      rowBinding.getRoot().setAlpha(0.8f);
+      boolean ready = "ready".equals(m.getDispenseStatus());
+      rowBinding.tvMedTime.setText(ready ? "Ready for pickup" : "Preparing...");
+      rowBinding.tvMedTime.setTextColor(
+          requireContext().getColor(ready ? R.color.tertiary : R.color.secondary));
+      return;
+    }
+
+    rowBinding.cbTaken.setVisibility(View.VISIBLE);
     rowBinding.cbTaken.setChecked(m.isTaken());
     rowBinding.cbTaken.setEnabled(!m.isTaken());
     rowBinding.cbTaken.setClickable(!m.isTaken());
@@ -113,9 +158,11 @@ public class MedicationFragment extends Fragment {
     }
     if (m.isTaken()) {
       rowBinding.tvMedTime.setText("Taken");
+      rowBinding.tvMedTime.setTextColor(requireContext().getColor(R.color.primary));
       rowBinding.getRoot().setAlpha(0.6f);
     } else {
       rowBinding.tvMedTime.setText(m.getTime());
+      rowBinding.tvMedTime.setTextColor(requireContext().getColor(R.color.primary));
       rowBinding.getRoot().setAlpha(1f);
     }
   }
@@ -140,6 +187,7 @@ public class MedicationFragment extends Fragment {
   private void scheduleAllReminders(List<MedicationResponse> responses) {
     if (!MedicationAlarmScheduler.canScheduleExactAlarms(requireContext())) return;
     for (MedicationResponse r : responses) {
+      if (!"collected".equals(r.getDispense_status())) continue;
       String endDateStr = r.getEnd_date();
       if (endDateStr == null) continue;
       LocalDate endDate;
@@ -182,21 +230,29 @@ public class MedicationFragment extends Fragment {
   private void bindMedications(List<Medication> meds) {
     if (binding == null) return;
     adapter.submitList(meds);
-    int total = meds.size();
-    int taken = 0;
+
+    List<Medication> collected = new ArrayList<>();
     for (Medication m : meds) {
+      if (isCollected(m)) collected.add(m);
+    }
+
+    int total = collected.size();
+    int taken = 0;
+    for (Medication m : collected) {
       if (m.isTaken()) taken++;
     }
     binding.tvAdherenceCount.setText(taken + "/" + total);
     int percent = total == 0 ? 0 : (int) ((taken / (float) total) * 100);
     binding.progressAdherence.setProgressCompat(percent, true);
+
     activeMedication = null;
-    for (Medication m : meds) {
+    for (Medication m : collected) {
       if (!m.isTaken()) {
         activeMedication = m;
         break;
       }
     }
+
     if (activeMedication != null) {
       binding.tvActiveName.setText(activeMedication.getName() + " " + activeMedication.getDosage());
       binding.tvActiveDosage.setText(activeMedication.getFrequency());
@@ -204,7 +260,11 @@ public class MedicationFragment extends Fragment {
       binding.btnMarkTaken.setEnabled(true);
       binding.btnMarkTaken.setText("Mark as Taken");
     } else {
-      binding.tvActiveName.setText(meds.isEmpty() ? "No medications" : "All medications taken");
+      boolean anyPending = meds.size() > collected.size();
+      binding.tvActiveName.setText(
+          meds.isEmpty()
+              ? "No medications"
+              : anyPending ? "Some medications pending pickup" : "All medications taken");
       binding.tvActiveDosage.setText("");
       binding.tvActiveTime.setText("--");
       binding.btnMarkTaken.setEnabled(false);

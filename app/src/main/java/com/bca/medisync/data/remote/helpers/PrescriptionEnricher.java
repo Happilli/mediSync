@@ -40,6 +40,7 @@ public class PrescriptionEnricher {
         r.getInstructions(),
         formatDate(r.getCreated_at()),
         formatDate(r.getFollow_up_date()),
+        r.getDispense_status(),
         meds);
   }
 
@@ -63,7 +64,8 @@ public class PrescriptionEnricher {
         m.getDuration_days() + " Days",
         m.is_taken(),
         m.getInstruction(),
-        m.getDoctor_name());
+        m.getDoctor_name(),
+        m.getDispense_status());
   }
 
   public static String formatDate(String iso) {

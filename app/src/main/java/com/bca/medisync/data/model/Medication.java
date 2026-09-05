@@ -17,4 +17,5 @@ public class Medication {
   private final boolean taken;
   private final String instruction;
   private final String doctorName;
+  private final String dispenseStatus;
 }
