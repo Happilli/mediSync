@@ -15,6 +15,7 @@ import com.bca.medisync.util.ViewUtils;
 public class PatientDetailsFragment extends Fragment {
   private FragmentPatientDetailsBinding binding;
   private int patientId = -1;
+  private String bookingNotes;
   private String patientName;
   private int appointmentId = -1;
 
@@ -47,6 +48,7 @@ public class PatientDetailsFragment extends Fragment {
     if (args == null) return;
     patientId = args.getInt("patient_id", -1);
     patientName = args.getString("patient_name");
+    bookingNotes = args.getString("booking_notes");
     binding.toolbar.setTitle(patientName);
     binding.txtPatientName.setText(patientName);
     appointmentId = args.getInt("appointment_id", -1);
@@ -110,6 +112,7 @@ public class PatientDetailsFragment extends Fragment {
           Bundle args = new Bundle();
           args.putString("patient_name", patientName);
           args.putInt("appointment_id", appointmentId);
+          args.putString("booking_notes", bookingNotes);
           ConsultationFragment fragment = new ConsultationFragment();
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).pushFragment(fragment);

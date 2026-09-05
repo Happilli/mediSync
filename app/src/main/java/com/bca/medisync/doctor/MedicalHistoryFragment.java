@@ -101,7 +101,8 @@ public class MedicalHistoryFragment extends Fragment {
                 new MedicalHistoryEntry(
                     PrescriptionEnricher.formatDate(r.getDate()),
                     r.getTitle(),
-                    r.getDescription()));
+                    r.getDescription(),
+                    r.getAppointment_id()));
           }
           binding.tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
           binding.tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());

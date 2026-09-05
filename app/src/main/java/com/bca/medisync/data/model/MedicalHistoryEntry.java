@@ -9,4 +9,5 @@ public class MedicalHistoryEntry {
   private final String date;
   private final String title;
   private final String description;
+  private final Integer appointmentId;
 }

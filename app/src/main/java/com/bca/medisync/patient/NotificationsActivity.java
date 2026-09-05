@@ -1,5 +1,6 @@
 package com.bca.medisync.patient;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import androidx.activity.EdgeToEdge;
@@ -78,9 +79,26 @@ public class NotificationsActivity extends AppCompatActivity
             this::bindNotificationRow,
             n -> {
               if (!n.isRead()) markAsRead(n.getId());
+              handleNotificationClick(n);
             });
     binding.rvNotifications.setLayoutManager(new LinearLayoutManager(this));
     binding.rvNotifications.setAdapter(adapter);
+  }
+
+  private void handleNotificationClick(Notification n) {
+    if (n.getRelatedId() == null) return;
+    if ("appointment_completed".equals(n.getType())) {
+      Bundle args = new Bundle();
+      args.putInt("appointment_id", n.getRelatedId());
+      ConsultationDetailFragment fragment = new ConsultationDetailFragment();
+      fragment.setArguments(args);
+      Intent intent = new Intent(this, MainTabActivity.class);
+      intent.putExtra("open_fragment", "consultation_detail");
+      intent.putExtra("appointment_id", n.getRelatedId());
+      intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+      startActivity(intent);
+      finish();
+    }
   }
 
   private void bindNotificationRow(

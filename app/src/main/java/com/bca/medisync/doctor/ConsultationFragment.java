@@ -51,14 +51,16 @@ public class ConsultationFragment extends Fragment {
     patientName = args != null ? args.getString("patient_name") : null;
     latestDiagnosis = args != null ? args.getString("latest_diagnosis") : null;
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
-
+    String bookingNotes = args != null ? args.getString("booking_notes") : null;
     if (patientName != null) {
       binding.tvPatientName.setText("Consultation - " + patientName);
     }
     if (latestDiagnosis != null) {
       binding.etDiagnosis.setText(latestDiagnosis);
     }
-
+    if (bookingNotes != null && !bookingNotes.trim().isEmpty()) {
+      binding.etComplaint.setText(bookingNotes);
+    }
     checkExistingConsultation();
   }
 

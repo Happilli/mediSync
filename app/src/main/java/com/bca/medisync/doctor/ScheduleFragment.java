@@ -219,6 +219,7 @@ public class ScheduleFragment extends Fragment {
           Bundle args = new Bundle();
           args.putInt("patient_id", p.getId());
           args.putInt("appointment_id", appointmentId);
+          args.putString("booking_notes", appointment.getNotes());
           args.putString("patient_name", p.getName());
           args.putString("patient_phone", p.getPhone());
           args.putString("patient_gender", p.getGender());
@@ -281,39 +282,32 @@ public class ScheduleFragment extends Fragment {
       String dayLabel = dayFmt.format(date);
       String fullDate = fullFmt.format(date);
       int dayNum = cal.get(Calendar.DAY_OF_MONTH);
-
       LinearLayout item = new LinearLayout(requireContext());
       item.setOrientation(LinearLayout.VERTICAL);
       item.setGravity(Gravity.CENTER);
       item.setPadding(dpToPx(10), dpToPx(8), dpToPx(10), dpToPx(8));
       item.setClickable(true);
       item.setFocusable(true);
-
       LinearLayout.LayoutParams lp =
           new LinearLayout.LayoutParams(
               LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       lp.setMarginEnd(dpToPx(8));
       item.setLayoutParams(lp);
-
       TextView txtDay = new TextView(requireContext());
       txtDay.setText(dayLabel);
       txtDay.setTextSize(12);
       txtDay.setGravity(Gravity.CENTER);
       txtDay.setTextColor(requireContext().getColor(R.color.on_surface_variant));
-
       TextView txtNum = new TextView(requireContext());
       txtNum.setText(String.valueOf(dayNum));
       txtNum.setTextSize(15);
       txtNum.setGravity(Gravity.CENTER);
       txtNum.setTextColor(requireContext().getColor(R.color.on_surface));
-
       LinearLayout.LayoutParams numLp = new LinearLayout.LayoutParams(dpToPx(36), dpToPx(36));
       numLp.topMargin = dpToPx(4);
       txtNum.setLayoutParams(numLp);
-
       item.addView(txtDay);
       item.addView(txtNum);
-
       boolean isToday = fullDate.equals(todayFull);
       if (isToday) {
         txtDay.setTextColor(requireContext().getColor(R.color.primary));
@@ -321,14 +315,12 @@ public class ScheduleFragment extends Fragment {
         txtNum.setTextColor(requireContext().getColor(R.color.on_primary));
         selectedDate = fullDate;
       }
-
       item.setOnClickListener(
           v -> {
             selectedDate = fullDate;
             filterByDate(fullDate);
             refreshDateStripSelection(item);
           });
-
       binding.dateStripContainer.addView(item);
       cal.add(Calendar.DAY_OF_MONTH, 1);
     }

@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.bca.medisync.R;
+import com.bca.medisync.data.model.Doctor;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
@@ -79,6 +80,11 @@ public class PrescriptionFragment extends Fragment {
     binding.btnSelectFollowUp.setOnClickListener(v -> showFollowUpDatePicker());
     binding.btnClearFollowUp.setOnClickListener(v -> clearFollowUp());
     binding.btnSavePrescription.setOnClickListener(v -> attemptSavePrescription());
+    binding.btnSkipPrescription.setOnClickListener(
+        v -> {
+          Toast.makeText(requireContext(), "Consultation completed.", Toast.LENGTH_SHORT).show();
+          ((DoctorTabActivity) requireActivity()).popToRoot();
+        });
   }
 
   private void showAddDosageTimePicker() {
@@ -302,7 +308,7 @@ public class PrescriptionFragment extends Fragment {
           } else if (code == 400) {
             Toast.makeText(
                     requireContext(),
-                    "Appointment must be confirmed with a consultation recorded, and can't already have a prescription.",
+                    "A consultation must be recorded before prescribing, and this appointment can't already have a prescription.",
                     Toast.LENGTH_LONG)
                 .show();
           } else if (code == 404) {

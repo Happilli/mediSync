@@ -130,15 +130,6 @@
                 android:layout_marginBottom="20dp"
                 android:nestedScrollingEnabled="false" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Additional Notes"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutNotes"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"

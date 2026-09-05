@@ -61,7 +61,14 @@ public class PatientMedicalHistoryFragment extends Fragment {
               rowBinding.txtTitle.setText(entry.getTitle());
               rowBinding.txtDescription.setText(entry.getDescription());
             },
-            null);
+            entry -> {
+              if (entry.getAppointmentId() == null) return;
+              Bundle args = new Bundle();
+              args.putInt("appointment_id", entry.getAppointmentId());
+              ConsultationDetailFragment fragment = new ConsultationDetailFragment();
+              fragment.setArguments(args);
+              ((MainTabActivity) requireActivity()).pushFragment(fragment);
+            });
     binding.rvHistory.setAdapter(adapter);
     adapter.setRoundedList(true);
   }
@@ -79,7 +86,8 @@ public class PatientMedicalHistoryFragment extends Fragment {
                 new MedicalHistoryEntry(
                     PrescriptionEnricher.formatDate(r.getDate()),
                     r.getTitle(),
-                    r.getDescription()));
+                    r.getDescription(),
+                    r.getAppointment_id()));
           }
           adapter.updateData(entries);
           EmptyState.bind(binding.rvHistory, binding.txtEmpty, entries.isEmpty());
