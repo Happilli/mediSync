@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -60,15 +61,41 @@ public class PrescriptionListFragment extends Fragment {
               rowBinding.txtDoctorName.setText(prescription.getDoctor_name());
               rowBinding.txtDate.setText(prescription.getCreatedAt());
             },
-            prescription -> {
-              Bundle args = new Bundle();
-              args.putInt("prescription_id", prescription.getId());
-              PrescriptionDetailFragment fragment = new PrescriptionDetailFragment();
-              fragment.setArguments(args);
-              ((MainTabActivity) requireActivity()).pushFragment(fragment);
-            });
+            this::onPrescriptionClicked);
     binding.rvPrescriptions.setAdapter(adapter);
     adapter.setRoundedList(true);
+  }
+
+  private void onPrescriptionClicked(Prescription prescription) {
+    String status = prescription.getDispenseStatus();
+    if (status == null || "not_required".equals(status)) {
+      openDetail(prescription);
+      return;
+    }
+    switch (status) {
+      case "collected":
+        openDetail(prescription);
+        break;
+      case "ready":
+        Toast.makeText(
+                requireContext(),
+                "Ready! Come collect your medicines at the hospital.",
+                Toast.LENGTH_SHORT)
+            .show();
+        break;
+      default:
+        Toast.makeText(
+                requireContext(), "Your medicines are still being prepared.", Toast.LENGTH_SHORT)
+            .show();
+    }
+  }
+
+  private void openDetail(Prescription prescription) {
+    Bundle args = new Bundle();
+    args.putInt("prescription_id", prescription.getId());
+    PrescriptionDetailFragment fragment = new PrescriptionDetailFragment();
+    fragment.setArguments(args);
+    ((MainTabActivity) requireActivity()).pushFragment(fragment);
   }
 
   private void loadPrescriptions() {
