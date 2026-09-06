@@ -6,7 +6,6 @@ import android.widget.TextView;
 import com.bca.medisync.R;
 
 public class InfoRowBinder {
-
   public static class Row {
     final View view;
     final int icon;

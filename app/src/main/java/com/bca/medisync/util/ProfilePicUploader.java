@@ -10,7 +10,6 @@ import okhttp3.MultipartBody;
 import retrofit2.Call;
 
 public class ProfilePicUploader {
-
   public interface CallProvider<T> {
     Call<T> createCall(MultipartBody.Part filePart);
   }

@@ -3,13 +3,11 @@ package com.bca.medisync.patient;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -17,18 +15,16 @@ import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.register.PatientRegisterRequest;
 import com.bca.medisync.databinding.ActivityRegisterBinding;
 import com.bca.medisync.util.LoadingHelper;
+import com.bca.medisync.util.ViewUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class RegisterActivity extends AppCompatActivity {
-
   private ActivityRegisterBinding binding;
-
   private String selectedDob = "";
   private boolean passwordsMismatched = false;
 
@@ -38,7 +34,6 @@ public class RegisterActivity extends AppCompatActivity {
     EdgeToEdge.enable(this);
     binding = ActivityRegisterBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
-
     ViewCompat.setOnApplyWindowInsetsListener(
         binding.mainStuff,
         (v, insets) -> {
@@ -46,7 +41,6 @@ public class RegisterActivity extends AppCompatActivity {
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return insets;
         });
-
     setupDobPicker();
     setupBloodGroupToggles();
     setupPasswordMatchWatcher();
@@ -71,20 +65,19 @@ public class RegisterActivity extends AppCompatActivity {
         });
     binding.etPassword.setOnFocusChangeListener(
         (v, hasFocus) -> {
-          if (!hasFocus && !textOf(binding.etConfirmPassword).isEmpty()) checkPasswordsMatch();
+          if (!hasFocus && !ViewUtils.textOf(binding.etConfirmPassword).isEmpty())
+            checkPasswordsMatch();
         });
   }
 
   private void checkPasswordsMatch() {
-    String password = textOf(binding.etPassword);
-    String confirmPassword = textOf(binding.etConfirmPassword);
-
+    String password = ViewUtils.textOf(binding.etPassword);
+    String confirmPassword = ViewUtils.textOf(binding.etConfirmPassword);
     if (confirmPassword.isEmpty() || password.isEmpty()) {
       passwordsMismatched = false;
       binding.txtPasswordMismatch.setVisibility(View.GONE);
       return;
     }
-
     if (!password.equals(confirmPassword)) {
       passwordsMismatched = true;
       binding.txtPasswordMismatch.setVisibility(View.VISIBLE);
@@ -139,16 +132,16 @@ public class RegisterActivity extends AppCompatActivity {
   }
 
   private void attemptRegister() {
-    String name = textOf(binding.etName);
-    String email = textOf(binding.etEmail);
-    String password = textOf(binding.etPassword);
-    String confirmPassword = textOf(binding.etConfirmPassword);
-    String phone = textOf(binding.etPhone);
-    String address = textOf(binding.etAddress);
-    String emergencyContact = textOf(binding.etEmergencyContact);
+    String name = ViewUtils.textOf(binding.etName);
+    String email = ViewUtils.textOf(binding.etEmail);
+    String password = ViewUtils.textOf(binding.etPassword);
+    String confirmPassword = ViewUtils.textOf(binding.etConfirmPassword);
+    String phone = ViewUtils.textOf(binding.etPhone);
+    String address = ViewUtils.textOf(binding.etAddress);
+    String emergencyContact = ViewUtils.textOf(binding.etEmergencyContact);
     String gender = getSelectedGender();
     String bloodGroup = getSelectedBloodGroup();
-    String securityAnswer = textOf(binding.etSecurityAnswer);
+    String securityAnswer = ViewUtils.textOf(binding.etSecurityAnswer);
 
     if (name.isEmpty()) {
       binding.etName.setError("Name is required");
@@ -248,9 +241,5 @@ public class RegisterActivity extends AppCompatActivity {
                         .show();
                   }
                 }));
-  }
-
-  private String textOf(TextInputEditText et) {
-    return et.getText() != null ? et.getText().toString().trim() : "";
   }
 }

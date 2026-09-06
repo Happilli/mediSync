@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -13,23 +12,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.databinding.ActivityVerificationBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.FileUploadHelper;
-
 import java.io.File;
-
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 public class VerificationActivity extends AppCompatActivity {
-
   private ActivityVerificationBinding binding;
-
   private Uri selectedImageUri;
   private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
       registerForActivityResult(
@@ -48,7 +43,6 @@ public class VerificationActivity extends AppCompatActivity {
     EdgeToEdge.enable(this);
     binding = ActivityVerificationBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
-
     ViewCompat.setOnApplyWindowInsetsListener(
         binding.main,
         (v, insets) -> {
@@ -84,7 +78,6 @@ public class VerificationActivity extends AppCompatActivity {
       Toast.makeText(this, "please select a citizenship photo", Toast.LENGTH_SHORT).show();
       return;
     }
-
     File cachedFile;
     try {
       cachedFile = FileUploadHelper.copyUriToCache(this, selectedImageUri, "citizenship");
@@ -92,15 +85,12 @@ public class VerificationActivity extends AppCompatActivity {
       Toast.makeText(this, "couldn't read the selected photo!", Toast.LENGTH_SHORT).show();
       return;
     }
-
     binding.btnSubmit.setEnabled(false);
     binding.loadingIndicator.setVisibility(View.VISIBLE);
     binding.loadingIndicator.show();
-
     RequestBody citizenshipBody =
         RequestBody.create(citizenshipNumber, MediaType.parse("text/plain"));
     MultipartBody.Part filePart = FileUploadHelper.toImagePart(cachedFile, "file");
-
     PatientApi patientApi = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         patientApi.requestVerification(citizenshipBody, filePart),
@@ -116,22 +106,12 @@ public class VerificationActivity extends AppCompatActivity {
           binding.loadingIndicator.hide();
           binding.loadingIndicator.setVisibility(View.INVISIBLE);
           binding.btnSubmit.setEnabled(true);
-
-          if (code == 400) {
-            Toast.makeText(
-                    VerificationActivity.this,
-                    "Verification already requested...",
-                    Toast.LENGTH_SHORT)
-                .show();
-            finish();
-          } else if (code == -1) {
-            Toast.makeText(VerificationActivity.this, "Network erros: " + msg, Toast.LENGTH_SHORT)
-                .show();
-          } else {
-            Toast.makeText(
-                    VerificationActivity.this, "Submission failed, try again..", Toast.LENGTH_LONG)
-                .show();
-          }
+          if (code == 400) finish();
+          ApiErrorHandler.with(VerificationActivity.this)
+              .on(400, "Verification already requested...")
+              .fallback("Submission failed, try again..")
+              .build()
+              .run(code, msg);
         });
   }
 }

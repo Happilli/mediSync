@@ -18,6 +18,7 @@ import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentMedicalHistoryBinding;
 import com.bca.medisync.databinding.ItemMedicalHistoryBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
@@ -97,19 +98,12 @@ public class MedicalHistoryFragment extends BaseBindingFragment<FragmentMedicalH
           binding.tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
           bindTimeline(entries);
         },
-        (code, msg) -> {
-          if (code == 403) {
-            Toast.makeText(
-                    requireContext(),
-                    "You can only view history for patients you've treated.",
-                    Toast.LENGTH_LONG)
-                .show();
-          } else if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(requireContext(), "Failed to load history", Toast.LENGTH_SHORT).show();
-          }
-        });
+        (code, msg) ->
+            ApiErrorHandler.with(requireContext())
+                .on(403, "You can only view history for patients you've treated.")
+                .fallback("Failed to load history")
+                .build()
+                .run(code, msg));
   }
 
   private void bindTimeline(List<MedicalHistoryEntry> timeline) {

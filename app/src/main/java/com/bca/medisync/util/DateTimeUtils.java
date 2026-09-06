@@ -18,7 +18,6 @@ public class DateTimeUtils {
       return Date.from(odt.toInstant());
     } catch (DateTimeParseException e) {
       try {
-        // Fallback for formats without offset like "2024-05-25T10:30:00" or "2024-05-25 10:30:00"
         String cleanedIso = iso.replace(" ", "T");
         LocalDateTime ldt = LocalDateTime.parse(cleanedIso);
         return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());

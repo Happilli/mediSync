@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SearchSuggestionHelper<T> {
-
   public interface SearchCall<T> {
     void search(String query, OnResult<T> onResult);
   }

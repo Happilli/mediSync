@@ -3,21 +3,20 @@ package com.bca.medisync;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.auth.ForgotPasswordCheckRequest;
 import com.bca.medisync.data.remote.dto.auth.ForgotPasswordVerifyRequest;
 import com.bca.medisync.databinding.ActivityForgotPasswordBinding;
+import com.bca.medisync.util.ApiErrorHandler;
+import com.bca.medisync.util.ViewUtils;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
-
   private ActivityForgotPasswordBinding binding;
   private String verifiedEmail;
 
@@ -26,7 +25,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     binding = ActivityForgotPasswordBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
-
     ViewCompat.setOnApplyWindowInsetsListener(
         binding.mainStuff,
         (v, insets) -> {
@@ -34,7 +32,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return insets;
         });
-
     setupListeners();
   }
 
@@ -45,12 +42,11 @@ public class ForgotPasswordActivity extends AppCompatActivity {
   }
 
   private void attemptCheckEmail() {
-    String email = textOf(binding.etEmail);
+    String email = ViewUtils.textOf(binding.etEmail);
     if (email.isEmpty()) {
       binding.etEmail.setError("Email is required");
       return;
     }
-
     binding.btnCheckEmail.setEnabled(false);
     AuthApi api = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
@@ -66,26 +62,20 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         (code, msg) -> {
           binding.btnCheckEmail.setEnabled(true);
           if (code == 404) {
-            Toast.makeText(this, "No account found with this email.", Toast.LENGTH_LONG).show();
-          } else if (code == 400) {
-            Toast.makeText(
-                    this,
-                    "This account has no security answer set up. Contact support.",
-                    Toast.LENGTH_LONG)
-                .show();
-          } else if (code == -1) {
-            Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+            ApiErrorHandler.with(this)
+                .on(404, "No account found with this email.")
+                .on(400, "This account has no security answer set up. Contact support.")
+                .fallback("Something went wrong.")
+                .build()
+                .run(code, msg);
           }
         });
   }
 
   private void attemptResetPassword() {
-    String answer = textOf(binding.etSecurityAnswer);
-    String newPassword = textOf(binding.etNewPassword);
-    String confirmPassword = textOf(binding.etConfirmPassword);
-
+    String answer = ViewUtils.textOf(binding.etSecurityAnswer);
+    String newPassword = ViewUtils.textOf(binding.etNewPassword);
+    String confirmPassword = ViewUtils.textOf(binding.etConfirmPassword);
     if (answer.isEmpty()) {
       binding.etSecurityAnswer.setError("Answer is required");
       return;
@@ -102,7 +92,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
       Toast.makeText(this, "Something went wrong, please start over.", Toast.LENGTH_SHORT).show();
       return;
     }
-
     binding.btnResetPassword.setEnabled(false);
     AuthApi api = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
@@ -115,17 +104,11 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         },
         (code, msg) -> {
           binding.btnResetPassword.setEnabled(true);
-          if (code == 401) {
-            Toast.makeText(this, "That answer isn't correct.", Toast.LENGTH_LONG).show();
-          } else if (code == -1) {
-            Toast.makeText(this, "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(this, "Failed to reset password.", Toast.LENGTH_SHORT).show();
-          }
+          ApiErrorHandler.with(this)
+              .on(401, "That answer isn't correct.")
+              .fallback("Failed to reset password.")
+              .build()
+              .run(code, msg);
         });
-  }
-
-  private String textOf(com.google.android.material.textfield.TextInputEditText et) {
-    return et.getText() != null ? et.getText().toString().trim() : "";
   }
 }

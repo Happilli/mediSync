@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bca.medisync.R;
 
 public class SwipeActionHelper {
-
   public interface DirectionProvider {
     int getMovementFlags(int position);
   }

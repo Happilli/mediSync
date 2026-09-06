@@ -25,6 +25,7 @@ import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
 import com.bca.medisync.databinding.FragmentProfileBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.AuthUtils;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
@@ -33,7 +34,6 @@ import java.util.Calendar;
 
 public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
     implements NotificationCenter.Listener {
-
   private SessionManager sessionManager;
   private ActivityResultLauncher<String> notifPermLauncher;
 
@@ -247,24 +247,17 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
           Toast.makeText(requireContext(), "Security answer updated.", Toast.LENGTH_SHORT).show();
           toggleSecurityAnswerForm();
         },
-        (code, msg) -> {
-          if (code == 401) {
-            Toast.makeText(requireContext(), "Current password is incorrect.", Toast.LENGTH_SHORT)
-                .show();
-          } else if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(
-                    requireContext(), "Failed to update security answer.", Toast.LENGTH_SHORT)
-                .show();
-          }
-        });
+        (code, msg) ->
+            ApiErrorHandler.with(requireContext())
+                .on(401, "Current password is incorrect.")
+                .fallback("Failed to update security answer.")
+                .build()
+                .run(code, msg));
   }
 
   private void loadPatientData() {
     LoadingHelper.show(binding.loadingIndicator);
     binding.scrollContent.setVisibility(View.GONE);
-
     PatientApi patientApi = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
         patientApi.getMyProfile(),
@@ -274,16 +267,12 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
         LoadingHelper.wrapError(
             binding.loadingIndicator,
             binding.scrollContent,
-            (code, msg) -> {
-              if (code == 403) {
-                Toast.makeText(
-                        requireContext(), "Your account is pending verification", Toast.LENGTH_LONG)
-                    .show();
-              } else {
-                ApiCallback.simpleError(requireContext(), "Failed to load your profile")
-                    .run(code, msg);
-              }
-            }));
+            (code, msg) ->
+                ApiErrorHandler.with(requireContext())
+                    .on(403, "Your account is pending verification")
+                    .fallback("Failed to load your profile")
+                    .build()
+                    .run(code, msg)));
   }
 
   public void setupNotificationSwitch() {

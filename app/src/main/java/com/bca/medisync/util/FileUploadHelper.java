@@ -12,7 +12,6 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 public class FileUploadHelper {
-
   public static File copyUriToCache(Context context, Uri uri, String prefix) throws Exception {
     ContentResolver resolver = context.getContentResolver();
     String mimeType = resolver.getType(uri);

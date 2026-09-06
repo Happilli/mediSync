@@ -19,6 +19,7 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.SwipeActionHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -189,24 +190,13 @@ public class AppointmentFragment extends Fragment {
           Toast.makeText(requireContext(), "Appointment cancelled.", Toast.LENGTH_SHORT).show();
           loadAppointments();
         },
-        (code, msg) -> {
-          if (code == 400) {
-            Toast.makeText(
-                    requireContext(),
-                    "This appointment can no longer be cancelled.",
-                    Toast.LENGTH_LONG)
-                .show();
-            loadAppointments();
-          } else if (code == 403) {
-            Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT).show();
-            loadAppointments();
-          } else if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(requireContext(), "Failed to cancel appointment.", Toast.LENGTH_SHORT)
-                .show();
-            loadAppointments();
-          }
-        });
+        (code, msg) ->
+            ApiErrorHandler.with(requireContext())
+                .on(400, "This appointment can no longer be cancelled.")
+                .on(403, "Not your appointment.")
+                .fallback("Failed to cancel appointment.")
+                .then(this::loadAppointments)
+                .build()
+                .run(code, msg));
   }
 }

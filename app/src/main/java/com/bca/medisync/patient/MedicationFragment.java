@@ -25,6 +25,7 @@ import com.bca.medisync.data.remote.helpers.MedicationAlarmScheduler;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentMedicationBinding;
 import com.bca.medisync.databinding.ItemMedicationBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +125,6 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
     rowBinding.tvMedName.setText(m.getName() + " " + m.getDosage());
     rowBinding.tvMedFrequency.setText(m.getFrequency());
     rowBinding.cbTaken.setOnCheckedChangeListener(null);
-
     if (!isCollected(m)) {
       rowBinding.cbTaken.setVisibility(View.GONE);
       rowBinding.getRoot().setAlpha(0.8f);
@@ -134,7 +134,6 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
           requireContext().getColor(ready ? R.color.tertiary : R.color.secondary));
       return;
     }
-
     rowBinding.cbTaken.setVisibility(View.VISIBLE);
     rowBinding.cbTaken.setChecked(m.isTaken());
     rowBinding.cbTaken.setEnabled(!m.isTaken());
@@ -206,12 +205,11 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
           loadMedications();
         },
         (code, msg) -> {
-          if (code == 403) {
-            Toast.makeText(requireContext(), "Not your medication.", Toast.LENGTH_SHORT).show();
-          } else {
-            Toast.makeText(requireContext(), "Failed to update medication.", Toast.LENGTH_SHORT)
-                .show();
-          }
+          ApiErrorHandler.with(requireContext())
+              .on(403, "Not your medication.")
+              .fallback("Failed to update medication.")
+              .build()
+              .run(code, msg);
           loadMedications();
         });
   }
@@ -219,12 +217,10 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
   private void bindMedications(List<Medication> meds) {
     if (binding == null) return;
     adapter.submitList(meds);
-
     List<Medication> collected = new ArrayList<>();
     for (Medication m : meds) {
       if (isCollected(m)) collected.add(m);
     }
-
     int total = collected.size();
     int taken = 0;
     for (Medication m : collected) {
@@ -233,7 +229,6 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
     binding.tvAdherenceCount.setText(taken + "/" + total);
     int percent = total == 0 ? 0 : (int) ((taken / (float) total) * 100);
     binding.progressAdherence.setProgressCompat(percent, true);
-
     activeMedication = null;
     for (Medication m : collected) {
       if (!m.isTaken()) {
@@ -241,7 +236,6 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
         break;
       }
     }
-
     if (activeMedication != null) {
       binding.tvActiveName.setText(activeMedication.getName() + " " + activeMedication.getDosage());
       binding.tvActiveDosage.setText(activeMedication.getFrequency());

@@ -6,9 +6,12 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.appbar.MaterialToolbar;
 
 public class ViewUtils {
-
   public static int dp(Context context, int value) {
     return (int) (value * context.getResources().getDisplayMetrics().density);
+  }
+
+  public static String textOf(com.google.android.material.textfield.TextInputEditText et) {
+    return et.getText() != null ? et.getText().toString().trim() : "";
   }
 
   public static void setupBackNav(Fragment fragment, MaterialToolbar toolbar) {

@@ -13,6 +13,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.ConsultationApi;
 import com.bca.medisync.data.remote.dto.consultation.ConsultationCreateRequest;
 import com.bca.medisync.databinding.FragmentConsultationBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 
 public class ConsultationFragment extends BaseBindingFragment<FragmentConsultationBinding> {
   private String patientName, latestDiagnosis;
@@ -51,7 +52,6 @@ public class ConsultationFragment extends BaseBindingFragment<FragmentConsultati
 
   private void checkExistingConsultation() {
     if (appointmentId == -1) return;
-
     ConsultationApi api = ApiClient.api(ConsultationApi.class);
     ApiCallback.handle(
         api.getConsultationForAppointment(appointmentId),
@@ -100,7 +100,6 @@ public class ConsultationFragment extends BaseBindingFragment<FragmentConsultati
           }
 
           binding.btnNextPrescription.setEnabled(false);
-
           ConsultationApi api = ApiClient.api(ConsultationApi.class);
           ApiCallback.handle(
               api.createConsultation(
@@ -118,7 +117,6 @@ public class ConsultationFragment extends BaseBindingFragment<FragmentConsultati
                 args.putString("diagnosis", diagnosis);
                 args.putString("complaint", complaint);
                 args.putString("notes", notes);
-
                 PrescriptionFragment fragment = new PrescriptionFragment();
                 fragment.setArguments(args);
                 ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
@@ -126,25 +124,18 @@ public class ConsultationFragment extends BaseBindingFragment<FragmentConsultati
               (code, msg) -> {
                 if (binding == null) return;
                 binding.btnNextPrescription.setEnabled(true);
-                if (code == 403) {
-                  Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT)
-                      .show();
-                } else if (code == 409) {
+                if (code == 409) {
                   fetchExistingConsultationAndContinue();
-                } else if (code == 400) {
-                  Toast.makeText(
-                          requireContext(),
-                          "Appointment must be confirmed, or a consultation already exists for it.",
-                          Toast.LENGTH_LONG)
-                      .show();
-                } else if (code == -1) {
-                  Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG)
-                      .show();
-                } else {
-                  Toast.makeText(
-                          requireContext(), "Failed to save consultation.", Toast.LENGTH_SHORT)
-                      .show();
+                  return;
                 }
+                ApiErrorHandler.with(requireContext())
+                    .on(403, "Not your appointment.")
+                    .on(
+                        400,
+                        "Appointment must be confirmed, or a consultation already exists for it.")
+                    .fallback("Failed to save consultation.")
+                    .build()
+                    .run(code, msg);
               });
         });
   }

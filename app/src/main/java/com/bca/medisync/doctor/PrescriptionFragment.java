@@ -18,6 +18,7 @@ import com.bca.medisync.data.remote.dto.medication.MedicationCreateRequest;
 import com.bca.medisync.data.remote.dto.medication.MedicationTimeCreateRequest;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionCreateRequest;
 import com.bca.medisync.databinding.FragmentPrescriptionBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.ViewUtils;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -168,7 +169,6 @@ public class PrescriptionFragment extends BaseBindingFragment<FragmentPrescripti
             + "x Daily \u2022 "
             + durationDays
             + " Days");
-
     refreshAddedMedicinesUi();
     clearDraftForm();
     Toast.makeText(requireContext(), medicine + " added.", Toast.LENGTH_SHORT).show();
@@ -291,22 +291,15 @@ public class PrescriptionFragment extends BaseBindingFragment<FragmentPrescripti
         (code, msg) -> {
           if (binding == null) return;
           binding.btnSavePrescription.setEnabled(true);
-          if (code == 403) {
-            Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT).show();
-          } else if (code == 400) {
-            Toast.makeText(
-                    requireContext(),
-                    "A consultation must be recorded before prescribing, and this appointment can't already have a prescription.",
-                    Toast.LENGTH_LONG)
-                .show();
-          } else if (code == 404) {
-            Toast.makeText(requireContext(), "Appointment not found.", Toast.LENGTH_SHORT).show();
-          } else if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(requireContext(), "Failed to save prescription.", Toast.LENGTH_SHORT)
-                .show();
-          }
+          ApiErrorHandler.with(requireContext())
+              .on(403, "Not your appointment.")
+              .on(
+                  400,
+                  "A consultation must be recorded before prescribing, and this appointment can't already have a prescription.")
+              .on(404, "Appointment not found.")
+              .fallback("Failed to save prescription.")
+              .build()
+              .run(code, msg);
         });
   }
 }

@@ -26,6 +26,7 @@ import com.bca.medisync.data.remote.dto.appointment.AppointmentStatusUpdateReque
 import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.databinding.FragmentScheduleBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.SwipeActionHelper;
 import com.bca.medisync.util.ViewUtils;
@@ -40,7 +41,6 @@ import java.util.List;
 import java.util.Locale;
 
 public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBinding> {
-
   private List<Appointment> allAppointments = new ArrayList<>();
   private String selectedDate;
 
@@ -120,7 +120,6 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
                 cal.set(Calendar.MINUTE, timePicker.getMinute());
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
-
                 if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
                   Toast.makeText(
                           requireContext(), "Please select a future time.", Toast.LENGTH_SHORT)
@@ -162,14 +161,12 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
         api.createTimeslot(new TimeSlotCreateRequest(iso)),
         this,
         body -> Toast.makeText(requireContext(), "Timeslot added.", Toast.LENGTH_SHORT).show(),
-        (code, msg) -> {
-          if (code == 400)
-            Toast.makeText(
-                    requireContext(), "Timeslot already exists for this time.", Toast.LENGTH_LONG)
-                .show();
-          else
-            Toast.makeText(requireContext(), "Failed to add timeslot.", Toast.LENGTH_SHORT).show();
-        });
+        (code, msg) ->
+            ApiErrorHandler.with(requireContext())
+                .on(400, "Timeslot already exists for this time.")
+                .fallback("Failed to add timeslot.")
+                .build()
+                .run(code, msg));
   }
 
   private void loadRealSchedule() {
@@ -213,17 +210,15 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
           args.putString("patient_address", p.getAddress());
           args.putString("patient_dob", p.getDate_of_birth());
           args.putString("patient_pic_url", p.getProfile_pic_url());
-
           PatientDetailsFragment fragment = new PatientDetailsFragment();
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
         },
-        (code, msg) -> {
-          if (code == -1)
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          else
-            Toast.makeText(requireContext(), "Failed to load patient.", Toast.LENGTH_SHORT).show();
-        });
+        (code, msg) ->
+            ApiErrorHandler.with(requireContext())
+                .fallback("Failed to load patient.")
+                .build()
+                .run(code, msg));
   }
 
   private void updateStatus(int appointmentId, String newStatus) {
@@ -236,20 +231,14 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
           loadRealSchedule();
           ((DoctorTabActivity) requireActivity()).refreshHomeIfPresent();
         },
-        (code, msg) -> {
-          if (code == 400) {
-            Toast.makeText(
-                    requireContext(), "Appointment can no longer be modified.", Toast.LENGTH_LONG)
-                .show();
-            loadRealSchedule();
-          } else if (code == 403) {
-            Toast.makeText(requireContext(), "Not your appointment.", Toast.LENGTH_SHORT).show();
-            loadRealSchedule();
-          } else {
-            Toast.makeText(requireContext(), "Failed to update status.", Toast.LENGTH_SHORT).show();
-            loadRealSchedule();
-          }
-        });
+        (code, msg) ->
+            ApiErrorHandler.with(requireContext())
+                .on(400, "Appointment can no longer be modified.")
+                .on(403, "Not your appointment.")
+                .fallback("Failed to update status.")
+                .then(this::loadRealSchedule)
+                .build()
+                .run(code, msg));
   }
 
   private void setupDateStrip() {

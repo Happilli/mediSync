@@ -19,6 +19,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.appointment.AppointmentCreateRequest;
 import com.bca.medisync.databinding.FragmentBookAppointmentBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ImageLoader;
@@ -133,23 +134,13 @@ public class BookAppointmentFragment extends BaseBindingFragment<FragmentBookApp
               (code, msg) -> {
                 if (binding == null) return;
                 binding.btnConfirm.setEnabled(true);
-                if (code == 403) {
-                  Toast.makeText(
-                          requireContext(),
-                          "You need to be verified before booking appointments.",
-                          Toast.LENGTH_LONG)
-                      .show();
-                } else if (code == 400) {
-                  Toast.makeText(
-                          requireContext(), "This slot is no longer available.", Toast.LENGTH_LONG)
-                      .show();
-                  setupTimeSlots();
-                } else if (code == -1) {
-                  Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG)
-                      .show();
-                } else {
-                  Toast.makeText(requireContext(), "Booking failed.", Toast.LENGTH_SHORT).show();
-                }
+                if (code == 400) setupTimeSlots();
+                ApiErrorHandler.with(requireContext())
+                    .on(403, "You need to be verified before booking appointments.")
+                    .on(400, "This slot is no longer available.")
+                    .fallback("Booking failed.")
+                    .build()
+                    .run(code, msg);
               });
         });
   }

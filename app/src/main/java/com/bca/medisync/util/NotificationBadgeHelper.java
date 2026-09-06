@@ -9,7 +9,6 @@ import com.bca.medisync.data.remote.api.NotificationApi;
 import com.google.android.material.button.MaterialButton;
 
 public class NotificationBadgeHelper {
-
   public static void refresh(Fragment fragment, MaterialButton btn) {
     NotificationApi api = ApiClient.api(NotificationApi.class);
     ApiCallback.handle(

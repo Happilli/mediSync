@@ -8,18 +8,15 @@ import android.view.ViewGroup;
 import com.bca.medisync.R;
 
 public class RoundedListStyler {
-
   public static void apply(View itemView, int position, int itemCount) {
     Context context = itemView.getContext();
     float density = context.getResources().getDisplayMetrics().density;
     float radius = density * 18f;
     boolean isFirst = position == 0;
     boolean isLast = position == itemCount - 1;
-
     GradientDrawable bg = new GradientDrawable();
     bg.setColor(context.getColor(R.color.surface));
     bg.setStroke((int) (density * 1.2f), context.getColor(R.color.outline_variant));
-
     if (isFirst && isLast) {
       bg.setCornerRadius(radius);
     } else if (isFirst) {
@@ -30,7 +27,6 @@ public class RoundedListStyler {
       bg.setCornerRadius(0f);
     }
     itemView.setBackground(bg);
-
     ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) itemView.getLayoutParams();
     if (lp != null) {
       lp.bottomMargin = isLast ? 0 : (int) (density * 6);

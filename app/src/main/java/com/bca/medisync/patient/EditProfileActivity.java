@@ -18,9 +18,9 @@ import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
 import com.bca.medisync.databinding.ActivityEditProfileBinding;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.ProfilePicUploader;
+import com.bca.medisync.util.ViewUtils;
 
 public class EditProfileActivity extends AppCompatActivity {
-
   private ActivityEditProfileBinding binding;
   private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
 
@@ -35,11 +35,9 @@ public class EditProfileActivity extends AppCompatActivity {
                 uploadProfilePic(uri);
               }
             });
-
     EdgeToEdge.enable(this);
     binding = ActivityEditProfileBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
-
     ViewCompat.setOnApplyWindowInsetsListener(
         binding.main,
         (v, insets) -> {
@@ -47,7 +45,6 @@ public class EditProfileActivity extends AppCompatActivity {
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return insets;
         });
-
     binding.imgProfilePreview.setOnClickListener(
         v ->
             pickMedia.launch(
@@ -57,7 +54,6 @@ public class EditProfileActivity extends AppCompatActivity {
 
     binding.toolbar.setNavigationOnClickListener(v -> finish());
     binding.btnSave.setOnClickListener(v -> attemptSave());
-
     loadCurrentProfile();
   }
 
@@ -94,10 +90,10 @@ public class EditProfileActivity extends AppCompatActivity {
   }
 
   private void attemptSave() {
-    String name = textOf(binding.etName);
-    String phone = textOf(binding.etPhone);
-    String address = textOf(binding.etAddress);
-    String emergencyContact = textOf(binding.etEmergencyContact);
+    String name = ViewUtils.textOf(binding.etName);
+    String phone = ViewUtils.textOf(binding.etPhone);
+    String address = ViewUtils.textOf(binding.etAddress);
+    String emergencyContact = ViewUtils.textOf(binding.etEmergencyContact);
     if (name.isEmpty()) {
       binding.etName.setError("Name is required");
       return;
@@ -127,9 +123,5 @@ public class EditProfileActivity extends AppCompatActivity {
           binding.btnSave.setEnabled(true);
           ApiCallback.simpleError(this, "Failed to update profile.").run(code, msg);
         });
-  }
-
-  private String textOf(com.google.android.material.textfield.TextInputEditText et) {
-    return et.getText() != null ? et.getText().toString().trim() : "";
   }
 }
