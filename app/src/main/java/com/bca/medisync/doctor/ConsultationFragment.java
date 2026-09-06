@@ -5,32 +5,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.ConsultationApi;
 import com.bca.medisync.data.remote.dto.consultation.ConsultationCreateRequest;
 import com.bca.medisync.databinding.FragmentConsultationBinding;
 
-public class ConsultationFragment extends Fragment {
-
-  private FragmentConsultationBinding binding;
-
+public class ConsultationFragment extends BaseBindingFragment<FragmentConsultationBinding> {
   private String patientName, latestDiagnosis;
   private int appointmentId = -1;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentConsultationBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentConsultationBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentConsultationBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -38,12 +29,6 @@ public class ConsultationFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     loadData();
     setupListeners();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void loadData() {
@@ -78,7 +63,6 @@ public class ConsultationFragment extends Fragment {
           args.putString("diagnosis", consultation.getDiagnosis());
           args.putString("complaint", consultation.getComplaint());
           args.putString("notes", consultation.getNotes());
-
           PrescriptionFragment fragment = new PrescriptionFragment();
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).replaceCurrentFragment(fragment);

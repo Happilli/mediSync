@@ -11,9 +11,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
@@ -39,21 +39,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class ScheduleFragment extends Fragment {
-
-  private FragmentScheduleBinding binding;
+public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBinding> {
 
   private List<Appointment> allAppointments = new ArrayList<>();
   private String selectedDate;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentScheduleBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentScheduleBinding inflateBinding(LayoutInflater inflater, ViewGroup container) {
+    return FragmentScheduleBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -70,12 +63,6 @@ public class ScheduleFragment extends Fragment {
   public void onResume() {
     super.onResume();
     loadRealSchedule();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void setupFab() {
@@ -118,7 +105,6 @@ public class ScheduleFragment extends Fragment {
   private void showAddTimeslotDialog() {
     MaterialDatePicker<Long> datePicker =
         MaterialDatePicker.Builder.datePicker().setTitleText("Select Date").build();
-
     datePicker.addOnPositiveButtonClickListener(
         dateMillis -> {
           MaterialTimePicker timePicker =
@@ -126,7 +112,6 @@ public class ScheduleFragment extends Fragment {
                   .setTimeFormat(TimeFormat.CLOCK_12H)
                   .setTitleText("Select Time")
                   .build();
-
           timePicker.addOnPositiveButtonClickListener(
               v -> {
                 Calendar cal = Calendar.getInstance();
@@ -142,7 +127,6 @@ public class ScheduleFragment extends Fragment {
                       .show();
                   return;
                 }
-
                 String iso =
                     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
                         .format(cal.getTime());

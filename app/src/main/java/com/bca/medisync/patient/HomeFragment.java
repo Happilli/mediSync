@@ -7,9 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.adapter.SimpleListAdapter;
@@ -31,19 +31,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class HomeFragment extends Fragment implements NotificationCenter.Listener {
-  private FragmentHomeBinding binding;
+public class HomeFragment extends BaseBindingFragment<FragmentHomeBinding>
+    implements NotificationCenter.Listener {
 
   public HomeFragment() {}
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentHomeBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentHomeBinding inflateBinding(LayoutInflater inflater, ViewGroup container) {
+    return FragmentHomeBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -66,12 +61,6 @@ public class HomeFragment extends Fragment implements NotificationCenter.Listene
   public void onPause() {
     super.onPause();
     NotificationCenter.get().unregister(this);
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   @Override

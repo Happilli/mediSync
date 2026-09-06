@@ -8,13 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.databinding.FragmentHospitalDetailBinding;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.ViewUtils;
 
-public class HospitalDetailFragment extends Fragment {
-  private FragmentHospitalDetailBinding binding;
+public class HospitalDetailFragment extends BaseBindingFragment<FragmentHospitalDetailBinding> {
   private String hospitalId;
   private String hospitalName;
   private String hospitalPhone;
@@ -22,14 +21,10 @@ public class HospitalDetailFragment extends Fragment {
   private String hospitalAddress;
   private String hospitalDescription;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentHospitalDetailBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentHospitalDetailBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentHospitalDetailBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -37,12 +32,6 @@ public class HospitalDetailFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     loadData();
     setupListeners();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void loadData() {

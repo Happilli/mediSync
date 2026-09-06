@@ -11,7 +11,7 @@ import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -26,23 +26,17 @@ import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.ProfilePicUploader;
 
-public class DoctorProfileFragment extends Fragment {
-
-  private FragmentDoctorProfileBinding binding;
+public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorProfileBinding> {
 
   private SessionManager sessionManager;
   private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
 
   public DoctorProfileFragment() {}
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentDoctorProfileBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentDoctorProfileBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentDoctorProfileBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -67,12 +61,6 @@ public class DoctorProfileFragment extends Fragment {
   public void onResume() {
     super.onResume();
     loadProfile();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void setupListeners() {

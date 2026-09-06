@@ -15,7 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -31,23 +31,17 @@ import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
 import java.util.Calendar;
 
-public class ProfileFragment extends Fragment implements NotificationCenter.Listener {
-
-  private FragmentProfileBinding binding;
+public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
+    implements NotificationCenter.Listener {
 
   private SessionManager sessionManager;
   private ActivityResultLauncher<String> notifPermLauncher;
 
   public ProfileFragment() {}
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentProfileBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentProfileBinding inflateBinding(LayoutInflater inflater, ViewGroup container) {
+    return FragmentProfileBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -94,12 +88,6 @@ public class ProfileFragment extends Fragment implements NotificationCenter.List
   public void onPause() {
     super.onPause();
     NotificationCenter.get().unregister(this);
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   @Override

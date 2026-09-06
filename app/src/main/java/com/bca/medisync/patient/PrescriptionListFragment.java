@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Prescription;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -22,18 +22,13 @@ import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrescriptionListFragment extends Fragment {
-  private FragmentPrescriptionListBinding binding;
+public class PrescriptionListFragment extends BaseBindingFragment<FragmentPrescriptionListBinding> {
   private SimpleListAdapter<Prescription, ItemPrescriptionBinding> adapter;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentPrescriptionListBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentPrescriptionListBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentPrescriptionListBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -41,12 +36,6 @@ public class PrescriptionListFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     initViews();
     loadPrescriptions();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void initViews() {

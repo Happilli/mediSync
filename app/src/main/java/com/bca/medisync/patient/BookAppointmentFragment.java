@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.TimeSlotAdapter;
 import com.bca.medisync.data.model.TimeSlot;
@@ -27,20 +27,15 @@ import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookAppointmentFragment extends Fragment {
-  private FragmentBookAppointmentBinding binding;
+public class BookAppointmentFragment extends BaseBindingFragment<FragmentBookAppointmentBinding> {
   private TimeSlot selectedTimeSlot;
   private String doctorName, doctorSpeciality, doctorInfo, doctorDepartment;
   private int doctorId = -1;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentBookAppointmentBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentBookAppointmentBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentBookAppointmentBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -51,12 +46,6 @@ public class BookAppointmentFragment extends Fragment {
     loadDoctorData();
     setupTimeSlots();
     setupConfirmButton();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void loadDoctorData() {

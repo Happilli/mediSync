@@ -9,7 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -29,8 +29,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class PrescriptionFragment extends Fragment {
-  private FragmentPrescriptionBinding binding;
+public class PrescriptionFragment extends BaseBindingFragment<FragmentPrescriptionBinding> {
   private String patientName, diagnosis, notes;
   private int appointmentId = -1;
   private final List<MedicationTimeCreateRequest> draftDosageTimes = new ArrayList<>();
@@ -38,14 +37,10 @@ public class PrescriptionFragment extends Fragment {
   private final List<String> medicationSummaries = new ArrayList<>();
   private String selectedFollowUpIso;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentPrescriptionBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentPrescriptionBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentPrescriptionBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -54,12 +49,6 @@ public class PrescriptionFragment extends Fragment {
     loadData();
     setupListeners();
     refreshAddedMedicinesUi();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void loadData() {

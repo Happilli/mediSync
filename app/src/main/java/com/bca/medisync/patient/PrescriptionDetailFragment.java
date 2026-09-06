@@ -9,7 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.model.Prescription;
@@ -23,18 +23,14 @@ import com.bca.medisync.util.RoundedListStyler;
 import com.bca.medisync.util.ViewUtils;
 import java.util.List;
 
-public class PrescriptionDetailFragment extends Fragment {
-  private FragmentPrescriptionDetailBinding binding;
+public class PrescriptionDetailFragment
+    extends BaseBindingFragment<FragmentPrescriptionDetailBinding> {
   private int prescriptionId;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentPrescriptionDetailBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentPrescriptionDetailBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentPrescriptionDetailBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -49,12 +45,6 @@ public class PrescriptionDetailFragment extends Fragment {
       return;
     }
     loadDetail();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void loadDetail() {

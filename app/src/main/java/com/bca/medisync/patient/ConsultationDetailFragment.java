@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -14,39 +14,27 @@ import com.bca.medisync.data.remote.api.ConsultationApi;
 import com.bca.medisync.databinding.FragmentConsultationDetailBinding;
 import com.bca.medisync.util.ViewUtils;
 
-public class ConsultationDetailFragment extends Fragment {
-  private FragmentConsultationDetailBinding binding;
+public class ConsultationDetailFragment
+    extends BaseBindingFragment<FragmentConsultationDetailBinding> {
   private int appointmentId = -1;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentConsultationDetailBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentConsultationDetailBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentConsultationDetailBinding.inflate(inflater, container, false);
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     ViewUtils.setupBackNav(this, binding.toolbar);
-
     Bundle args = getArguments();
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
     if (appointmentId == -1) {
       requireActivity().getOnBackPressedDispatcher().onBackPressed();
       return;
     }
-
     loadConsultation();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void loadConsultation() {

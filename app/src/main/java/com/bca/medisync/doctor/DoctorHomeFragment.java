@@ -6,12 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.MainActivity;
 import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
@@ -29,7 +27,6 @@ import com.bca.medisync.patient.NotificationsActivity;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.NotificationBadgeHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,19 +34,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class DoctorHomeFragment extends Fragment implements NotificationCenter.Listener {
-
-  private FragmentDoctorHomeBinding binding;
+public class DoctorHomeFragment extends BaseBindingFragment<FragmentDoctorHomeBinding>
+    implements NotificationCenter.Listener {
   private SessionManager sessionManager;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentDoctorHomeBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentDoctorHomeBinding inflateBinding(LayoutInflater inflater, ViewGroup container) {
+    return FragmentDoctorHomeBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -72,12 +63,6 @@ public class DoctorHomeFragment extends Fragment implements NotificationCenter.L
   public void onPause() {
     super.onPause();
     NotificationCenter.get().unregister(this);
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   @Override

@@ -6,27 +6,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.databinding.FragmentPatientDetailsBinding;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.ViewUtils;
 
-public class PatientDetailsFragment extends Fragment {
-  private FragmentPatientDetailsBinding binding;
+public class PatientDetailsFragment extends BaseBindingFragment<FragmentPatientDetailsBinding> {
   private int patientId = -1;
   private String bookingNotes;
   private String patientName;
   private int appointmentId = -1;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentPatientDetailsBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentPatientDetailsBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentPatientDetailsBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -35,12 +30,6 @@ public class PatientDetailsFragment extends Fragment {
     ViewUtils.setupBackNav(this, binding.toolbar);
     loadData();
     setupListener();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void loadData() {

@@ -6,8 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -22,18 +22,14 @@ import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PatientMedicalHistoryFragment extends Fragment {
-  private FragmentPatientMedicalHistoryBinding binding;
+public class PatientMedicalHistoryFragment
+    extends BaseBindingFragment<FragmentPatientMedicalHistoryBinding> {
   private SimpleListAdapter<MedicalHistoryEntry, ItemMedicalHistoryBinding> adapter;
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentPatientMedicalHistoryBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  protected FragmentPatientMedicalHistoryBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentPatientMedicalHistoryBinding.inflate(inflater, container, false);
   }
 
   @Override
@@ -41,12 +37,6 @@ public class PatientMedicalHistoryFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     initViews();
     loadHistory();
-  }
-
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
-    binding = null;
   }
 
   private void initViews() {
