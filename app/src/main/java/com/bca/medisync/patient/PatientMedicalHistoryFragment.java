@@ -17,6 +17,7 @@ import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPatientMedicalHistoryBinding;
 import com.bca.medisync.databinding.ItemMedicalHistoryBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
@@ -82,6 +83,6 @@ public class PatientMedicalHistoryFragment
           adapter.updateData(entries);
           EmptyState.bind(binding.rvHistory, binding.txtEmpty, entries.isEmpty());
         },
-        ApiCallback.simpleError(requireContext(), "Failed to load history."));
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load history.").build());
   }
 }

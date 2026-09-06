@@ -169,7 +169,7 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
           bindMedications(meds);
           scheduleAllReminders(body);
         },
-        ApiCallback.simpleError(requireContext(), "Failed to load medications."));
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load medications.").build());
   }
 
   private void scheduleAllReminders(List<MedicationResponse> responses) {

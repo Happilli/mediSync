@@ -107,7 +107,7 @@ public class BookAppointmentFragment extends BaseBindingFragment<FragmentBookApp
           }
           bindTimeSlots(slots);
         },
-        ApiCallback.simpleError(requireContext(), "Failed to load available slots."));
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load available slots.").build());
   }
 
   private void setupConfirmButton() {

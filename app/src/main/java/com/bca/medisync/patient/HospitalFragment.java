@@ -15,6 +15,7 @@ import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.hospital.HospitalResponse;
 import com.bca.medisync.databinding.ItemHospitalBinding;
 import com.bca.medisync.databinding.ItemHospitalCarouselBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.SearchSuggestionHelper;
@@ -174,7 +175,7 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
         LoadingHelper.wrapError(
             loadingIndicator,
             scrollContent,
-            ApiCallback.simpleError(requireContext(), "Failed to load hospitals.")));
+            ApiErrorHandler.with(requireContext()).fallback("Failed to load hospitals.").build()));
   }
 
   private void updateCarouselVisibility(String search) {

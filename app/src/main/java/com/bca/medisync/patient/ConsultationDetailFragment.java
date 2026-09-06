@@ -12,6 +12,7 @@ import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.ConsultationApi;
 import com.bca.medisync.databinding.FragmentConsultationDetailBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.ViewUtils;
 
 public class ConsultationDetailFragment
@@ -61,7 +62,7 @@ public class ConsultationDetailFragment
             binding.txtNotes.setText(c.getNotes());
           }
         },
-        ApiCallback.simpleError(requireContext(), "Failed to load consultation."));
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load consultation.").build());
   }
 
   private String safe(String s) {

@@ -142,7 +142,7 @@ public class NotificationsActivity extends AppCompatActivity
           }
           applyFilter();
         },
-        ApiCallback.simpleError(this, "Failed to load notifications"));
+        ApiErrorHandler.with(this).fallback("Failed to load notifications").build());
   }
 
   private void applyFilter() {

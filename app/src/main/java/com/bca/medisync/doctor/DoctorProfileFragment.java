@@ -20,6 +20,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.databinding.FragmentDoctorProfileBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.AuthUtils;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
@@ -27,7 +28,6 @@ import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.ProfilePicUploader;
 
 public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorProfileBinding> {
-
   private SessionManager sessionManager;
   private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
 
@@ -43,7 +43,6 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     sessionManager = new SessionManager(requireContext());
-
     pickMedia =
         registerForActivityResult(
             new ActivityResultContracts.PickVisualMedia(),
@@ -52,7 +51,6 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
                 uploadProfilePic(uri);
               }
             });
-
     setupListeners();
     loadProfile();
   }
@@ -70,7 +68,6 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
                 new PickVisualMediaRequest.Builder()
                     .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
                     .build()));
-
     binding.btnLogoutDoctor.setOnClickListener(
         v -> AuthUtils.logout((androidx.appcompat.app.AppCompatActivity) requireActivity()));
   }
@@ -92,7 +89,6 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
   private void loadProfile() {
     LoadingHelper.show(binding.loadingIndicator);
     binding.scrollContent.setVisibility(View.GONE);
-
     DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
         api.getMyProfile(),
@@ -107,7 +103,7 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
         LoadingHelper.wrapError(
             binding.loadingIndicator,
             binding.scrollContent,
-            ApiCallback.simpleError(requireContext(), "Failed to load profile.")));
+            ApiErrorHandler.with(requireContext()).fallback("Failed to load profile.").build()));
   }
 
   private void loadHospitalName(int hospitalId) {
@@ -127,12 +123,9 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
 
   private void bindProfile(DoctorProfileResponse p) {
     if (binding == null) return;
-
     int years = p.getYears_experience() != null ? p.getYears_experience() : 0;
-
     binding.txtDoctorName.setText("Dr. " + p.getName());
     binding.txtRole.setText(p.getSpeciality());
-
     if (p.is_verified()) {
       binding.txtRegistrationBadge.setText("Verified");
       binding.txtRegistrationBadge.setTextColor(
@@ -146,19 +139,15 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
       binding.txtRegistrationBadge.setBackgroundColor(
           requireContext().getColor(R.color.error_container));
     }
-
     if (p.getBio() != null && !p.getBio().trim().isEmpty()) {
       binding.txtBio.setVisibility(View.VISIBLE);
       binding.txtBio.setText(p.getBio());
     } else {
       binding.txtBio.setVisibility(View.GONE);
     }
-
     bindProfilePic(p.getProfile_pic_url());
-
     binding.statPatientsMonthValue.setText(String.valueOf(p.getPatients_this_month()));
     binding.statPatientsTotalValue.setText(String.valueOf(p.getTotal_patients()));
-
     InfoRowBinder.bind(
         new InfoRowBinder.Row(
             binding.rowSpecialization.getRoot(),

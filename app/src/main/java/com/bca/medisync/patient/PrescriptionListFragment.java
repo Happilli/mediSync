@@ -17,6 +17,7 @@ import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPrescriptionListBinding;
 import com.bca.medisync.databinding.ItemPrescriptionBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class PrescriptionListFragment extends BaseBindingFragment<FragmentPrescr
                 showEmpty(enriched.isEmpty());
               });
         },
-        ApiCallback.simpleError(requireContext(), "Failed to load prescriptions."));
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load prescriptions.").build());
   }
 
   private void showEmpty(boolean empty) {

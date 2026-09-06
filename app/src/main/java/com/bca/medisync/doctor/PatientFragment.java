@@ -14,6 +14,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.databinding.ItemPatientBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.SearchSuggestionHelper;
 import com.bca.medisync.util.SearchableListFragment;
@@ -103,7 +104,7 @@ public class PatientFragment extends SearchableListFragment<Patient> {
         api.getTreatedPatients(query),
         this,
         this::bindPatients,
-        ApiCallback.simpleError(requireContext(), "Failed to load patients."));
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load patients.").build());
   }
 
   private void bindPatients(List<PatientPublicResponse> patients) {

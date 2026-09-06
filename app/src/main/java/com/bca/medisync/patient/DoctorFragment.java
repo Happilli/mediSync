@@ -21,6 +21,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.HospitalApi;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 import com.bca.medisync.databinding.ItemDoctorRowBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.SearchSuggestionHelper;
 import com.bca.medisync.util.SearchableListFragment;
@@ -124,7 +125,7 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
           for (DoctorResponse r : body) doctors.add(mapToDoctor(r));
           adapter.submitList(doctors);
         },
-        ApiCallback.simpleError(requireContext(), "Failed to load doctors."));
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load doctors.").build());
   }
 
   private void bindDoctorRow(ItemDoctorRowBinding binding, Doctor doctor) {

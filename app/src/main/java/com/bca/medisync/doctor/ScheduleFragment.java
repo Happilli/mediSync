@@ -188,7 +188,7 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
                 filterByDate(selectedDate);
               });
         },
-        ApiCallback.simpleError(requireContext(), "Failed to load schedule."));
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load schedule.").build());
   }
 
   private void openPatientDetail(Appointment appointment, int appointmentId) {

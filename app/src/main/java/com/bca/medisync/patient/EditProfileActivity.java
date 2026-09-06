@@ -16,6 +16,7 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
 import com.bca.medisync.databinding.ActivityEditProfileBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.ProfilePicUploader;
 import com.bca.medisync.util.ViewUtils;
@@ -72,7 +73,7 @@ public class EditProfileActivity extends AppCompatActivity {
           binding.etEmergencyContact.setText(p.getEmergency_contact());
           bindProfilePic(p.getProfile_pic_url());
         },
-        ApiCallback.simpleError(this, "Failed to load current profile."));
+        ApiErrorHandler.with(this).fallback("Failed to load current profile.").build());
   }
 
   private void uploadProfilePic(Uri uri) {
@@ -121,7 +122,7 @@ public class EditProfileActivity extends AppCompatActivity {
         },
         (code, msg) -> {
           binding.btnSave.setEnabled(true);
-          ApiCallback.simpleError(this, "Failed to update profile.").run(code, msg);
+          ApiErrorHandler.with(this).fallback("Failed to update profile.").build().run(code, msg);
         });
   }
 }
