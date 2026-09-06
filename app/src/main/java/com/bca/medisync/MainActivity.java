@@ -3,14 +3,11 @@ package com.bca.medisync;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.bca.medisync.data.local.SessionManager;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
@@ -24,10 +21,10 @@ import com.bca.medisync.databinding.ActivityLoginBinding;
 import com.bca.medisync.doctor.DoctorTabActivity;
 import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.patient.RegisterActivity;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.LoadingHelper;
 
 public class MainActivity extends AppCompatActivity {
-
   private ActivityLoginBinding binding;
   private SessionManager sessionManager;
 
@@ -35,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     sessionManager = new SessionManager(this);
-
     if (sessionManager.isLoggedIn()) {
       Intent intent;
       if ("doctor".equalsIgnoreCase(sessionManager.getRole())) {
@@ -52,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
     EdgeToEdge.enable(this);
     binding = ActivityLoginBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
-
     ViewCompat.setOnApplyWindowInsetsListener(
         binding.mainStuff,
         (v, i) -> {
@@ -60,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
           return i;
         });
-
     sessionManager = new SessionManager(this);
     binding.GoToRegister.setText("No Account?\nRegister");
     binding.GoToRegister.setOnClickListener(
@@ -92,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
         binding.etEmail.getText() != null ? binding.etEmail.getText().toString().trim() : "";
     String password =
         binding.etPassword.getText() != null ? binding.etPassword.getText().toString().trim() : "";
-
     if (email.isEmpty()) {
       binding.etEmail.setError("Email is required");
       return;
@@ -101,10 +94,8 @@ public class MainActivity extends AppCompatActivity {
       binding.etPassword.setError("Password is required");
       return;
     }
-
     binding.btnLogin.setEnabled(false);
     LoadingHelper.show(binding.loadingIndicator);
-
     AuthApi authApi = ApiClient.api(AuthApi.class);
     ApiCallback.handle(
         authApi.login(new LoginRequest(email, password)),
@@ -132,16 +123,11 @@ public class MainActivity extends AppCompatActivity {
               binding.loadingIndicator,
               () -> {
                 binding.btnLogin.setEnabled(true);
-                if (code == -1) {
-                  Toast.makeText(MainActivity.this, "network error: " + msg, Toast.LENGTH_LONG)
-                      .show();
-                } else {
-                  Toast.makeText(
-                          MainActivity.this,
-                          "login failed: invalid credentials",
-                          Toast.LENGTH_SHORT)
-                      .show();
-                }
+                ApiErrorHandler.with(MainActivity.this)
+                    .on(401, "Login failed: invalid credentials")
+                    .fallback("Login failed: invalid credentials")
+                    .build()
+                    .run(code, msg);
               });
         });
   }

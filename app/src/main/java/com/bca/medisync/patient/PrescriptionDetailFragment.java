@@ -19,6 +19,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPrescriptionDetailBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.RoundedListStyler;
 import com.bca.medisync.util.ViewUtils;
 import java.util.List;
@@ -56,14 +57,7 @@ public class PrescriptionDetailFragment
           bind(PrescriptionEnricher.mapToPrescription(body, null));
           fetchDoctorName(body.getDoctor_id());
         },
-        (code, msg) -> {
-          if (code == -1) {
-            Toast.makeText(requireContext(), "Network error: " + msg, Toast.LENGTH_LONG).show();
-          } else {
-            Toast.makeText(requireContext(), "Failed to load prescription", Toast.LENGTH_SHORT)
-                .show();
-          }
-        });
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load prescription").build());
   }
 
   private void fetchDoctorName(int doctorId) {

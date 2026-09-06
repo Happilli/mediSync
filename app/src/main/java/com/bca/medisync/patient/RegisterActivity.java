@@ -14,11 +14,11 @@ import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.register.PatientRegisterRequest;
 import com.bca.medisync.databinding.ActivityRegisterBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.ViewUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.textfield.TextInputEditText;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -229,17 +229,10 @@ public class RegisterActivity extends AppCompatActivity {
                 binding.loadingIndicator,
                 () -> {
                   binding.btnRegister.setEnabled(true);
-                  if (code == -1) {
-                    Toast.makeText(
-                            RegisterActivity.this, "Network error: " + msg, Toast.LENGTH_LONG)
-                        .show();
-                  } else {
-                    Toast.makeText(
-                            RegisterActivity.this,
-                            "Registration failed. Email may already be in use.",
-                            Toast.LENGTH_LONG)
-                        .show();
-                  }
+                  ApiErrorHandler.with(RegisterActivity.this)
+                      .fallback("Registration failed. Email may already be in use.")
+                      .build()
+                      .run(code, msg);
                 }));
   }
 }

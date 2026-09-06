@@ -19,6 +19,7 @@ import com.bca.medisync.data.remote.api.NotificationApi;
 import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.databinding.ActivityNotificationsBinding;
 import com.bca.medisync.databinding.ItemNotificationBinding;
+import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
 import java.util.ArrayList;
@@ -167,10 +168,7 @@ public class NotificationsActivity extends AppCompatActivity
     ApiCallback.handle(
         api.markAllRead(),
         body -> loadNotifications(),
-        (code, msg) ->
-            android.widget.Toast.makeText(
-                    this, "Network error: " + msg, android.widget.Toast.LENGTH_LONG)
-                .show());
+        ApiErrorHandler.with(this).fallback("Failed to mark notifications as read.").build());
   }
 
   private Notification mapToNotification(NotificationResponse r) {
