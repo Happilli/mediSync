@@ -41,8 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="?attr/colorPrimaryContainer"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp">
+                style="@style/Widget.MediSync.Card.Flat.Large">
 
                 <LinearLayout
                     android:layout_width="match_parent"

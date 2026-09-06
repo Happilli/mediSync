@@ -7,11 +7,10 @@
     app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge">
 
     <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.MediSync.Card.Flat.Large"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cardBackgroundColor="?attr/colorSurfaceContainer"
-        app:cardCornerRadius="28dp"
-        app:cardElevation="0dp">
+        app:cardBackgroundColor="?attr/colorSurfaceContainer">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -82,7 +81,6 @@
                 android:insetTop="0dp"
                 android:insetRight="0dp"
                 android:insetBottom="0dp" />
-
         </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
 </com.google.android.material.carousel.MaskableFrameLayout>

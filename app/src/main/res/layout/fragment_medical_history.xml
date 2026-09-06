@@ -58,12 +58,11 @@
                 android:textStyle="bold" />
 
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.MediSync.Card.Flat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="?attr/colorPrimaryContainer"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp">
+                app:cardBackgroundColor="?attr/colorPrimaryContainer">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -146,7 +145,6 @@
                 android:layout_marginBottom="24dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false" />
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -166,5 +164,4 @@
         app:icon="@drawable/stethoscope"
         app:iconSize="20dp"
         app:iconTint="?attr/colorOnPrimary" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

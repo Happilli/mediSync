@@ -55,7 +55,6 @@
                     android:contentDescription="notifications"
                     app:icon="@drawable/notification"
                     app:iconSize="28dp" />
-
             </LinearLayout>
         </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
@@ -75,6 +74,7 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardTodaySchedule"
+                style="@style/Widget.MediSync.Card.Flat.Large"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
@@ -83,8 +83,6 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp"
                 app:strokeColor="?attr/colorOutlineVariant"
                 app:strokeWidth="1dp">
 
@@ -142,7 +140,6 @@
                         android:contentDescription="null"
                         android:src="@drawable/arrow"
                         app:tint="?attr/colorOnSurfaceVariant" />
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -263,7 +260,6 @@
                                 android:textColor="?attr/colorOnSecondaryContainer" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
-
                 </LinearLayout>
 
                 <com.google.android.material.card.MaterialCardView
@@ -376,7 +372,6 @@
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
                         </LinearLayout>
-
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -414,7 +409,6 @@
                     android:nestedScrollingEnabled="false"
                     android:overScrollMode="never"
                     app:layout_constraintTop_toBottomOf="@id/lblTodayAppointments" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
