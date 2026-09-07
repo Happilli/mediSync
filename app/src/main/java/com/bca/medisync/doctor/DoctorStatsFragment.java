@@ -9,10 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.DrawableRes;
 import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -22,7 +24,6 @@ import com.bca.medisync.data.remote.dto.doctor.DoctorStatsResponse;
 import com.bca.medisync.databinding.FragmentDoctorStatsBinding;
 import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.LoadingHelper;
-import com.bca.medisync.util.MorphShapeView;
 import com.bca.medisync.util.StatsChartHelper;
 import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
@@ -33,23 +34,22 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
   private static class HeroStat {
     final String value;
     final String label;
-    final float[] shapeData;
+    @DrawableRes final int shapeRes;
 
-    HeroStat(String value, String label, float[] shapeData) {
+    HeroStat(String value, String label, @DrawableRes int shapeRes) {
       this.value = value;
       this.label = label;
-      this.shapeData = shapeData;
+      this.shapeRes = shapeRes;
     }
   }
 
   private final List<HeroStat> heroStats = new ArrayList<>();
   private int heroStatIndex = 0;
-  private MorphShapeView heroShape;
+  private ImageView heroShape;
   private TextView heroValue;
   private TextView heroLabel;
   private final Handler heroHandler = new Handler(Looper.getMainLooper());
-  private Runnable heroMorphRunnable;
-  private boolean heroMorphing = false;
+  private final Runnable heroSwapRunnable = this::swapHeroShape;
 
   @Override
   protected FragmentDoctorStatsBinding inflateBinding(
@@ -68,19 +68,18 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
   @Override
   public void onDestroyView() {
     heroHandler.removeCallbacksAndMessages(null);
-    if (heroShape != null) heroShape.destroy();
     super.onDestroyView();
   }
 
   private void setupHeroShape() {
     binding.heroShapeContainer.removeAllViews();
 
-    heroShape = new MorphShapeView(requireContext());
+    heroShape = new ImageView(requireContext());
     heroShape.setLayoutParams(
         new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-    heroShape.setShapeColor(requireContext().getColor(R.color.primary_container));
-    heroShape.setShapeImmediate(MorphShapeView.Shapes.ROUND);
+    heroShape.setImageResource(R.drawable.cookie9sided);
+    heroShape.setColorFilter(requireContext().getColor(R.color.primary_container));
 
     LinearLayout textCol = new LinearLayout(requireContext());
     textCol.setOrientation(LinearLayout.VERTICAL);
@@ -117,27 +116,19 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     binding.heroShapeContainer.addView(textCol);
   }
 
-  private void startHeroMorphLoop() {
+  private void startHeroLoop() {
     heroHandler.removeCallbacksAndMessages(null);
-    heroMorphRunnable = this::morphHeroShape;
-    heroHandler.postDelayed(heroMorphRunnable, 2600);
+    heroHandler.postDelayed(heroSwapRunnable, 2600);
   }
 
-  private void morphHeroShape() {
-    if (binding == null || heroShape == null || heroStats.isEmpty() || heroMorphing) return;
-    heroMorphing = true;
+  private void swapHeroShape() {
+    if (binding == null || heroShape == null || heroStats.isEmpty()) return;
     heroStatIndex = (heroStatIndex + 1) % heroStats.size();
     HeroStat next = heroStats.get(heroStatIndex);
     heroValue.setText(next.value);
     heroLabel.setText(next.label);
-    heroShape.morphTo(
-        next.shapeData,
-        100,
-        () -> {
-          heroMorphing = false;
-          if (binding == null) return;
-          heroHandler.postDelayed(heroMorphRunnable, 100);
-        });
+    heroShape.setImageResource(next.shapeRes);
+    heroHandler.postDelayed(heroSwapRunnable, 2600);
   }
 
   private void loadStats() {
@@ -162,44 +153,32 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
         new HeroStat(
             String.valueOf(stats.getTotal_appointments()),
             "Total Appointments",
-            MorphShapeView.Shapes.ROUND));
+            R.drawable.cookie9sided));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getTotal_patients()),
-            "Total Patients",
-            MorphShapeView.Shapes.CLOVER));
+            String.valueOf(stats.getTotal_patients()), "Total Patients", R.drawable.clover4leaf));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getPatients_this_month()),
-            "This Month",
-            MorphShapeView.Shapes.BURST));
+            String.valueOf(stats.getPatients_this_month()), "This Month", R.drawable.pill));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getUpcoming_appointments()),
-            "Upcoming",
-            MorphShapeView.Shapes.SOFTBOOM));
+            String.valueOf(stats.getUpcoming_appointments()), "Upcoming", R.drawable.cookie6sided));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getTotal_consultations()),
-            "Consultations",
-            MorphShapeView.Shapes.GEM));
+            String.valueOf(stats.getTotal_consultations()), "Consultations", R.drawable.gem));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getTotal_prescriptions()),
-            "Prescriptions",
-            MorphShapeView.Shapes.PENTAGON));
+            String.valueOf(stats.getTotal_prescriptions()), "Prescriptions", R.drawable.pentagon));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getUpcoming_followups()),
-            "Follow-ups",
-            MorphShapeView.Shapes.FLOWER));
+            String.valueOf(stats.getUpcoming_followups()), "Follow-ups", R.drawable.ghostish));
 
     heroStatIndex = 0;
     HeroStat first = heroStats.get(0);
-    heroShape.setShapeImmediate(first.shapeData);
+    heroShape.setImageResource(first.shapeRes);
     heroValue.setText(first.value);
     heroLabel.setText(first.label);
-    startHeroMorphLoop();
+    startHeroLoop();
 
     StatsChartHelper.bindStatusBreakdown(
         binding.statusBreakdownContainer,
