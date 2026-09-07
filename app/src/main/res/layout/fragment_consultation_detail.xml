@@ -70,7 +70,6 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.MediSync.Card.Flat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp">
@@ -134,7 +133,6 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.MediSync.Card.Flat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp">
@@ -167,7 +165,6 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardNotes"
-                style="@style/Widget.MediSync.Card.Flat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 

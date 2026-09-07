@@ -23,6 +23,7 @@ import com.bca.medisync.data.remote.dto.notification.NotificationResponse;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.databinding.FragmentHomeBinding;
 import com.bca.medisync.databinding.ItemDashboardBinding;
+import com.bca.medisync.doctor.MedicalHistoryFragment;
 import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.NotificationBadgeHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -187,8 +188,11 @@ public class HomeFragment extends BaseBindingFragment<FragmentHomeBinding>
                   goToTab(R.id.nav_profile);
                   break;
                 case 4:
-                  ((MainTabActivity) requireActivity())
-                      .pushFragment(new PatientMedicalHistoryFragment());
+                  MedicalHistoryFragment historyFragment = new MedicalHistoryFragment();
+                  Bundle args = new Bundle();
+                  args.putBoolean("is_doctor_view", false);
+                  historyFragment.setArguments(args);
+                  ((MainTabActivity) requireActivity()).pushFragment(historyFragment);
                   break;
                 case 5:
                   ((MainTabActivity) requireActivity()).pushFragment(new HospitalFragment());

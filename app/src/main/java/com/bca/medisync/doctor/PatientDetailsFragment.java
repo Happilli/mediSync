@@ -89,6 +89,7 @@ public class PatientDetailsFragment extends BaseBindingFragment<FragmentPatientD
     binding.fabHistory.setOnClickListener(
         v -> {
           Bundle args = new Bundle();
+          args.putBoolean("is_doctor_view", true);
           args.putString("patient_name", patientName);
           args.putInt("patient_id", patientId);
           args.putInt("appointment_id", appointmentId);

@@ -10,4 +10,5 @@ public class MedicalHistoryEntry {
   private final String title;
   private final String description;
   private final Integer appointmentId;
+  private final int doctorId;
 }

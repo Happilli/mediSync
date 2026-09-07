@@ -13,21 +13,27 @@ import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.MedicalHistoryEntry;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
+import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.MedicalHistoryApi;
 import com.bca.medisync.data.remote.dto.medicalhistory.MedicalHistoryResponse;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentMedicalHistoryBinding;
 import com.bca.medisync.databinding.ItemMedicalHistoryBinding;
+import com.bca.medisync.patient.ConsultationDetailFragment;
+import com.bca.medisync.patient.MainTabActivity;
 import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
+import retrofit2.Call;
 
 public class MedicalHistoryFragment extends BaseBindingFragment<FragmentMedicalHistoryBinding> {
   private String patientName;
   private int patientId = -1;
   private int appointmentId = -1;
+  private boolean isDoctorView;
+  private Integer currentDoctorId = null;
   private SimpleListAdapter<MedicalHistoryEntry, ItemMedicalHistoryBinding> adapter;
 
   public MedicalHistoryFragment() {}
@@ -58,31 +64,67 @@ public class MedicalHistoryFragment extends BaseBindingFragment<FragmentMedicalH
               rowBinding.txtTitle.setText(entry.getTitle());
               rowBinding.txtDescription.setText(entry.getDescription());
             },
-            null);
+            entry -> {
+              if (entry.getAppointmentId() == null) return;
+              if (isDoctorView
+                  && (currentDoctorId == null || entry.getDoctorId() != currentDoctorId)) {
+                Toast.makeText(requireContext(), "Recorded by another doctor.", Toast.LENGTH_SHORT)
+                    .show();
+                return;
+              }
+              Bundle args = new Bundle();
+              args.putInt("appointment_id", entry.getAppointmentId());
+              ConsultationDetailFragment fragment = new ConsultationDetailFragment();
+              fragment.setArguments(args);
+              if (isDoctorView) {
+                ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
+              } else {
+                ((MainTabActivity) requireActivity()).pushFragment(fragment);
+              }
+            });
     binding.rvTimeline.setAdapter(adapter);
     adapter.setRoundedList(true);
   }
 
   private void loadData() {
     Bundle args = getArguments();
+    isDoctorView = args != null && args.getBoolean("is_doctor_view", false);
     patientName = args != null ? args.getString("patient_name") : null;
     patientId = args != null ? args.getInt("patient_id", -1) : -1;
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
-    binding.tvHeader.setText(
-        patientName != null ? patientName + "\nOverview" : "Patient\nOverview");
-    binding.fabConsult.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
-    if (patientId == -1) {
-      Toast.makeText(requireContext(), "Missing patient reference.", Toast.LENGTH_SHORT).show();
-      requireActivity().getOnBackPressedDispatcher().onBackPressed();
-      return;
+
+    if (isDoctorView) {
+      binding.tvHeader.setVisibility(View.VISIBLE);
+      binding.tvHeader.setText(
+          patientName != null ? patientName + "\nOverview" : "Patient\nOverview");
+      binding.fabConsult.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
+      binding.cardLatestRecord.setVisibility(View.VISIBLE);
+      if (patientId == -1) {
+        Toast.makeText(requireContext(), "Missing patient reference.", Toast.LENGTH_SHORT).show();
+        requireActivity().getOnBackPressedDispatcher().onBackPressed();
+        return;
+      }
+      fetchCurrentDoctorId();
+    } else {
+      binding.tvHeader.setVisibility(View.GONE);
+      binding.fabConsult.setVisibility(View.GONE);
+      binding.cardLatestRecord.setVisibility(View.GONE);
     }
-    loadRealHistory();
+    loadHistory();
   }
 
-  private void loadRealHistory() {
-    MedicalHistoryApi api = ApiClient.api(MedicalHistoryApi.class);
+  private void fetchCurrentDoctorId() {
+    DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
-        api.getPatientHistory(patientId),
+        api.getMyProfile(), this, profile -> currentDoctorId = profile.getId(), (code, msg) -> {});
+  }
+
+  private void loadHistory() {
+    MedicalHistoryApi api = ApiClient.api(MedicalHistoryApi.class);
+    Call<List<MedicalHistoryResponse>> call =
+        isDoctorView ? api.getPatientHistory(patientId) : api.getMyMedicalHistory();
+    ApiCallback.handle(
+        call,
         this,
         body -> {
           List<MedicalHistoryEntry> entries = new ArrayList<>();
@@ -92,18 +134,21 @@ public class MedicalHistoryFragment extends BaseBindingFragment<FragmentMedicalH
                     PrescriptionEnricher.formatDate(r.getDate()),
                     r.getTitle(),
                     r.getDescription(),
-                    r.getAppointment_id()));
+                    r.getAppointment_id(),
+                    r.getDoctor_id()));
           }
-          binding.tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
-          binding.tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
+          if (isDoctorView) {
+            binding.tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
+            binding.tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
+          }
           bindTimeline(entries);
         },
-        (code, msg) ->
-            ApiErrorHandler.with(requireContext())
+        isDoctorView
+            ? ApiErrorHandler.with(requireContext())
                 .on(403, "You can only view history for patients you've treated.")
                 .fallback("Failed to load history")
                 .build()
-                .run(code, msg));
+            : ApiErrorHandler.with(requireContext()).fallback("Failed to load history.").build());
   }
 
   private void bindTimeline(List<MedicalHistoryEntry> timeline) {

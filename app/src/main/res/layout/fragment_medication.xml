@@ -21,11 +21,9 @@
             android:paddingTop="20dp">
 
             <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.MediSync.Card.Flat.Large"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="28dp"
-                app:cardBackgroundColor="?attr/colorSurfaceContainerLow">
+                android:layout_marginBottom="28dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -99,11 +97,9 @@
                                 android:max="100"
                                 android:progress="0"
                                 app:indicatorColor="?attr/colorPrimary"
-                                app:indicatorSize="88dp"
+                                app:indicatorSize="100dp"
                                 app:trackColor="?attr/colorSurfaceContainerHigh"
-                                app:trackThickness="4dp"
-                                app:waveAmplitude="4dp"
-                                app:wavelengthDeterminate="20dp" />
+                                app:trackThickness="3dp" />
 
                             <TextView
                                 android:id="@+id/tvAdherenceCount"
