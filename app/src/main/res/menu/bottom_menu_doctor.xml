@@ -8,6 +8,13 @@
         android:id="@+id/nav_doctor_schedule"
         android:icon="@drawable/ic_nav_calendar"
         android:title="Schedule" />
+
+    <item
+        android:id="@+id/nav_spacer"
+        android:enabled="false"
+        android:icon="@android:color/transparent"
+        android:title="" />
+
     <item
         android:id="@+id/nav_doctor_patients"
         android:icon="@drawable/stethoscope"

@@ -3,6 +3,7 @@ package com.bca.medisync.patient;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -30,6 +31,8 @@ import com.bca.medisync.util.AuthUtils;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
+import com.bca.medisync.util.ViewUtils;
+
 import java.util.Calendar;
 
 public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
@@ -157,47 +160,49 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
 
   private void bindProfilePic(String profilePicUrl) {
     if (binding == null) return;
-    ImageLoader.loadProfilePic(this, binding.imgProfile, profilePicUrl);
+    ImageLoader.loadProfilePicShaped(
+        this, binding.imgProfile, profilePicUrl, R.drawable.cookie12sided);
   }
 
   private void bindVerificationBadge(
       boolean isVerified, String citizenshipNumber, String rejectionReason) {
     if (isVerified) {
-      binding.txtVerifiedBadge.setText("Verified");
-      binding.txtVerifiedBadge.setTextColor(
-          requireContext().getColor(R.color.on_tertiary_container));
-      binding.cardVerifiedBadge.setCardBackgroundColor(
-          requireContext().getColor(R.color.tertiary_container));
-      binding.cardVerifiedBadge.setOnClickListener(null);
-      binding.cardVerifiedBadge.setClickable(false);
+      setBadge("Verified", R.drawable.verified_on, R.color.tertiary, null);
     } else if (citizenshipNumber != null) {
-      binding.txtVerifiedBadge.setText("Pending Review");
-      binding.txtVerifiedBadge.setTextColor(
-          requireContext().getColor(R.color.on_secondary_container));
-      binding.cardVerifiedBadge.setCardBackgroundColor(
-          requireContext().getColor(R.color.secondary_container));
-      binding.cardVerifiedBadge.setOnClickListener(null);
-      binding.cardVerifiedBadge.setClickable(false);
+      setBadge("Pending Review", R.drawable.verified_off, R.color.secondary, null);
     } else if (rejectionReason != null) {
-      binding.txtVerifiedBadge.setText("Rejected - Tap to resubmit");
-      binding.txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_error_container));
-      binding.cardVerifiedBadge.setCardBackgroundColor(
-          requireContext().getColor(R.color.error_container));
-      binding.cardVerifiedBadge.setClickable(true);
-      binding.cardVerifiedBadge.setOnClickListener(
+      setBadge(
+          "Rejected - Tap to resubmit",
+          R.drawable.verified_off,
+          R.color.error,
           v -> {
             Toast.makeText(requireContext(), rejectionReason, Toast.LENGTH_LONG).show();
             startActivity(new Intent(requireContext(), VerificationActivity.class));
           });
     } else {
-      binding.txtVerifiedBadge.setText("Not Verified");
-      binding.txtVerifiedBadge.setTextColor(requireContext().getColor(R.color.on_error_container));
-      binding.cardVerifiedBadge.setCardBackgroundColor(
-          requireContext().getColor(R.color.error_container));
-      binding.cardVerifiedBadge.setClickable(true);
-      binding.cardVerifiedBadge.setOnClickListener(
+      setBadge(
+          "Not Verified - Tap to verify",
+          R.drawable.verified_off,
+          R.color.error,
           v -> startActivity(new Intent(requireContext(), VerificationActivity.class)));
     }
+  }
+
+  private void setBadge(String text, int iconRes, int colorRes, View.OnClickListener listener) {
+    binding.txtVerifiedBadge.setText(text);
+    int color = requireContext().getColor(colorRes);
+    binding.txtVerifiedBadge.setTextColor(color);
+
+    Drawable icon = ContextCompat.getDrawable(requireContext(), iconRes);
+    if (icon != null) {
+      icon = icon.mutate();
+      icon.setTint(color);
+    }
+    binding.txtVerifiedBadge.setCompoundDrawablesRelativeWithIntrinsicBounds(
+        icon, null, null, null);
+    binding.txtVerifiedBadge.setCompoundDrawablePadding(ViewUtils.dp(requireContext(), 6));
+    binding.txtVerifiedBadge.setClickable(listener != null);
+    binding.txtVerifiedBadge.setOnClickListener(listener);
   }
 
   private String calculateAge(String dob) {

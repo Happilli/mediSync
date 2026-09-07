@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingBottom="40dp"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -26,78 +26,57 @@
                 android:layout_margin="16dp"
                 app:cardBackgroundColor="?attr/colorPrimaryContainer">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
                     android:padding="16dp">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnEditProfile"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_marginStart="8dp"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="0dp"
-                        android:text="Edit Profile"
-                        android:textAllCaps="false"
-                        android:textColor="?attr/colorOnSecondaryContainer"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        app:backgroundTint="?attr/colorSecondaryContainer"
-                        app:cornerRadius="14dp"
-                        app:elevation="0dp"
-                        app:layout_constraintBottom_toBottomOf="@id/cardVerifiedBadge"
-                        app:layout_constraintStart_toEndOf="@id/cardVerifiedBadge"
-                        app:layout_constraintTop_toTopOf="@id/cardVerifiedBadge" />
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/imgProfile"
-                        android:layout_width="88dp"
-                        android:layout_height="88dp"
-                        android:background="?attr/colorSecondaryContainer"
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
                         android:contentDescription="profile photo"
                         android:scaleType="centerCrop"
                         android:src="@drawable/ic_nav_profile"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MediSync.Tile" />
 
-                    <TextView
-                        android:id="@+id/txtName"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="8dp"
-                        android:textColor="?attr/colorOnPrimaryContainer"
-                        android:textSize="22sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/imgProfile"
-                        app:layout_constraintTop_toTopOf="@id/imgProfile" />
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardVerifiedBadge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="8dp"
-                        app:cardCornerRadius="14dp"
-                        app:cardElevation="0dp"
-                        app:layout_constraintStart_toStartOf="@id/txtName"
-                        app:layout_constraintTop_toBottomOf="@id/txtName">
+                        <TextView
+                            android:id="@+id/txtName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/txtVerifiedBadge"
                             android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:paddingHorizontal="14dp"
-                            android:paddingVertical="6dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
                             android:textSize="12sp"
                             android:textStyle="bold" />
-                    </com.google.android.material.card.MaterialCardView>
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnEditProfile"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Edit"
+                        android:textAllCaps="false"
+                        android:textColor="?attr/colorOnSecondaryContainer"
+                        app:backgroundTint="?attr/colorSecondaryContainer" />
+
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
@@ -319,5 +298,5 @@
         android:layout_width="wrap_content"
         android:layout_height="64dp"
         android:layout_gravity="center"
-        android:visibility="visible" />
+        android:visibility="gone" />
 </FrameLayout>

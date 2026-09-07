@@ -1,12 +1,10 @@
 package com.bca.medisync.doctor;
 
 import androidx.fragment.app.Fragment;
-
 import com.bca.medisync.BaseTabActivity;
 import com.bca.medisync.R;
 
 public class DoctorTabActivity extends BaseTabActivity {
-
   @Override
   protected int getLayoutRes() {
     return R.layout.activity_doctor_tab;
@@ -25,6 +23,16 @@ public class DoctorTabActivity extends BaseTabActivity {
   @Override
   protected int getDefaultTabId() {
     return R.id.nav_doctor_home;
+  }
+
+  @Override
+  protected int getFabId() {
+    return R.id.fabDoctorStats;
+  }
+
+  @Override
+  protected void onFabClicked() {
+    pushFragment(new DoctorStatsFragment());
   }
 
   @Override

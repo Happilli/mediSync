@@ -3,6 +3,7 @@ package com.bca.medisync.data.remote.api;
 import com.bca.medisync.data.remote.dto.TimeSlotResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
+import com.bca.medisync.data.remote.dto.doctor.DoctorStatsResponse;
 import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
 
 import java.util.List;
@@ -42,4 +43,7 @@ public interface DoctorApi {
   @Multipart
   @PATCH("/api/v1/doctors/me/profile-pic")
   Call<DoctorResponse> updateProfilePic(@Part MultipartBody.Part file);
+
+  @GET("/api/v1/doctors/me/stats")
+  Call<DoctorStatsResponse> getMyStats();
 }

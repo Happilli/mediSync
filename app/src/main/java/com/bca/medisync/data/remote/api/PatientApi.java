@@ -2,6 +2,7 @@ package com.bca.medisync.data.remote.api;
 
 import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientResponse;
+import com.bca.medisync.data.remote.dto.patient.PatientStatsResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientUpdateRequest;
 import com.bca.medisync.patient.PatientSecurityAnswerUpdateRequest;
 
@@ -47,4 +48,7 @@ public interface PatientApi {
 
   @GET("/api/v1/patients/doctor/{patient_id}")
   Call<PatientPublicResponse> getPatientDetailForDoctor(@Path("patient_id") int patientId);
+
+  @GET("/api/v1/patients/me/stats")
+  Call<PatientStatsResponse> getMyStats();
 }

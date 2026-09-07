@@ -28,4 +28,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_menu_doctor" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabDoctorStats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Practice stats"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavDoctor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bottomNavDoctor"
+        app:srcCompat="@drawable/stats" />
 </androidx.constraintlayout.widget.ConstraintLayout>

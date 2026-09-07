@@ -3,6 +3,7 @@ package com.bca.medisync.util;
 import android.content.Context;
 import android.widget.ImageView;
 
+import androidx.annotation.DrawableRes;
 import androidx.fragment.app.Fragment;
 
 import com.bca.medisync.R;
@@ -62,5 +63,17 @@ public class ImageLoader {
 
   public static void loadDoctorImage(Fragment fragment, ImageView imageView, String fullUrl) {
     load(fragment, imageView, fullUrl, R.drawable.stethoscope);
+  }
+
+  public static void loadProfilePicShaped(
+      Fragment fragment, ImageView imageView, String path, @DrawableRes int maskRes) {
+    String fullUrl = ApiClient.mediaUrl(path);
+    RequestBuilder<android.graphics.drawable.Drawable> request =
+        Glide.with(fragment)
+            .load(fullUrl)
+            .placeholder(R.drawable.ic_nav_profile)
+            .error(R.drawable.ic_nav_profile)
+            .transform(new ShapeMaskTransformation(fragment.requireContext(), maskRes));
+    request.into(imageView);
   }
 }

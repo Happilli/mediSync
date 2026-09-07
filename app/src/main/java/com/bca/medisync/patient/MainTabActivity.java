@@ -3,7 +3,6 @@ package com.bca.medisync.patient;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
-
 import com.bca.medisync.BaseTabActivity;
 import com.bca.medisync.R;
 
@@ -59,10 +58,20 @@ public class MainTabActivity extends BaseTabActivity {
   }
 
   @Override
+  protected int getFabId() {
+    return R.id.fabCenter;
+  }
+
+  @Override
+  protected void onFabClicked() {
+    pushFragment(new PatientStatsFragment());
+  }
+
+  @Override
   protected void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
     setIntent(intent);
-   handleDeepLink(intent);
+    handleDeepLink(intent);
   }
 
   public void popToRootAndRefreshAppointments() {

@@ -2,7 +2,6 @@ package com.bca.medisync;
 
 import android.os.Bundle;
 import android.view.View;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -11,11 +10,10 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class BaseTabActivity extends AppCompatActivity {
   private BottomNavigationView bottomNav;
@@ -25,6 +23,12 @@ public abstract class BaseTabActivity extends AppCompatActivity {
   protected abstract int getLayoutRes();
 
   protected abstract int getContainerId();
+
+  protected int getFabId() {
+    return 0;
+  }
+
+  protected void onFabClicked() {}
 
   protected abstract int getBottomNavId();
 
@@ -45,11 +49,9 @@ public abstract class BaseTabActivity extends AppCompatActivity {
           return insets;
         });
     bottomNav = findViewById(getBottomNavId());
-
     if (savedInstanceState == null) {
       switchTo(getDefaultTabId());
     }
-
     bottomNav.setOnItemSelectedListener(
         item -> {
           getSupportFragmentManager()
@@ -58,7 +60,12 @@ public abstract class BaseTabActivity extends AppCompatActivity {
           switchTo(item.getItemId());
           return true;
         });
-
+    int fabId = getFabId();
+    if (fabId != 0) {
+      View fab = findViewById(fabId);
+      if (fab != null) fab.setOnClickListener(v -> onFabClicked());
+      Objects.requireNonNull(fab).setTranslationY(-28 * getResources().getDisplayMetrics().density);
+    }
     getSupportFragmentManager()
         .addOnBackStackChangedListener(
             () -> {
