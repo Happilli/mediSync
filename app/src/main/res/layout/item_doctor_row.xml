@@ -67,7 +67,7 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:contentDescription="expand"
-            android:src="@drawable/arrow"
+            android:src="@drawable/arrx"
             app:tint="?attr/colorOnSurfaceVariant" />
     </LinearLayout>
 

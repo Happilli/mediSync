@@ -138,7 +138,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:contentDescription="null"
-                        android:src="@drawable/arrow"
+                        android:src="@drawable/arrx"
                         app:tint="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
