@@ -2,6 +2,7 @@ package com.bca.medisync.doctor;
 
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,9 +10,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,13 +25,27 @@ import com.bca.medisync.data.remote.dto.doctor.DoctorStatsResponse;
 import com.bca.medisync.databinding.FragmentDoctorStatsBinding;
 import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.LoadingHelper;
+import com.bca.medisync.util.MorphShapeView;
 import com.bca.medisync.util.ViewUtils;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStatsBinding> {
 
-  private final int[] shapes = {
+  private static class HeroStat {
+    final String value;
+    final String label;
+    final float[] shapeData;
+
+    HeroStat(String value, String label, float[] shapeData) {
+      this.value = value;
+      this.label = label;
+      this.shapeData = shapeData;
+    }
+  }
+
+  private final int[] dotShapes = {
     R.drawable.cookie9sided,
     R.drawable.clover4leaf,
     R.drawable.burst,
@@ -42,13 +55,14 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     R.drawable.flower,
   };
 
-  private int shapeIndex = 0;
-  private int heroShapeIndex = 0;
-  private ImageView heroShape;
+  private final List<HeroStat> heroStats = new ArrayList<>();
+  private int heroStatIndex = 0;
+  private MorphShapeView heroShape;
   private TextView heroValue;
   private TextView heroLabel;
   private final Handler heroHandler = new Handler(Looper.getMainLooper());
   private Runnable heroMorphRunnable;
+  private boolean heroMorphing = false;
 
   @Override
   protected FragmentDoctorStatsBinding inflateBinding(
@@ -67,19 +81,19 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
   @Override
   public void onDestroyView() {
     heroHandler.removeCallbacksAndMessages(null);
+    if (heroShape != null) heroShape.destroy();
     super.onDestroyView();
   }
 
   private void setupHeroShape() {
     binding.heroShapeContainer.removeAllViews();
 
-    heroShape = new ImageView(requireContext());
+    heroShape = new MorphShapeView(requireContext());
     heroShape.setLayoutParams(
         new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-    heroShape.setImageResource(shapes[heroShapeIndex]);
-    heroShape.setColorFilter(
-        requireContext().getColor(R.color.primary_container), PorterDuff.Mode.SRC_IN);
+    heroShape.setShapeColor(requireContext().getColor(R.color.primary_container));
+    heroShape.setShapeImmediate(MorphShapeView.Shapes.ROUND);
 
     LinearLayout textCol = new LinearLayout(requireContext());
     textCol.setOrientation(LinearLayout.VERTICAL);
@@ -123,31 +137,20 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
   }
 
   private void morphHeroShape() {
-    if (binding == null || heroShape == null) return;
-    heroShape
-        .animate()
-        .rotationBy(180f)
-        .scaleX(0.82f)
-        .scaleY(0.82f)
-        .setDuration(280)
-        .withEndAction(
-            () -> {
-              if (binding == null || heroShape == null) return;
-              heroShapeIndex = (heroShapeIndex + 1) % shapes.length;
-              heroShape.setImageResource(shapes[heroShapeIndex]);
-              heroShape
-                  .animate()
-                  .scaleX(1f)
-                  .scaleY(1f)
-                  .setDuration(280)
-                  .withEndAction(
-                      () -> {
-                        if (binding == null) return;
-                        heroHandler.postDelayed(heroMorphRunnable, 2600);
-                      })
-                  .start();
-            })
-        .start();
+    if (binding == null || heroShape == null || heroStats.isEmpty() || heroMorphing) return;
+    heroMorphing = true;
+    heroStatIndex = (heroStatIndex + 1) % heroStats.size();
+    HeroStat next = heroStats.get(heroStatIndex);
+    heroValue.setText(next.value);
+    heroLabel.setText(next.label);
+    heroShape.morphTo(
+        next.shapeData,
+        500,
+        () -> {
+          heroMorphing = false;
+          if (binding == null) return;
+          heroHandler.postDelayed(heroMorphRunnable, 100);
+        });
   }
 
   private void loadStats() {
@@ -167,87 +170,52 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
   private void bind(DoctorStatsResponse stats) {
     if (binding == null) return;
 
-    heroValue.setText(String.valueOf(stats.getTotal_appointments()));
-    heroLabel.setText("Total Appointments");
-    startHeroMorphLoop();
+    heroStats.clear();
+    heroStats.add(
+        new HeroStat(
+            String.valueOf(stats.getTotal_appointments()),
+            "Total Appointments",
+            MorphShapeView.Shapes.ROUND));
+    heroStats.add(
+        new HeroStat(
+            String.valueOf(stats.getTotal_patients()),
+            "Total Patients",
+            MorphShapeView.Shapes.CLOVER));
+    heroStats.add(
+        new HeroStat(
+            String.valueOf(stats.getPatients_this_month()),
+            "This Month",
+            MorphShapeView.Shapes.BURST));
+    heroStats.add(
+        new HeroStat(
+            String.valueOf(stats.getUpcoming_appointments()),
+            "Upcoming",
+            MorphShapeView.Shapes.SOFTBOOM));
+    heroStats.add(
+        new HeroStat(
+            String.valueOf(stats.getTotal_consultations()),
+            "Consultations",
+            MorphShapeView.Shapes.GEM));
+    heroStats.add(
+        new HeroStat(
+            String.valueOf(stats.getTotal_prescriptions()),
+            "Prescriptions",
+            MorphShapeView.Shapes.PENTAGON));
+    heroStats.add(
+        new HeroStat(
+            String.valueOf(stats.getUpcoming_followups()),
+            "Follow-ups",
+            MorphShapeView.Shapes.FLOWER));
 
-    shapeIndex = 0;
-    binding.shapeStatsGrid.removeAllViews();
-    binding.shapeStatsGrid.addView(
-        buildShapeStat(String.valueOf(stats.getTotal_patients()), "Total Patients"));
-    binding.shapeStatsGrid.addView(
-        buildShapeStat(String.valueOf(stats.getPatients_this_month()), "This Month"));
-    binding.shapeStatsGrid.addView(
-        buildShapeStat(String.valueOf(stats.getUpcoming_appointments()), "Upcoming"));
-    binding.shapeStatsGrid.addView(
-        buildShapeStat(String.valueOf(stats.getTotal_consultations()), "Consultations"));
-    binding.shapeStatsGrid.addView(
-        buildShapeStat(String.valueOf(stats.getTotal_prescriptions()), "Prescriptions"));
-    binding.shapeStatsGrid.addView(
-        buildShapeStat(String.valueOf(stats.getUpcoming_followups()), "Follow-ups"));
+    heroStatIndex = 0;
+    HeroStat first = heroStats.get(0);
+    heroShape.setShapeImmediate(first.shapeData);
+    heroValue.setText(first.value);
+    heroLabel.setText(first.label);
+    startHeroMorphLoop();
 
     bindStatusBreakdown(stats.getAppointments_by_status());
     bindMonthlyTrend(stats.getAppointments_last_6_months());
-  }
-
-  private View buildShapeStat(String value, String label) {
-    FrameLayout container = new FrameLayout(requireContext());
-    int size = ViewUtils.dp(requireContext(), 100);
-    GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
-    lp.width = size;
-    lp.height = size;
-    lp.setMargins(
-        ViewUtils.dp(requireContext(), 6),
-        ViewUtils.dp(requireContext(), 6),
-        ViewUtils.dp(requireContext(), 6),
-        ViewUtils.dp(requireContext(), 6));
-    container.setLayoutParams(lp);
-
-    ImageView shape = new ImageView(requireContext());
-    shape.setLayoutParams(
-        new FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-    shape.setImageResource(shapes[shapeIndex % shapes.length]);
-    shapeIndex++;
-    shape.setColorFilter(
-        requireContext().getColor(R.color.primary_container), PorterDuff.Mode.SRC_IN);
-
-    LinearLayout textCol = new LinearLayout(requireContext());
-    textCol.setOrientation(LinearLayout.VERTICAL);
-    textCol.setGravity(Gravity.CENTER);
-    int inset = ViewUtils.dp(requireContext(), 18);
-    textCol.setPadding(inset, inset, inset, inset);
-    textCol.setLayoutParams(
-        new FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-
-    TextView txtValue = new TextView(requireContext());
-    txtValue.setText(value);
-    txtValue.setGravity(Gravity.CENTER);
-    txtValue.setTextColor(requireContext().getColor(R.color.on_primary_container));
-    txtValue.setTextSize(20);
-    txtValue.setTypeface(null, Typeface.BOLD);
-    txtValue.setMaxLines(1);
-
-    TextView txtLabel = new TextView(requireContext());
-    txtLabel.setText(label);
-    txtLabel.setGravity(Gravity.CENTER);
-    txtLabel.setTextColor(requireContext().getColor(R.color.on_primary_container));
-    txtLabel.setAlpha(0.75f);
-    txtLabel.setTextSize(10);
-    txtLabel.setMaxLines(2);
-    LinearLayout.LayoutParams labelLp =
-        new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-    labelLp.topMargin = ViewUtils.dp(requireContext(), 2);
-    txtLabel.setLayoutParams(labelLp);
-
-    textCol.addView(txtValue);
-    textCol.addView(txtLabel);
-
-    container.addView(shape);
-    container.addView(textCol);
-    return container;
   }
 
   private void bindStatusBreakdown(Map<String, Integer> statusMap) {
@@ -259,12 +227,14 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
       binding.statusBreakdownContainer.addView(empty);
       return;
     }
+    int i = 0;
     for (Map.Entry<String, Integer> entry : statusMap.entrySet()) {
-      binding.statusBreakdownContainer.addView(buildStatusRow(entry.getKey(), entry.getValue()));
+      binding.statusBreakdownContainer.addView(buildStatusRow(entry.getKey(), entry.getValue(), i));
+      i++;
     }
   }
 
-  private View buildStatusRow(String label, int count) {
+  private View buildStatusRow(String label, int count, int index) {
     LinearLayout row = new LinearLayout(requireContext());
     row.setOrientation(LinearLayout.HORIZONTAL);
     row.setGravity(Gravity.CENTER_VERTICAL);
@@ -275,10 +245,9 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     LinearLayout.LayoutParams dotLp = new LinearLayout.LayoutParams(dotSize, dotSize);
     dotLp.setMarginEnd(ViewUtils.dp(requireContext(), 10));
     dot.setLayoutParams(dotLp);
-    dot.setImageResource(shapes[shapeIndex % shapes.length]);
+    dot.setImageResource(dotShapes[index % dotShapes.length]);
     dot.setColorFilter(
         requireContext().getColor(R.color.primary_container), PorterDuff.Mode.SRC_IN);
-    shapeIndex++;
 
     TextView txtLabel = new TextView(requireContext());
     txtLabel.setText(label);
@@ -330,7 +299,7 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
       countText.setTextColor(requireContext().getColor(R.color.on_surface_variant));
       countText.setGravity(Gravity.CENTER);
 
-      ImageView bar = new ImageView(requireContext());
+      View bar = new View(requireContext());
       int barHeight =
           (int) (((m.getCount() / (float) max)) * ViewUtils.dp(requireContext(), 90))
               + ViewUtils.dp(requireContext(), 4);
@@ -338,9 +307,10 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
           new LinearLayout.LayoutParams(ViewUtils.dp(requireContext(), 28), barHeight);
       barLp.topMargin = ViewUtils.dp(requireContext(), 4);
       bar.setLayoutParams(barLp);
-      bar.setImageResource(R.drawable.bun);
-      bar.setColorFilter(requireContext().getColor(R.color.primary), PorterDuff.Mode.SRC_IN);
-      bar.setScaleType(ImageView.ScaleType.FIT_XY);
+      GradientDrawable barDrawable = new GradientDrawable();
+      barDrawable.setColor(requireContext().getColor(R.color.primary));
+      barDrawable.setCornerRadius(ViewUtils.dp(requireContext(), 6));
+      bar.setBackground(barDrawable);
 
       TextView monthLabel = new TextView(requireContext());
       monthLabel.setText(shortMonth(m.getMonth()));
