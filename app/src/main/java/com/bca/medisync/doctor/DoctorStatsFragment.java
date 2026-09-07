@@ -145,7 +145,7 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     heroLabel.setText(next.label);
     heroShape.morphTo(
         next.shapeData,
-        500,
+        100,
         () -> {
           heroMorphing = false;
           if (binding == null) return;
@@ -234,6 +234,19 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     }
   }
 
+  private int statusColor(String status) {
+    switch (status) {
+      case "Confirmed":
+        return R.color.tertiary;
+      case "Pending":
+        return R.color.secondary;
+      case "Cancelled":
+        return R.color.error;
+      default:
+        return R.color.primary;
+    }
+  }
+
   private View buildStatusRow(String label, int count, int index) {
     LinearLayout row = new LinearLayout(requireContext());
     row.setOrientation(LinearLayout.HORIZONTAL);
@@ -246,8 +259,7 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     dotLp.setMarginEnd(ViewUtils.dp(requireContext(), 10));
     dot.setLayoutParams(dotLp);
     dot.setImageResource(dotShapes[index % dotShapes.length]);
-    dot.setColorFilter(
-        requireContext().getColor(R.color.primary_container), PorterDuff.Mode.SRC_IN);
+    dot.setColorFilter(requireContext().getColor(statusColor(label)), PorterDuff.Mode.SRC_IN);
 
     TextView txtLabel = new TextView(requireContext());
     txtLabel.setText(label);

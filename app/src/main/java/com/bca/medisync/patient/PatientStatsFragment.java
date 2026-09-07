@@ -1,11 +1,13 @@
 package com.bca.medisync.patient;
 
+import android.graphics.PorterDuff;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -25,6 +27,16 @@ import java.util.Locale;
 import java.util.Map;
 
 public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientStatsBinding> {
+
+  private final int[] dotShapes = {
+    R.drawable.cookie9sided,
+    R.drawable.clover4leaf,
+    R.drawable.burst,
+    R.drawable.softboom,
+    R.drawable.gem,
+    R.drawable.pentagon,
+    R.drawable.flower,
+  };
 
   @Override
   protected FragmentPatientStatsBinding inflateBinding(
@@ -79,27 +91,27 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
       binding.statusBreakdownContainer.addView(empty);
       return;
     }
+    int i = 0;
     for (Map.Entry<String, Integer> entry : statusMap.entrySet()) {
       binding.statusBreakdownContainer.addView(
-          buildStatusRow(capitalize(entry.getKey()), entry.getValue()));
+          buildStatusRow(capitalize(entry.getKey()), entry.getValue(), i));
+      i++;
     }
   }
 
-  private View buildStatusRow(String label, int count) {
+  private View buildStatusRow(String label, int count, int index) {
     LinearLayout row = new LinearLayout(requireContext());
     row.setOrientation(LinearLayout.HORIZONTAL);
     row.setGravity(Gravity.CENTER_VERTICAL);
     row.setPadding(0, ViewUtils.dp(requireContext(), 10), 0, ViewUtils.dp(requireContext(), 10));
 
-    View dot = new View(requireContext());
-    int dotSize = ViewUtils.dp(requireContext(), 8);
+    ImageView dot = new ImageView(requireContext());
+    int dotSize = ViewUtils.dp(requireContext(), 18);
     LinearLayout.LayoutParams dotLp = new LinearLayout.LayoutParams(dotSize, dotSize);
     dotLp.setMarginEnd(ViewUtils.dp(requireContext(), 10));
     dot.setLayoutParams(dotLp);
-    GradientDrawable dotBg = new GradientDrawable();
-    dotBg.setShape(GradientDrawable.OVAL);
-    dotBg.setColor(requireContext().getColor(statusColor(label)));
-    dot.setBackground(dotBg);
+    dot.setImageResource(dotShapes[index % dotShapes.length]);
+    dot.setColorFilter(requireContext().getColor(statusColor(label)), PorterDuff.Mode.SRC_IN);
 
     TextView txtLabel = new TextView(requireContext());
     txtLabel.setText(label);

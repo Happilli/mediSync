@@ -16,6 +16,10 @@ public class StatusChip {
         chip.setTextColor(ctx.getColor(R.color.secondary));
         chip.setBackgroundColor(ctx.getColor(R.color.secondary_container));
         break;
+      case "Cancelled":
+        chip.setTextColor(ctx.getColor(R.color.error));
+        chip.setBackgroundColor(ctx.getColor(R.color.error_container));
+        break;
       default:
         chip.setTextColor(ctx.getColor(R.color.primary));
         chip.setBackgroundColor(ctx.getColor(R.color.primary_container));
