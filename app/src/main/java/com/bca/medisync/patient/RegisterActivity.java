@@ -17,7 +17,7 @@ import com.bca.medisync.databinding.ActivityRegisterBinding;
 import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.ViewUtils;
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,20 +42,8 @@ public class RegisterActivity extends AppCompatActivity {
           return insets;
         });
     setupDobPicker();
-    setupBloodGroupToggles();
     setupPasswordMatchWatcher();
     setupListeners();
-  }
-
-  private void setupBloodGroupToggles() {
-    binding.toggleBloodGroupRow1.addOnButtonCheckedListener(
-        (group, checkedId, isChecked) -> {
-          if (isChecked) binding.toggleBloodGroupRow2.clearChecked();
-        });
-    binding.toggleBloodGroupRow2.addOnButtonCheckedListener(
-        (group, checkedId, isChecked) -> {
-          if (isChecked) binding.toggleBloodGroupRow1.clearChecked();
-        });
   }
 
   private void setupPasswordMatchWatcher() {
@@ -78,13 +66,8 @@ public class RegisterActivity extends AppCompatActivity {
       binding.txtPasswordMismatch.setVisibility(View.GONE);
       return;
     }
-    if (!password.equals(confirmPassword)) {
-      passwordsMismatched = true;
-      binding.txtPasswordMismatch.setVisibility(View.VISIBLE);
-    } else {
-      passwordsMismatched = false;
-      binding.txtPasswordMismatch.setVisibility(View.GONE);
-    }
+    passwordsMismatched = !password.equals(confirmPassword);
+    binding.txtPasswordMismatch.setVisibility(passwordsMismatched ? View.VISIBLE : View.GONE);
   }
 
   private void setupDobPicker() {
@@ -118,17 +101,10 @@ public class RegisterActivity extends AppCompatActivity {
   }
 
   private String getSelectedBloodGroup() {
-    int checkedId1 = binding.toggleBloodGroupRow1.getCheckedButtonId();
-    if (checkedId1 != View.NO_ID) {
-      MaterialButton btn = binding.getRoot().findViewById(checkedId1);
-      return btn.getText().toString().trim().toUpperCase(Locale.ROOT);
-    }
-    int checkedId2 = binding.toggleBloodGroupRow2.getCheckedButtonId();
-    if (checkedId2 != View.NO_ID) {
-      MaterialButton btn = binding.getRoot().findViewById(checkedId2);
-      return btn.getText().toString().trim().toUpperCase(Locale.ROOT);
-    }
-    return "";
+    int checkedId = binding.chipGroupBloodGroup.getCheckedChipId();
+    if (checkedId == View.NO_ID) return "";
+    Chip chip = binding.getRoot().findViewById(checkedId);
+    return chip.getText().toString().trim().toUpperCase(Locale.ROOT);
   }
 
   private void attemptRegister() {
@@ -186,7 +162,7 @@ public class RegisterActivity extends AppCompatActivity {
       return;
     }
     if (securityAnswer.isEmpty()) {
-      Toast.makeText(this, "Please answer the security Question... ", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, "Please answer the security question", Toast.LENGTH_SHORT).show();
       return;
     }
     if (emergencyContact.isEmpty()) {

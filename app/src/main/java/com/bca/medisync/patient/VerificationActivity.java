@@ -32,7 +32,7 @@ public class VerificationActivity extends AppCompatActivity {
           uri -> {
             if (uri != null) {
               selectedImageUri = uri;
-              binding.cardPreview.setVisibility(View.VISIBLE);
+              binding.imgPreview.setVisibility(View.VISIBLE);
               binding.imgPreview.setImageURI(uri);
             }
           });

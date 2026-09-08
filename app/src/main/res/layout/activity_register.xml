@@ -43,7 +43,6 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
@@ -59,7 +58,6 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
@@ -73,7 +71,6 @@
                         android:inputType="textEmailAddress"
                         android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
-
             </LinearLayout>
 
             <LinearLayout
@@ -84,7 +81,6 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layoutPassword"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
@@ -102,7 +98,6 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layoutConfirmPassword"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
@@ -117,7 +112,6 @@
                         android:inputType="textPassword"
                         android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
-
             </LinearLayout>
 
             <TextView
@@ -131,7 +125,6 @@
                 android:visibility="gone" />
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -146,7 +139,6 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -160,7 +152,6 @@
                     android:inputType="textPostalAddress"
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
-
 
             <TextView
                 android:layout_width="wrap_content"
@@ -197,7 +188,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Other" />
-
             </RadioGroup>
 
             <TextView
@@ -209,91 +199,77 @@
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggleBloodGroupRow1"
-                style="@style/Widget.Material3.MaterialButtonGroup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:selectionRequired="false"
-                app:singleSelection="true">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAPos"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="A+"
-                    android:textAllCaps="false" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnANeg"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="A-"
-                    android:textAllCaps="false" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBPos"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="B+"
-                    android:textAllCaps="false" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBNeg"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="B-"
-                    android:textAllCaps="false" />
-
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggleBloodGroupRow2"
-                style="@style/Widget.Material3.MaterialButtonGroup"
-                android:layout_width="wrap_content"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupBloodGroup"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:selectionRequired="false"
                 app:singleSelection="true">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnABPos"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAPos"
+                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="AB+"
-                    android:textAllCaps="false" />
+                    android:checkable="true"
+                    android:text="A+" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnABNeg"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipANeg"
+                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="AB-"
-                    android:textAllCaps="false" />
+                    android:checkable="true"
+                    android:text="A-" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnOPos"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBPos"
+                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="O+"
-                    android:textAllCaps="false" />
+                    android:checkable="true"
+                    android:text="B+" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnONeg"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBNeg"
+                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="O-"
-                    android:textAllCaps="false" />
+                    android:checkable="true"
+                    android:text="B-" />
 
-            </com.google.android.material.button.MaterialButtonToggleGroup>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipABPos"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="AB+" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipABNeg"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="AB-" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipOPos"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="O+" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipONeg"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="O-" />
+            </com.google.android.material.chip.ChipGroup>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -333,11 +309,9 @@
                     android:text="No date selected"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="14sp" />
-
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
@@ -360,7 +334,6 @@
                 android:textSize="13sp" />
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -394,7 +367,6 @@
                 android:textAlignment="center"
                 android:textColor="?attr/colorPrimary"
                 android:textStyle="bold" />
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -410,5 +382,4 @@
         app:backgroundTint="?attr/colorPrimary"
         app:icon="@android:drawable/ic_input_add"
         app:iconTint="?attr/colorOnPrimary" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
