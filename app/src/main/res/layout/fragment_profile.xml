@@ -14,231 +14,150 @@
         android:scaleType="centerCrop"
         android:src="@drawable/bg_everest" />
 
-    <androidx.core.widget.NestedScrollView
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnEditProfile"
+        style="@style/Widget.Material3.Button.IconButton.Filled"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:contentDescription="Edit profile"
+        app:backgroundTint="#66000000"
+        app:cornerRadius="10dp"
+        app:icon="@drawable/edit"
+        app:iconGravity="textStart"
+        app:iconTint="@android:color/white" />
+
+    <LinearLayout
         android:id="@+id/scrollContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="40dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="200dp"
         android:visibility="visible">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/txtName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="19sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/txtVerifiedBadge"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/txtVerifiedBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="200dp">
+            android:layout_marginTop="4dp"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+            <include
+                android:id="@+id/rowAge"
+                layout="@layout/item_profile_row_plain" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+            <include
+                android:id="@+id/rowGender"
+                layout="@layout/item_profile_row_plain" />
 
-                    <TextView
-                        android:id="@+id/txtName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="19sp"
-                        android:textStyle="bold" />
+            <include
+                android:id="@+id/rowBloodGroup"
+                layout="@layout/item_profile_row_plain" />
 
-                    <TextView
-                        android:id="@+id/txtVerifiedBadge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+            <include
+                android:id="@+id/rowEmail"
+                layout="@layout/item_profile_row_plain" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnEditProfile"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_gravity="end"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:paddingHorizontal="16dp"
-                    android:text="Edit Profile"
-                    android:textAllCaps="false"
-                    android:textSize="12sp"
-                    app:cornerRadius="10dp" />
-            </LinearLayout>
+            <include
+                android:id="@+id/rowPhone"
+                layout="@layout/item_profile_row_plain" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:text="Personal Information"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+            <include
+                android:id="@+id/rowDob"
+                layout="@layout/item_profile_row_plain" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:orientation="vertical">
+            <include
+                android:id="@+id/rowAddress"
+                layout="@layout/item_profile_row_plain" />
+        </LinearLayout>
 
-                <include
-                    android:id="@+id/rowAge"
-                    layout="@layout/item_profile_row_plain" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Emergency Contact"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-                <include
-                    android:id="@+id/rowGender"
-                    layout="@layout/item_profile_row_plain" />
+        <TextView
+            android:id="@+id/txtEmergencyContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
-                <include
-                    android:id="@+id/rowBloodGroup"
-                    layout="@layout/item_profile_row_plain" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="18dp"
+            android:background="?attr/colorOutlineVariant" />
 
-                <include
-                    android:id="@+id/rowEmail"
-                    layout="@layout/item_profile_row_plain" />
-
-                <include
-                    android:id="@+id/rowPhone"
-                    layout="@layout/item_profile_row_plain" />
-
-                <include
-                    android:id="@+id/rowDob"
-                    layout="@layout/item_profile_row_plain" />
-
-                <include
-                    android:id="@+id/rowAddress"
-                    layout="@layout/item_profile_row_plain" />
-            </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingVertical="2dp">
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Emergency Contact"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:layout_weight="1"
+                android:text="System Notifications"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="13sp" />
 
-            <TextView
-                android:id="@+id/txtEmergencyContact"
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchNotifications"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="24dp"
-                android:background="?attr/colorOutlineVariant" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="System Notifications"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="15sp" />
-
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchNotifications"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="18dp"
-                    android:background="?attr/colorOutlineVariant" />
-
-                <include
-                    android:id="@+id/rowSecurityAnswer"
-                    layout="@layout/item_profile_settings_row" />
-
-                <LinearLayout
-                    android:id="@+id/securityAnswerForm"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:hint="Security Answer">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etSecurityAnswer"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text"
-                            android:maxLines="1" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:hint="Current Password"
-                        app:endIconMode="password_toggle">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etCurrentPassword"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPassword"
-                            android:maxLines="1" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSaveSecurityAnswer"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:text="Save"
-                        android:textAllCaps="false"
-                        app:cornerRadius="14dp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLogout"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="28dp"
-                android:text="Logout"
-                android:textAllCaps="false"
-                android:textColor="?attr/colorError"
-                app:cornerRadius="14dp"
-                app:strokeColor="?attr/colorError" />
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:scaleX="0.8"
+                android:scaleY="0.8" />
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogout"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="140dp"
+            android:layout_height="44dp"
+            android:layout_marginBottom="16dp"
+            android:text="Logout"
+            android:textColor="?attr/colorError"
+            app:strokeColor="?attr/colorError" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/imgProfile"

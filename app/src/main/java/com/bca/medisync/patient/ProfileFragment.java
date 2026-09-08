@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -67,7 +66,6 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
               }
             });
 
-    setupSettingsRows();
     setupNotificationSwitch();
     setupListeners();
   }
@@ -102,25 +100,6 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
     }
   }
 
-  private void setupSettingsRows() {
-    setRowLabel(binding.rowSecurityAnswer.getRoot(), "Security Answer");
-  }
-
-  private int genderIcon(String gender) {
-    switch (gender.trim().toLowerCase()) {
-      case "male":
-        return R.drawable.male;
-      case "female":
-        return R.drawable.female;
-      default:
-        return R.drawable.othergender;
-    }
-  }
-
-  private void setRowLabel(View row, String label) {
-    ((TextView) row.findViewById(R.id.txtSettingsLabel)).setText(label);
-  }
-
   private void bindPatient(PatientResponse patient) {
     if (binding == null) return;
 
@@ -144,8 +123,10 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
 
   private void bindProfilePic(String profilePicUrl) {
     if (binding == null) return;
+    int borderPx = ViewUtils.dp(requireContext(), 3);
+    int borderColor = requireContext().getColor(R.color.surface);
     ImageLoader.loadProfilePicShaped(
-        this, binding.imgProfile, profilePicUrl, R.drawable.cookie12sided);
+        this, binding.imgProfile, profilePicUrl, R.drawable.cookie12sided, borderPx, borderColor);
   }
 
   private void bindVerificationBadge(
@@ -200,50 +181,6 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
     }
   }
 
-  private void toggleSecurityAnswerForm() {
-    boolean expanding = binding.securityAnswerForm.getVisibility() != View.VISIBLE;
-    binding.securityAnswerForm.setVisibility(expanding ? View.VISIBLE : View.GONE);
-    if (!expanding) {
-      binding.etSecurityAnswer.setText("");
-      binding.etCurrentPassword.setText("");
-    }
-  }
-
-  private void submitSecurityAnswer() {
-    String answer =
-        binding.etSecurityAnswer.getText() != null
-            ? binding.etSecurityAnswer.getText().toString().trim()
-            : "";
-    String password =
-        binding.etCurrentPassword.getText() != null
-            ? binding.etCurrentPassword.getText().toString().trim()
-            : "";
-
-    if (answer.isEmpty()) {
-      binding.etSecurityAnswer.setError("Answer is required");
-      return;
-    }
-    if (password.isEmpty()) {
-      binding.etCurrentPassword.setError("Password is required");
-      return;
-    }
-
-    PatientApi api = ApiClient.api(PatientApi.class);
-    ApiCallback.handle(
-        api.updateSecurityAnswer(new PatientSecurityAnswerUpdateRequest(password, answer)),
-        this,
-        body -> {
-          Toast.makeText(requireContext(), "Security answer updated.", Toast.LENGTH_SHORT).show();
-          toggleSecurityAnswerForm();
-        },
-        (code, msg) ->
-            ApiErrorHandler.with(requireContext())
-                .on(401, "Current password is incorrect.")
-                .fallback("Failed to update security answer.")
-                .build()
-                .run(code, msg));
-  }
-
   private void loadPatientData() {
     LoadingHelper.show(binding.loadingIndicator);
     binding.scrollContent.setVisibility(View.GONE);
@@ -286,8 +223,6 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
   private void setupListeners() {
     binding.btnEditProfile.setOnClickListener(
         v -> startActivity(new Intent(requireContext(), EditProfileActivity.class)));
-    binding.rowSecurityAnswer.getRoot().setOnClickListener(v -> toggleSecurityAnswerForm());
-    binding.btnSaveSecurityAnswer.setOnClickListener(v -> submitSecurityAnswer());
     binding.btnLogout.setOnClickListener(
         v -> AuthUtils.logout((androidx.appcompat.app.AppCompatActivity) requireActivity()));
   }

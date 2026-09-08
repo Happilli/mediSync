@@ -67,13 +67,25 @@ public class ImageLoader {
 
   public static void loadProfilePicShaped(
       Fragment fragment, ImageView imageView, String path, @DrawableRes int maskRes) {
+    loadProfilePicShaped(fragment, imageView, path, maskRes, 0, 0);
+  }
+
+  public static void loadProfilePicShaped(
+      Fragment fragment,
+      ImageView imageView,
+      String path,
+      @DrawableRes int maskRes,
+      int borderWidthPx,
+      int borderColor) {
     String fullUrl = ApiClient.mediaUrl(path);
     RequestBuilder<android.graphics.drawable.Drawable> request =
         Glide.with(fragment)
             .load(fullUrl)
             .placeholder(R.drawable.ic_nav_profile)
             .error(R.drawable.ic_nav_profile)
-            .transform(new ShapeMaskTransformation(fragment.requireContext(), maskRes));
+            .transform(
+                new ShapeMaskTransformation(
+                    fragment.requireContext(), maskRes, borderWidthPx, borderColor));
     request.into(imageView);
   }
 }

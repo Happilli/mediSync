@@ -55,6 +55,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     binding.toolbar.setNavigationOnClickListener(v -> finish());
     binding.btnSave.setOnClickListener(v -> attemptSave());
+    binding.btnSaveSecurityAnswer.setOnClickListener(v -> submitSecurityAnswer());
     loadCurrentProfile();
   }
 
@@ -123,6 +124,39 @@ public class EditProfileActivity extends AppCompatActivity {
         (code, msg) -> {
           binding.btnSave.setEnabled(true);
           ApiErrorHandler.with(this).fallback("Failed to update profile.").build().run(code, msg);
+        });
+  }
+
+  private void submitSecurityAnswer() {
+    String answer = ViewUtils.textOf(binding.etSecurityAnswer);
+    String password = ViewUtils.textOf(binding.etCurrentPassword);
+
+    if (answer.isEmpty()) {
+      binding.etSecurityAnswer.setError("Answer is required");
+      return;
+    }
+    if (password.isEmpty()) {
+      binding.etCurrentPassword.setError("Password is required");
+      return;
+    }
+
+    binding.btnSaveSecurityAnswer.setEnabled(false);
+    PatientApi api = ApiClient.api(PatientApi.class);
+    ApiCallback.handle(
+        api.updateSecurityAnswer(new PatientSecurityAnswerUpdateRequest(password, answer)),
+        body -> {
+          binding.btnSaveSecurityAnswer.setEnabled(true);
+          Toast.makeText(this, "Security answer updated.", Toast.LENGTH_SHORT).show();
+          binding.etSecurityAnswer.setText("");
+          binding.etCurrentPassword.setText("");
+        },
+        (code, msg) -> {
+          binding.btnSaveSecurityAnswer.setEnabled(true);
+          ApiErrorHandler.with(this)
+              .on(401, "Current password is incorrect.")
+              .fallback("Failed to update security answer.")
+              .build()
+              .run(code, msg);
         });
   }
 }
