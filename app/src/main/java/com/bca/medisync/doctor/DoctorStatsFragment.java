@@ -20,6 +20,7 @@ import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
+import com.bca.medisync.data.remote.dto.MonthlyAppointmentCount;
 import com.bca.medisync.data.remote.dto.doctor.DoctorStatsResponse;
 import com.bca.medisync.databinding.FragmentDoctorStatsBinding;
 import com.bca.medisync.util.ApiErrorHandler;
@@ -30,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStatsBinding> {
-
   private static class HeroStat {
     final String value;
     final String label;
@@ -80,7 +80,6 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
     heroShape.setImageResource(R.drawable.cookie9sided);
     heroShape.setColorFilter(requireContext().getColor(R.color.primary_container));
-
     LinearLayout textCol = new LinearLayout(requireContext());
     textCol.setOrientation(LinearLayout.VERTICAL);
     textCol.setGravity(Gravity.CENTER);
@@ -89,14 +88,12 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     textCol.setLayoutParams(
         new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-
     heroValue = new TextView(requireContext());
     heroValue.setGravity(Gravity.CENTER);
     heroValue.setTextColor(requireContext().getColor(R.color.on_primary_container));
     heroValue.setTextSize(44);
     heroValue.setTypeface(null, Typeface.BOLD);
     heroValue.setMaxLines(1);
-
     heroLabel = new TextView(requireContext());
     heroLabel.setGravity(Gravity.CENTER);
     heroLabel.setTextColor(requireContext().getColor(R.color.on_primary_container));
@@ -108,10 +105,8 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
     labelLp.topMargin = ViewUtils.dp(requireContext(), 4);
     heroLabel.setLayoutParams(labelLp);
-
     textCol.addView(heroValue);
     textCol.addView(heroLabel);
-
     binding.heroShapeContainer.addView(heroShape);
     binding.heroShapeContainer.addView(textCol);
   }
@@ -147,7 +142,6 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
 
   private void bind(DoctorStatsResponse stats) {
     if (binding == null) return;
-
     heroStats.clear();
     heroStats.add(
         new HeroStat(
@@ -172,24 +166,21 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     heroStats.add(
         new HeroStat(
             String.valueOf(stats.getUpcoming_followups()), "Follow-ups", R.drawable.ghostish));
-
     heroStatIndex = 0;
     HeroStat first = heroStats.get(0);
     heroShape.setImageResource(first.shapeRes);
     heroValue.setText(first.value);
     heroLabel.setText(first.label);
     startHeroLoop();
-
     StatsChartHelper.bindStatusBreakdown(
         binding.statusBreakdownContainer,
         stats.getAppointments_by_status(),
         stats.getTotal_appointments(),
         "No appointments yet");
-
     List<String> months = new ArrayList<>();
     List<Integer> counts = new ArrayList<>();
     if (stats.getAppointments_last_6_months() != null) {
-      for (DoctorStatsResponse.MonthlyAppointmentCount m : stats.getAppointments_last_6_months()) {
+      for (MonthlyAppointmentCount m : stats.getAppointments_last_6_months()) {
         months.add(m.getMonth());
         counts.add(m.getCount());
       }

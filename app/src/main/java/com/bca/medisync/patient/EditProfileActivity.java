@@ -52,7 +52,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 new PickVisualMediaRequest.Builder()
                     .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
                     .build()));
-
     binding.toolbar.setNavigationOnClickListener(v -> finish());
     binding.btnSave.setOnClickListener(v -> attemptSave());
     binding.btnSaveSecurityAnswer.setOnClickListener(v -> submitSecurityAnswer());
@@ -130,7 +129,6 @@ public class EditProfileActivity extends AppCompatActivity {
   private void submitSecurityAnswer() {
     String answer = ViewUtils.textOf(binding.etSecurityAnswer);
     String password = ViewUtils.textOf(binding.etCurrentPassword);
-
     if (answer.isEmpty()) {
       binding.etSecurityAnswer.setError("Answer is required");
       return;
@@ -139,7 +137,6 @@ public class EditProfileActivity extends AppCompatActivity {
       binding.etCurrentPassword.setError("Password is required");
       return;
     }
-
     binding.btnSaveSecurityAnswer.setEnabled(false);
     PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(

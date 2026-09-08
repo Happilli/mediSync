@@ -1,5 +1,6 @@
 package com.bca.medisync.data.remote.dto.doctor;
 
+import com.bca.medisync.data.remote.dto.MonthlyAppointmentCount;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -15,10 +16,4 @@ public class DoctorStatsResponse {
   private int total_prescriptions;
   private int total_consultations;
   private int upcoming_followups;
-
-  @Getter
-  public static class MonthlyAppointmentCount {
-    private String month;
-    private int count;
-  }
 }

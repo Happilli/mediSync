@@ -1,13 +1,9 @@
 package com.bca.medisync.patient;
 
-import android.graphics.PorterDuff;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -17,13 +13,13 @@ import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
+import com.bca.medisync.data.remote.dto.MonthlyAppointmentCount;
 import com.bca.medisync.data.remote.dto.patient.PatientStatsResponse;
 import com.bca.medisync.databinding.FragmentPatientStatsBinding;
 import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.StatsChartHelper;
 import com.bca.medisync.util.ViewUtils;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,7 +57,6 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
 
   private void bind(PatientStatsResponse stats) {
     if (binding == null) return;
-
     int adherence = (int) Math.round(stats.getMedication_adherence_percent());
     binding.progressAdherence.setProgressCompat(adherence, true);
     binding.txtAdherencePercent.setText(adherence + "%");
@@ -86,7 +81,7 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
     List<String> months = new ArrayList<>();
     List<Integer> counts = new ArrayList<>();
     if (stats.getAppointments_last_6_months() != null) {
-      for (PatientStatsResponse.MonthlyAppointmentCount m : stats.getAppointments_last_6_months()) {
+      for (MonthlyAppointmentCount m : stats.getAppointments_last_6_months()) {
         months.add(m.getMonth());
         counts.add(m.getCount());
       }
@@ -112,11 +107,9 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
   private boolean addVitalIfPresent(String label, List<PatientStatsResponse.VitalPoint> points) {
     if (points == null || points.isEmpty()) return false;
     PatientStatsResponse.VitalPoint latest = points.get(points.size() - 1);
-
     LinearLayout row = new LinearLayout(requireContext());
     row.setOrientation(LinearLayout.HORIZONTAL);
     row.setPadding(0, ViewUtils.dp(requireContext(), 10), 0, ViewUtils.dp(requireContext(), 10));
-
     TextView txtLabel = new TextView(requireContext());
     txtLabel.setText(label);
     txtLabel.setTextColor(requireContext().getColor(R.color.on_surface_variant));
@@ -124,13 +117,11 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
     LinearLayout.LayoutParams lp =
         new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
     txtLabel.setLayoutParams(lp);
-
     TextView txtValue = new TextView(requireContext());
     txtValue.setText(latest.getValue());
     txtValue.setTextColor(requireContext().getColor(R.color.on_surface));
     txtValue.setTextSize(14);
     txtValue.setTypeface(null, android.graphics.Typeface.BOLD);
-
     row.addView(txtLabel);
     row.addView(txtValue);
     binding.vitalsContainer.addView(row);
