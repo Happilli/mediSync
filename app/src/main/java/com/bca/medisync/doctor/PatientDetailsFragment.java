@@ -43,38 +43,17 @@ public class PatientDetailsFragment extends BaseBindingFragment<FragmentPatientD
     appointmentId = args.getInt("appointment_id", -1);
     InfoRowBinder.bind(
         new InfoRowBinder.Row(
-            binding.rowGender.getRoot(),
-            com.bca.medisync.R.drawable.stethoscope,
-            "Gender",
-            args.getString("patient_gender")),
+            binding.rowGender.getRoot(), "Gender", args.getString("patient_gender")),
         new InfoRowBinder.Row(
-            binding.rowBlood.getRoot(),
-            com.bca.medisync.R.drawable.stethoscope,
-            "Blood Group",
-            args.getString("patient_blood")),
+            binding.rowBlood.getRoot(), "Blood Group", args.getString("patient_blood")),
+        new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", args.getString("patient_phone")),
+        new InfoRowBinder.Row(binding.rowEmail.getRoot(), "Email", args.getString("patient_email")),
         new InfoRowBinder.Row(
-            binding.rowPhone.getRoot(),
-            com.bca.medisync.R.drawable.phone,
-            "Phone",
-            args.getString("patient_phone")),
+            binding.rowDob.getRoot(), "Date of Birth", args.getString("patient_dob")),
         new InfoRowBinder.Row(
-            binding.rowEmail.getRoot(),
-            com.bca.medisync.R.drawable.email,
-            "Email",
-            args.getString("patient_email")),
-        new InfoRowBinder.Row(
-            binding.rowDob.getRoot(),
-            com.bca.medisync.R.drawable.birthdate,
-            "Date of Birth",
-            args.getString("patient_dob")),
-        new InfoRowBinder.Row(
-            binding.rowAddress.getRoot(),
-            com.bca.medisync.R.drawable.location,
-            "Address",
-            args.getString("patient_address")),
+            binding.rowAddress.getRoot(), "Address", args.getString("patient_address")),
         new InfoRowBinder.Row(
             binding.rowEmergency.getRoot(),
-            com.bca.medisync.R.drawable.emergency,
             "Emergency Contact",
             args.getString("patient_emergency")));
     bindProfilePic(args.getString("patient_pic_url"));

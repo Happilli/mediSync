@@ -128,31 +128,15 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
     binding.txtEmergencyContact.setText(patient.getEmergency_contact());
     InfoRowBinder.bind(
         new InfoRowBinder.Row(
-            binding.rowAge.getRoot(),
-            R.drawable.age,
-            "Age",
-            calculateAge(patient.getDate_of_birth())),
+            binding.rowAge.getRoot(), "Age", calculateAge(patient.getDate_of_birth())),
+        new InfoRowBinder.Row(binding.rowGender.getRoot(), "Gender", patient.getGender()),
         new InfoRowBinder.Row(
-            binding.rowGender.getRoot(),
-            genderIcon(patient.getGender()),
-            "Gender",
-            patient.getGender()),
+            binding.rowBloodGroup.getRoot(), "Blood Group", patient.getBlood_group()),
+        new InfoRowBinder.Row(binding.rowEmail.getRoot(), "Email", sessionManager.getEmail()),
+        new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", patient.getPhone()),
         new InfoRowBinder.Row(
-            binding.rowBloodGroup.getRoot(),
-            R.drawable.bloodtype,
-            "Blood Group",
-            patient.getBlood_group()),
-        new InfoRowBinder.Row(
-            binding.rowEmail.getRoot(), R.drawable.email, "Email", sessionManager.getEmail()),
-        new InfoRowBinder.Row(
-            binding.rowPhone.getRoot(), R.drawable.phone, "Phone", patient.getPhone()),
-        new InfoRowBinder.Row(
-            binding.rowDob.getRoot(),
-            R.drawable.birthdate,
-            "Date of Birth",
-            patient.getDate_of_birth()),
-        new InfoRowBinder.Row(
-            binding.rowAddress.getRoot(), R.drawable.location, "Address", patient.getAddress()));
+            binding.rowDob.getRoot(), "Date of Birth", patient.getDate_of_birth()),
+        new InfoRowBinder.Row(binding.rowAddress.getRoot(), "Address", patient.getAddress()));
     bindVerificationBadge(
         patient.is_verified(), patient.getCitizenship_number(), patient.getRejection_reason());
     bindProfilePic(patient.getProfile_pic_url());

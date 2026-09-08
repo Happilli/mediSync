@@ -130,14 +130,9 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
       binding.txtRegistrationBadge.setText("Verified");
       binding.txtRegistrationBadge.setTextColor(
           requireContext().getColor(R.color.on_tertiary_container));
-      binding.txtRegistrationBadge.setBackgroundColor(
-          requireContext().getColor(R.color.tertiary_container));
     } else {
       binding.txtRegistrationBadge.setText("Pending Verification");
-      binding.txtRegistrationBadge.setTextColor(
-          requireContext().getColor(R.color.on_error_container));
-      binding.txtRegistrationBadge.setBackgroundColor(
-          requireContext().getColor(R.color.error_container));
+      binding.txtRegistrationBadge.setTextColor(requireContext().getColor(R.color.error));
     }
     if (p.getBio() != null && !p.getBio().trim().isEmpty()) {
       binding.txtBio.setVisibility(View.VISIBLE);
@@ -150,25 +145,16 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
     binding.statPatientsTotalValue.setText(String.valueOf(p.getTotal_patients()));
     InfoRowBinder.bind(
         new InfoRowBinder.Row(
-            binding.rowSpecialization.getRoot(),
-            R.drawable.stethoscope,
-            "Specialization",
-            p.getSpeciality()),
+            binding.rowSpecialization.getRoot(), "Specialization", p.getSpeciality()),
         new InfoRowBinder.Row(
-            binding.rowHospital.getRoot(),
-            R.drawable.hospital,
-            "Hospital",
-            "Hospital #" + p.getHospital_id()),
+            binding.rowHospital.getRoot(), "Hospital", "Hospital #" + p.getHospital_id()),
         new InfoRowBinder.Row(
             binding.rowExperience.getRoot(),
-            R.drawable.ic_nav_calendar,
             "Experience",
             years > 0 ? years + " years" : "Not specified"),
-        new InfoRowBinder.Row(binding.rowPhone.getRoot(), R.drawable.phone, "Phone", p.getPhone()),
-        new InfoRowBinder.Row(
-            binding.rowEmail.getRoot(), R.drawable.email, "Email", sessionManager.getEmail()),
-        new InfoRowBinder.Row(
-            binding.rowAddress.getRoot(), R.drawable.location, "Address", p.getAddress()));
+        new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", p.getPhone()),
+        new InfoRowBinder.Row(binding.rowEmail.getRoot(), "Email", sessionManager.getEmail()),
+        new InfoRowBinder.Row(binding.rowAddress.getRoot(), "Address", p.getAddress()));
   }
 
   private void bindProfilePic(String profilePicUrl) {
