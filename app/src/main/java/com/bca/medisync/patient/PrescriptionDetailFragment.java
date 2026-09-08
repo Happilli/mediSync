@@ -1,16 +1,14 @@
 package com.bca.medisync.patient;
 
+import com.bca.medisync.databinding.ItemMedicationSummaryBinding;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bca.medisync.BaseBindingFragment;
-import com.bca.medisync.R;
 import com.bca.medisync.data.model.Medication;
 import com.bca.medisync.data.model.Prescription;
 import com.bca.medisync.data.remote.ApiCallback;
@@ -97,41 +95,15 @@ public class PrescriptionDetailFragment
   }
 
   private View buildMedicationRow(Medication m) {
-    LinearLayout row = new LinearLayout(requireContext());
-    row.setOrientation(LinearLayout.VERTICAL);
-    row.setPadding(
-        ViewUtils.dp(requireContext(), 16),
-        ViewUtils.dp(requireContext(), 14),
-        ViewUtils.dp(requireContext(), 16),
-        ViewUtils.dp(requireContext(), 14));
-    TextView name = new TextView(requireContext());
-    name.setText(m.getName() + " " + m.getDosage());
-    name.setTextSize(15);
-    name.setTypeface(null, android.graphics.Typeface.BOLD);
-    name.setTextColor(requireContext().getColor(R.color.on_surface));
-    TextView freq = new TextView(requireContext());
-    freq.setText(m.getFrequency() + " \u2022 " + m.getTime());
-    freq.setTextSize(12);
-    freq.setTextColor(requireContext().getColor(R.color.on_surface_variant));
-    LinearLayout.LayoutParams freqLp =
-        new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-    freqLp.topMargin = ViewUtils.dp(requireContext(), 2);
-    freq.setLayoutParams(freqLp);
-    row.addView(name);
-    row.addView(freq);
+    ItemMedicationSummaryBinding rowBinding =
+        ItemMedicationSummaryBinding.inflate(
+            getLayoutInflater(), binding.medicationsContainer, false);
+    rowBinding.txtMedName.setText(m.getName() + " " + m.getDosage());
+    rowBinding.txtMedFrequency.setText(m.getFrequency() + " \u2022 " + m.getTime());
     if (m.getInstruction() != null && !m.getInstruction().isEmpty()) {
-      TextView instr = new TextView(requireContext());
-      instr.setText(m.getInstruction());
-      instr.setTextSize(12);
-      instr.setTextColor(requireContext().getColor(R.color.primary));
-      LinearLayout.LayoutParams instrLp =
-          new LinearLayout.LayoutParams(
-              LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-      instrLp.topMargin = ViewUtils.dp(requireContext(), 6);
-      instr.setLayoutParams(instrLp);
-      row.addView(instr);
+      rowBinding.txtMedInstruction.setVisibility(View.VISIBLE);
+      rowBinding.txtMedInstruction.setText(m.getInstruction());
     }
-    return row;
+    return rowBinding.getRoot();
   }
 }

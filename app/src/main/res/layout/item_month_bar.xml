@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:gravity="bottom|center_horizontal"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/txtMonthCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="11sp" />
+
+    <View
+        android:id="@+id/viewMonthBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/txtMonthLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="11sp" />
+</LinearLayout>

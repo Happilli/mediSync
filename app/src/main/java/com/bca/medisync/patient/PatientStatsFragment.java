@@ -4,13 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bca.medisync.BaseBindingFragment;
-import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
+import com.bca.medisync.databinding.ItemVitalBinding;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
 import com.bca.medisync.data.remote.dto.MonthlyAppointmentCount;
@@ -107,24 +105,11 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
   private boolean addVitalIfPresent(String label, List<PatientStatsResponse.VitalPoint> points) {
     if (points == null || points.isEmpty()) return false;
     PatientStatsResponse.VitalPoint latest = points.get(points.size() - 1);
-    LinearLayout row = new LinearLayout(requireContext());
-    row.setOrientation(LinearLayout.HORIZONTAL);
-    row.setPadding(0, ViewUtils.dp(requireContext(), 10), 0, ViewUtils.dp(requireContext(), 10));
-    TextView txtLabel = new TextView(requireContext());
-    txtLabel.setText(label);
-    txtLabel.setTextColor(requireContext().getColor(R.color.on_surface_variant));
-    txtLabel.setTextSize(13);
-    LinearLayout.LayoutParams lp =
-        new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-    txtLabel.setLayoutParams(lp);
-    TextView txtValue = new TextView(requireContext());
-    txtValue.setText(latest.getValue());
-    txtValue.setTextColor(requireContext().getColor(R.color.on_surface));
-    txtValue.setTextSize(14);
-    txtValue.setTypeface(null, android.graphics.Typeface.BOLD);
-    row.addView(txtLabel);
-    row.addView(txtValue);
-    binding.vitalsContainer.addView(row);
+    ItemVitalBinding rowBinding =
+        ItemVitalBinding.inflate(getLayoutInflater(), binding.vitalsContainer, false);
+    rowBinding.txtVitalLabel.setText(label);
+    rowBinding.txtVitalValue.setText(latest.getValue());
+    binding.vitalsContainer.addView(rowBinding.getRoot());
     return true;
   }
 

@@ -4,13 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import com.bca.medisync.databinding.ItemAddedMedicineBinding;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bca.medisync.BaseBindingFragment;
-import com.bca.medisync.R;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
@@ -19,7 +17,6 @@ import com.bca.medisync.data.remote.dto.medication.MedicationTimeCreateRequest;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionCreateRequest;
 import com.bca.medisync.databinding.FragmentPrescriptionBinding;
 import com.bca.medisync.util.ApiErrorHandler;
-import com.bca.medisync.util.ViewUtils;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
@@ -196,41 +193,17 @@ public class PrescriptionFragment extends BaseBindingFragment<FragmentPrescripti
   }
 
   private View buildAddedMedicineRow(int index) {
-    LinearLayout row = new LinearLayout(requireContext());
-    row.setOrientation(LinearLayout.HORIZONTAL);
-    row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-    row.setPadding(
-        ViewUtils.dp(requireContext(), 16),
-        ViewUtils.dp(requireContext(), 12),
-        ViewUtils.dp(requireContext(), 16),
-        ViewUtils.dp(requireContext(), 12));
-    TextView txt = new TextView(requireContext());
-    txt.setText(medicationSummaries.get(index));
-    txt.setTextColor(requireContext().getColor(R.color.on_surface));
-    txt.setTextSize(13);
-    LinearLayout.LayoutParams txtLp =
-        new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-    txt.setLayoutParams(txtLp);
-    TextView remove = new TextView(requireContext());
-    remove.setText("Remove");
-    remove.setTextColor(requireContext().getColor(R.color.error));
-    remove.setTextSize(12);
-    remove.setTypeface(null, android.graphics.Typeface.BOLD);
-    remove.setPadding(
-        ViewUtils.dp(requireContext(), 8),
-        ViewUtils.dp(requireContext(), 4),
-        ViewUtils.dp(requireContext(), 8),
-        ViewUtils.dp(requireContext(), 4));
-    remove.setOnClickListener(
+    ItemAddedMedicineBinding rowBinding =
+        ItemAddedMedicineBinding.inflate(
+            getLayoutInflater(), binding.addedMedicinesContainer, false);
+    rowBinding.txtMedicineSummary.setText(medicationSummaries.get(index));
+    rowBinding.txtRemove.setOnClickListener(
         v -> {
           medications.remove(index);
           medicationSummaries.remove(index);
           refreshAddedMedicinesUi();
         });
-
-    row.addView(txt);
-    row.addView(remove);
-    return row;
+    return rowBinding.getRoot();
   }
 
   private void showFollowUpDatePicker() {

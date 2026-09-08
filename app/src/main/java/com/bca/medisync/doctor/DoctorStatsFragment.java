@@ -1,17 +1,11 @@
 package com.bca.medisync.doctor;
 
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.DrawableRes;
@@ -23,6 +17,7 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.MonthlyAppointmentCount;
 import com.bca.medisync.data.remote.dto.doctor.DoctorStatsResponse;
 import com.bca.medisync.databinding.FragmentDoctorStatsBinding;
+import com.bca.medisync.databinding.ItemHeroStatBinding;
 import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.StatsChartHelper;
@@ -45,9 +40,7 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
 
   private final List<HeroStat> heroStats = new ArrayList<>();
   private int heroStatIndex = 0;
-  private ImageView heroShape;
-  private TextView heroValue;
-  private TextView heroLabel;
+  private ItemHeroStatBinding heroBinding;
   private final Handler heroHandler = new Handler(Looper.getMainLooper());
   private final Runnable heroSwapRunnable = this::swapHeroShape;
 
@@ -68,47 +61,14 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
   @Override
   public void onDestroyView() {
     heroHandler.removeCallbacksAndMessages(null);
+    heroBinding = null;
     super.onDestroyView();
   }
 
   private void setupHeroShape() {
     binding.heroShapeContainer.removeAllViews();
-
-    heroShape = new ImageView(requireContext());
-    heroShape.setLayoutParams(
-        new FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-    heroShape.setImageResource(R.drawable.cookie9sided);
-    heroShape.setColorFilter(requireContext().getColor(R.color.primary_container));
-    LinearLayout textCol = new LinearLayout(requireContext());
-    textCol.setOrientation(LinearLayout.VERTICAL);
-    textCol.setGravity(Gravity.CENTER);
-    int inset = ViewUtils.dp(requireContext(), 40);
-    textCol.setPadding(inset, inset, inset, inset);
-    textCol.setLayoutParams(
-        new FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-    heroValue = new TextView(requireContext());
-    heroValue.setGravity(Gravity.CENTER);
-    heroValue.setTextColor(requireContext().getColor(R.color.on_primary_container));
-    heroValue.setTextSize(44);
-    heroValue.setTypeface(null, Typeface.BOLD);
-    heroValue.setMaxLines(1);
-    heroLabel = new TextView(requireContext());
-    heroLabel.setGravity(Gravity.CENTER);
-    heroLabel.setTextColor(requireContext().getColor(R.color.on_primary_container));
-    heroLabel.setAlpha(0.75f);
-    heroLabel.setTextSize(13);
-    heroLabel.setTypeface(null, Typeface.BOLD);
-    LinearLayout.LayoutParams labelLp =
-        new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-    labelLp.topMargin = ViewUtils.dp(requireContext(), 4);
-    heroLabel.setLayoutParams(labelLp);
-    textCol.addView(heroValue);
-    textCol.addView(heroLabel);
-    binding.heroShapeContainer.addView(heroShape);
-    binding.heroShapeContainer.addView(textCol);
+    heroBinding =
+        ItemHeroStatBinding.inflate(getLayoutInflater(), binding.heroShapeContainer, true);
   }
 
   private void startHeroLoop() {
@@ -117,13 +77,17 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
   }
 
   private void swapHeroShape() {
-    if (binding == null || heroShape == null || heroStats.isEmpty()) return;
+    if (binding == null || heroBinding == null || heroStats.isEmpty()) return;
     heroStatIndex = (heroStatIndex + 1) % heroStats.size();
-    HeroStat next = heroStats.get(heroStatIndex);
-    heroValue.setText(next.value);
-    heroLabel.setText(next.label);
-    heroShape.setImageResource(next.shapeRes);
+    bindHero(heroStats.get(heroStatIndex));
     heroHandler.postDelayed(heroSwapRunnable, 2600);
+  }
+
+  private void bindHero(HeroStat stat) {
+    heroBinding.txtHeroValue.setText(stat.value);
+    heroBinding.txtHeroLabel.setText(stat.label);
+    heroBinding.imgHeroShape.setImageResource(stat.shapeRes);
+    heroBinding.imgHeroShape.setColorFilter(requireContext().getColor(R.color.primary_container));
   }
 
   private void loadStats() {
@@ -167,10 +131,7 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
         new HeroStat(
             String.valueOf(stats.getUpcoming_followups()), "Follow-ups", R.drawable.ghostish));
     heroStatIndex = 0;
-    HeroStat first = heroStats.get(0);
-    heroShape.setImageResource(first.shapeRes);
-    heroValue.setText(first.value);
-    heroLabel.setText(first.label);
+    bindHero(heroStats.get(0));
     startHeroLoop();
     StatsChartHelper.bindStatusBreakdown(
         binding.statusBreakdownContainer,
