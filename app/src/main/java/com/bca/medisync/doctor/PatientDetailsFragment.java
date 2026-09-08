@@ -40,18 +40,13 @@ public class PatientDetailsFragment extends BaseBindingFragment<FragmentPatientD
     patientName = args.getString("patient_name");
     bookingNotes = args.getString("booking_notes");
     appointmentId = args.getInt("appointment_id", -1);
-
-    binding.toolbar.setTitle("");
     binding.txtPatientName.setText(patientName);
-
     String gender = args.getString("patient_gender");
     String blood = args.getString("patient_blood");
     binding.chipGender.setText(isEmpty(gender) ? "--" : capitalize(gender));
     binding.chipBloodGroup.setText(isEmpty(blood) ? "--" : blood);
-
     String emergency = args.getString("patient_emergency");
     binding.txtEmergencyContact.setText(isEmpty(emergency) ? "Not provided" : emergency);
-
     InfoRowBinder.bind(
         new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", args.getString("patient_phone")),
         new InfoRowBinder.Row(binding.rowEmail.getRoot(), "Email", args.getString("patient_email")),
@@ -59,7 +54,6 @@ public class PatientDetailsFragment extends BaseBindingFragment<FragmentPatientD
             binding.rowDob.getRoot(), "Date of Birth", args.getString("patient_dob")),
         new InfoRowBinder.Row(
             binding.rowAddress.getRoot(), "Address", args.getString("patient_address")));
-
     bindProfilePic(args.getString("patient_pic_url"));
     binding.btnConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
   }
