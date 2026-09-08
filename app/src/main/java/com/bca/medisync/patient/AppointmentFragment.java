@@ -5,51 +5,37 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import com.bca.medisync.BaseBindingFragment;
+import com.bca.medisync.R;
 import com.bca.medisync.adapter.AppointmentAdapter;
 import com.bca.medisync.data.model.Appointment;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AppointmentApi;
 import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
+import com.bca.medisync.databinding.FragmentAppointmentBinding;
 import com.bca.medisync.util.ApiErrorHandler;
+import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.SwipeActionHelper;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-
 import java.util.ArrayList;
 import java.util.List;
-import com.bca.medisync.R;
 
-public class AppointmentFragment extends Fragment {
-  private RecyclerView rvUpcoming, rvHistory;
-  private MaterialButtonToggleGroup toggleGroup;
-  private MaterialToolbar toolbar;
-  private ExtendedFloatingActionButton fabBookAppointment;
-
+public class AppointmentFragment extends BaseBindingFragment<FragmentAppointmentBinding> {
   public AppointmentFragment() {}
 
-  @Nullable
   @Override
-  public View onCreateView(
-      @NonNull LayoutInflater inflater,
-      @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_appointment, container, false);
+  protected FragmentAppointmentBinding inflateBinding(
+      LayoutInflater inflater, ViewGroup container) {
+    return FragmentAppointmentBinding.inflate(inflater, container, false);
   }
 
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    initViews(view);
     setupToolbar();
     setupTabs();
     setUpRecylerViews();
@@ -68,49 +54,37 @@ public class AppointmentFragment extends Fragment {
     loadAppointments();
   }
 
-  private void initViews(View view) {
-    rvUpcoming = view.findViewById(R.id.rvUpcoming);
-    rvHistory = view.findViewById(R.id.rvHistory);
-    toggleGroup = view.findViewById(R.id.toggleGroup);
-    toolbar = view.findViewById(R.id.toolbar);
-    fabBookAppointment = view.findViewById(R.id.fabBookAppointment);
-  }
-
   private void setupToolbar() {
-    toolbar.setNavigationOnClickListener(null);
+    binding.toolbar.setNavigationOnClickListener(null);
   }
 
   private void setupTabs() {
-    toggleGroup.addOnButtonCheckedListener(
+    binding.toggleGroup.addOnButtonCheckedListener(
         (group, checkedId, isChecked) -> {
           if (!isChecked) return;
-          if (checkedId == R.id.btnUpcoming) {
-            rvUpcoming.setVisibility(View.VISIBLE);
-            rvHistory.setVisibility(View.GONE);
-          } else {
-            rvUpcoming.setVisibility(View.GONE);
-            rvHistory.setVisibility(View.VISIBLE);
-          }
+          boolean upcoming = checkedId == R.id.btnUpcoming;
+          binding.upcomingContainer.setVisibility(upcoming ? View.VISIBLE : View.GONE);
+          binding.historyContainer.setVisibility(upcoming ? View.GONE : View.VISIBLE);
         });
   }
 
   private void setUpRecylerViews() {
-    rvUpcoming.setLayoutManager(new LinearLayoutManager(requireContext()));
-    rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
+    binding.rvUpcoming.setLayoutManager(new LinearLayoutManager(requireContext()));
+    binding.rvHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
   }
 
   private void setupSwipe() {
     new SwipeActionHelper(
             this,
             position -> {
-              AppointmentAdapter adapter = (AppointmentAdapter) rvUpcoming.getAdapter();
+              AppointmentAdapter adapter = (AppointmentAdapter) binding.rvUpcoming.getAdapter();
               if (adapter == null) return 0;
               Appointment a = adapter.getItemAt(position);
               if (a == null) return 0;
               return a.getStatus().equalsIgnoreCase("Pending") ? ItemTouchHelper.LEFT : 0;
             },
             (position, direction) -> {
-              AppointmentAdapter adapter = (AppointmentAdapter) rvUpcoming.getAdapter();
+              AppointmentAdapter adapter = (AppointmentAdapter) binding.rvUpcoming.getAdapter();
               if (adapter == null) return;
               Appointment a = adapter.getItemAt(position);
               if (a != null) cancelAppointment(a);
@@ -118,11 +92,11 @@ public class AppointmentFragment extends Fragment {
         .withColors(
             R.color.error_container, R.color.on_error_container,
             R.color.error_container, R.color.on_error_container)
-        .attachTo(rvUpcoming);
+        .attachTo(binding.rvUpcoming);
   }
 
   private void setupFab() {
-    fabBookAppointment.setOnClickListener(
+    binding.fabBookAppointment.setOnClickListener(
         v -> ((MainTabActivity) requireActivity()).pushFragment(new HospitalFragment()));
   }
 
@@ -135,7 +109,7 @@ public class AppointmentFragment extends Fragment {
   }
 
   private void bindLists(List<Appointment> all) {
-    if (!isAdded()) return;
+    if (!isAdded() || binding == null) return;
     List<Appointment> upcoming = new ArrayList<>();
     List<Appointment> history = new ArrayList<>();
     for (Appointment a : all) {
@@ -146,11 +120,14 @@ public class AppointmentFragment extends Fragment {
         history.add(a);
       }
     }
-    rvUpcoming.setAdapter(
+    binding.rvUpcoming.setAdapter(
         new AppointmentAdapter(
             requireContext(), upcoming, false, true, this::onAppointmentClicked));
-    rvHistory.setAdapter(
+    binding.rvHistory.setAdapter(
         new AppointmentAdapter(requireContext(), history, false, this::onAppointmentClicked));
+
+    EmptyState.bind(binding.rvUpcoming, binding.txtNoUpcoming, upcoming.isEmpty());
+    EmptyState.bind(binding.rvHistory, binding.txtNoHistory, history.isEmpty());
   }
 
   private void onAppointmentClicked(Appointment appointment) {
@@ -181,7 +158,6 @@ public class AppointmentFragment extends Fragment {
       loadAppointments();
       return;
     }
-
     AppointmentApi api = ApiClient.api(AppointmentApi.class);
     ApiCallback.handle(
         api.cancelAppointment(appointmentId),
