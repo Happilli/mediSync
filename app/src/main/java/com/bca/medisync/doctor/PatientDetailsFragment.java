@@ -11,6 +11,7 @@ import com.bca.medisync.databinding.FragmentPatientDetailsBinding;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.ViewUtils;
+import com.bca.medisync.R;
 
 public class PatientDetailsFragment extends BaseBindingFragment<FragmentPatientDetailsBinding> {
   private int patientId = -1;
@@ -38,30 +39,36 @@ public class PatientDetailsFragment extends BaseBindingFragment<FragmentPatientD
     patientId = args.getInt("patient_id", -1);
     patientName = args.getString("patient_name");
     bookingNotes = args.getString("booking_notes");
-    binding.toolbar.setTitle(patientName);
-    binding.txtPatientName.setText(patientName);
     appointmentId = args.getInt("appointment_id", -1);
+
+    binding.toolbar.setTitle("");
+    binding.txtPatientName.setText(patientName);
+
+    String gender = args.getString("patient_gender");
+    String blood = args.getString("patient_blood");
+    binding.chipGender.setText(isEmpty(gender) ? "--" : capitalize(gender));
+    binding.chipBloodGroup.setText(isEmpty(blood) ? "--" : blood);
+
+    String emergency = args.getString("patient_emergency");
+    binding.txtEmergencyContact.setText(isEmpty(emergency) ? "Not provided" : emergency);
+
     InfoRowBinder.bind(
-        new InfoRowBinder.Row(
-            binding.rowGender.getRoot(), "Gender", args.getString("patient_gender")),
-        new InfoRowBinder.Row(
-            binding.rowBlood.getRoot(), "Blood Group", args.getString("patient_blood")),
         new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", args.getString("patient_phone")),
         new InfoRowBinder.Row(binding.rowEmail.getRoot(), "Email", args.getString("patient_email")),
         new InfoRowBinder.Row(
             binding.rowDob.getRoot(), "Date of Birth", args.getString("patient_dob")),
         new InfoRowBinder.Row(
-            binding.rowAddress.getRoot(), "Address", args.getString("patient_address")),
-        new InfoRowBinder.Row(
-            binding.rowEmergency.getRoot(),
-            "Emergency Contact",
-            args.getString("patient_emergency")));
+            binding.rowAddress.getRoot(), "Address", args.getString("patient_address")));
+
     bindProfilePic(args.getString("patient_pic_url"));
     binding.btnConsultation.setVisibility(appointmentId != -1 ? View.VISIBLE : View.GONE);
   }
 
   private void bindProfilePic(String url) {
-    ImageLoader.loadProfilePic(this, binding.imgPatientProfile, url);
+    int borderPx = ViewUtils.dp(requireContext(), 4);
+    int borderColor = requireContext().getColor(R.color.primary);
+    ImageLoader.loadProfilePicShaped(
+        this, binding.imgPatientProfile, url, R.drawable.sunny, borderPx, borderColor);
   }
 
   private void setupListener() {
@@ -86,5 +93,13 @@ public class PatientDetailsFragment extends BaseBindingFragment<FragmentPatientD
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
         });
+  }
+
+  private boolean isEmpty(String s) {
+    return s == null || s.trim().isEmpty();
+  }
+
+  private String capitalize(String s) {
+    return s.substring(0, 1).toUpperCase() + s.substring(1);
   }
 }
