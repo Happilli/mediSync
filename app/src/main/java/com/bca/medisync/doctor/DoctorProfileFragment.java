@@ -1,5 +1,6 @@
 package com.bca.medisync.doctor;
 
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
 import com.bca.medisync.data.local.SessionManager;
@@ -26,6 +28,7 @@ import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.ProfilePicUploader;
+import com.bca.medisync.util.ViewUtils;
 
 public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorProfileBinding> {
   private SessionManager sessionManager;
@@ -68,6 +71,12 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
                 new PickVisualMediaRequest.Builder()
                     .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
                     .build()));
+    binding.btnEditDoctorProfile.setOnClickListener(
+        v ->
+            pickMedia.launch(
+                new PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                    .build()));
     binding.btnLogoutDoctor.setOnClickListener(
         v -> AuthUtils.logout((androidx.appcompat.app.AppCompatActivity) requireActivity()));
   }
@@ -98,7 +107,7 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
             binding.scrollContent,
             profile -> {
               bindProfile(profile);
-              loadHospitalName(profile.getHospital_id());
+              loadHospitalDetails(profile.getHospital_id());
             }),
         LoadingHelper.wrapError(
             binding.loadingIndicator,
@@ -106,7 +115,7 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
             ApiErrorHandler.with(requireContext()).fallback("Failed to load profile.").build()));
   }
 
-  private void loadHospitalName(int hospitalId) {
+  private void loadHospitalDetails(int hospitalId) {
     HospitalApi api = ApiClient.api(HospitalApi.class);
     ApiCallback.handle(
         api.getHospitalDetail(hospitalId),
@@ -114,6 +123,7 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
         h -> {
           if (binding == null) return;
           InfoRowBinder.setValue(binding.rowHospital.getRoot(), h.getName());
+          ImageLoader.loadHospitalImage(this, binding.imgHospitalBanner, h.getImage_url());
         },
         (code, msg) -> {
           if (binding == null) return;
@@ -126,14 +136,7 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
     int years = p.getYears_experience() != null ? p.getYears_experience() : 0;
     binding.txtDoctorName.setText("Dr. " + p.getName());
     binding.txtRole.setText(p.getSpeciality());
-    if (p.is_verified()) {
-      binding.txtRegistrationBadge.setText("Verified");
-      binding.txtRegistrationBadge.setTextColor(
-          requireContext().getColor(R.color.on_tertiary_container));
-    } else {
-      binding.txtRegistrationBadge.setText("Pending Verification");
-      binding.txtRegistrationBadge.setTextColor(requireContext().getColor(R.color.error));
-    }
+    bindVerificationBadge(p.is_verified());
     if (p.getBio() != null && !p.getBio().trim().isEmpty()) {
       binding.txtBio.setVisibility(View.VISIBLE);
       binding.txtBio.setText(p.getBio());
@@ -157,8 +160,35 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
         new InfoRowBinder.Row(binding.rowAddress.getRoot(), "Address", p.getAddress()));
   }
 
+  private void bindVerificationBadge(boolean isVerified) {
+    String text = isVerified ? "Verified" : "Pending Verification";
+    int colorRes = isVerified ? R.color.tertiary : R.color.error;
+    int iconRes = isVerified ? R.drawable.verified_on : R.drawable.verified_off;
+    int color = requireContext().getColor(colorRes);
+
+    binding.txtRegistrationBadge.setText(text);
+    binding.txtRegistrationBadge.setTextColor(color);
+
+    Drawable icon = ContextCompat.getDrawable(requireContext(), iconRes);
+    if (icon != null) {
+      icon = icon.mutate();
+      icon.setTint(color);
+    }
+    binding.txtRegistrationBadge.setCompoundDrawablesRelativeWithIntrinsicBounds(
+        icon, null, null, null);
+    binding.txtRegistrationBadge.setCompoundDrawablePadding(ViewUtils.dp(requireContext(), 6));
+  }
+
   private void bindProfilePic(String profilePicUrl) {
     if (binding == null) return;
-    ImageLoader.loadProfilePic(this, binding.imgDoctorProfile, profilePicUrl);
+    int borderPx = ViewUtils.dp(requireContext(), 3);
+    int borderColor = requireContext().getColor(R.color.surface);
+    ImageLoader.loadProfilePicShaped(
+        this,
+        binding.imgDoctorProfile,
+        profilePicUrl,
+        R.drawable.pill,
+        borderPx,
+        borderColor);
   }
 }
