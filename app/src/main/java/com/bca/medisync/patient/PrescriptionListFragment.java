@@ -11,13 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.adapter.SimpleListAdapter;
 import com.bca.medisync.data.model.Prescription;
-import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPrescriptionListBinding;
 import com.bca.medisync.databinding.ItemPrescriptionBinding;
-import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ViewUtils;
 import java.util.ArrayList;
@@ -90,9 +88,8 @@ public class PrescriptionListFragment extends BaseBindingFragment<FragmentPrescr
 
   private void loadPrescriptions() {
     PrescriptionApi api = ApiClient.api(PrescriptionApi.class);
-    ApiCallback.handle(
+    call(
         api.getMyPrescriptions(),
-        this,
         body -> {
           if (body.isEmpty()) {
             adapter.updateData(new ArrayList<>());
@@ -107,7 +104,7 @@ public class PrescriptionListFragment extends BaseBindingFragment<FragmentPrescr
                 showEmpty(enriched.isEmpty());
               });
         },
-        ApiErrorHandler.with(requireContext()).fallback("Failed to load prescriptions.").build());
+        "Failed to load prescriptions.");
   }
 
   private void showEmpty(boolean empty) {

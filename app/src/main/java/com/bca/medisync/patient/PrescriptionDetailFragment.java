@@ -19,7 +19,6 @@ import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.api.PrescriptionApi;
 import com.bca.medisync.data.remote.helpers.PrescriptionEnricher;
 import com.bca.medisync.databinding.FragmentPrescriptionDetailBinding;
-import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.RoundedListStyler;
 import com.bca.medisync.util.ViewUtils;
 import java.util.List;
@@ -50,14 +49,13 @@ public class PrescriptionDetailFragment
 
   private void loadDetail() {
     PrescriptionApi api = ApiClient.api(PrescriptionApi.class);
-    ApiCallback.handle(
+    call(
         api.getPrescriptionDetail(prescriptionId),
-        this,
         body -> {
           bind(PrescriptionEnricher.mapToPrescription(body, null));
           fetchDoctorName(body.getDoctor_id());
         },
-        ApiErrorHandler.with(requireContext()).fallback("Failed to load prescription").build());
+        "Failed to load prescription");
   }
 
   private void fetchDoctorName(int doctorId) {
@@ -84,7 +82,6 @@ public class PrescriptionDetailFragment
     }
     binding.txtInstructions.setVisibility(
         p.getInstructions() == null || p.getInstructions().isEmpty() ? View.GONE : View.VISIBLE);
-
     binding.medicationsContainer.removeAllViews();
     List<Medication> meds = p.getMedications();
     if (meds == null || meds.isEmpty()) {

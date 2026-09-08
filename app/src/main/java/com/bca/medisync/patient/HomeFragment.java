@@ -24,7 +24,6 @@ import com.bca.medisync.data.remote.helpers.AppointmentEnricher;
 import com.bca.medisync.databinding.FragmentHomeBinding;
 import com.bca.medisync.databinding.ItemDashboardBinding;
 import com.bca.medisync.doctor.MedicalHistoryFragment;
-import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.NotificationBadgeHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
@@ -84,13 +83,12 @@ public class HomeFragment extends BaseBindingFragment<FragmentHomeBinding>
 
   private void loadPatientName() {
     PatientApi api = ApiClient.api(PatientApi.class);
-    ApiCallback.handle(
+    call(
         api.getMyProfile(),
-        this,
         body -> {
           if (binding != null) binding.txtPatientName.setText(body.getName());
         },
-        ApiErrorHandler.with(requireContext()).fallback("Failed to load profile.").build());
+        "Failed to load profile.");
   }
 
   @Override

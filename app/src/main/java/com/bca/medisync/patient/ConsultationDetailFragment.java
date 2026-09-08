@@ -8,11 +8,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
-import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.ConsultationApi;
 import com.bca.medisync.databinding.FragmentConsultationDetailBinding;
-import com.bca.medisync.util.ApiErrorHandler;
 import com.bca.medisync.util.ViewUtils;
 
 public class ConsultationDetailFragment
@@ -40,9 +38,8 @@ public class ConsultationDetailFragment
 
   private void loadConsultation() {
     ConsultationApi api = ApiClient.api(ConsultationApi.class);
-    ApiCallback.handle(
+    call(
         api.getConsultationForAppointment(appointmentId),
-        this,
         c -> {
           if (binding == null) return;
           binding.txtDiagnosis.setText(c.getDiagnosis());
@@ -62,7 +59,7 @@ public class ConsultationDetailFragment
             binding.txtNotes.setText(c.getNotes());
           }
         },
-        ApiErrorHandler.with(requireContext()).fallback("Failed to load consultation.").build());
+        "Failed to load consultation.");
   }
 
   private String safe(String s) {

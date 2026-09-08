@@ -97,17 +97,13 @@ public class BookAppointmentFragment extends BaseBindingFragment<FragmentBookApp
   private void setupTimeSlots() {
     if (doctorId == -1) return;
     DoctorApi api = ApiClient.api(DoctorApi.class);
-    ApiCallback.handle(
-        api.getDoctorTimeslots(doctorId, true),
-        this,
-        body -> {
+    call(api.getDoctorTimeslots(doctorId, true), body -> {
           List<TimeSlot> slots = new ArrayList<>();
           for (TimeSlotResponse r : body) {
             slots.add(mapToTimeSlot(r));
           }
           bindTimeSlots(slots);
-        },
-        ApiErrorHandler.with(requireContext()).fallback("Failed to load available slots.").build());
+        }, "Failed to load available slots.");
   }
 
   private void setupConfirmButton() {

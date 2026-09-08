@@ -157,10 +157,7 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
 
   private void loadMedications() {
     MedicationApi api = ApiClient.api(MedicationApi.class);
-    ApiCallback.handle(
-        api.getMyMedications(),
-        this,
-        body -> {
+    call(api.getMyMedications(), body -> {
           if (binding == null) return;
           List<Medication> meds = new ArrayList<>();
           for (MedicationResponse r : body) {
@@ -168,8 +165,7 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
           }
           bindMedications(meds);
           scheduleAllReminders(body);
-        },
-        ApiErrorHandler.with(requireContext()).fallback("Failed to load medications.").build());
+        }, "Failed to load medications.");
   }
 
   private void scheduleAllReminders(List<MedicationResponse> responses) {
