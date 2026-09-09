@@ -45,9 +45,9 @@ public class PrescriptionListFragment extends BaseBindingFragment<FragmentPrescr
             ItemPrescriptionBinding::inflate,
             new ArrayList<>(),
             (rowBinding, prescription, pos) -> {
-              rowBinding.txtDiagnosis.setText(prescription.getDiagnosis());
-              rowBinding.txtDoctorName.setText(prescription.getDoctor_name());
-              rowBinding.txtDate.setText(prescription.getCreatedAt());
+              rowBinding.txtDiagnosis.setText(prescription.diagnosis());
+              rowBinding.txtDoctorName.setText(prescription.doctor_name());
+              rowBinding.txtDate.setText(prescription.createdAt());
             },
             this::onPrescriptionClicked);
     binding.rvPrescriptions.setAdapter(adapter);
@@ -55,7 +55,7 @@ public class PrescriptionListFragment extends BaseBindingFragment<FragmentPrescr
   }
 
   private void onPrescriptionClicked(Prescription prescription) {
-    String status = prescription.getDispenseStatus();
+    String status = prescription.dispenseStatus();
     if (status == null || "not_required".equals(status)) {
       openDetail(prescription);
       return;
@@ -80,7 +80,7 @@ public class PrescriptionListFragment extends BaseBindingFragment<FragmentPrescr
 
   private void openDetail(Prescription prescription) {
     Bundle args = new Bundle();
-    args.putInt("prescription_id", prescription.getId());
+    args.putInt("prescription_id", prescription.id());
     PrescriptionDetailFragment fragment = new PrescriptionDetailFragment();
     fragment.setArguments(args);
     ((MainTabActivity) requireActivity()).pushFragment(fragment);

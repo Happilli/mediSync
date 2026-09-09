@@ -1,17 +1,11 @@
 package com.bca.medisync.data.model;
 
-import lombok.Getter;
-import lombok.AllArgsConstructor;
-
-@Getter
-@AllArgsConstructor
-public class Hospital {
-  private final String id;
-  private final String name;
-  private final String address;
-  private final String phone;
-  private final String website;
-  private final String description;
-  private final double rating;
-  private final String imageUrl;
-}
+public record Hospital(
+    String id,
+    String name,
+    String address,
+    String phone,
+    String website,
+    String description,
+    double rating,
+    String imageUrl) {}

@@ -1,11 +1,4 @@
 package com.bca.medisync.data.remote.dto.patient;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
-public class PatientUpdateRequest {
-  private String name;
-  private String phone;
-  private String address;
-  private String emergency_contact;
-}
+public record PatientUpdateRequest(
+    String name, String phone, String address, String emergency_contact) {}

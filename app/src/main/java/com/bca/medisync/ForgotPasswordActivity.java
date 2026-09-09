@@ -54,7 +54,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         body -> {
           binding.btnCheckEmail.setEnabled(true);
           verifiedEmail = email;
-          binding.txtSecurityQuestion.setText(body.getQuestion());
+          binding.txtSecurityQuestion.setText(body.question());
           binding.stepEmail.setVisibility(View.GONE);
           binding.stepReset.setVisibility(View.VISIBLE);
           binding.txtSubtitle.setText("Answer your security question to reset your password");

@@ -7,7 +7,6 @@ import com.bca.medisync.data.remote.dto.login.LoginRequest;
 import com.bca.medisync.data.remote.dto.login.LoginResponse;
 import com.bca.medisync.data.remote.dto.register.PatientRegisterRequest;
 import com.bca.medisync.data.remote.dto.register.RegisterResponse;
-
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;

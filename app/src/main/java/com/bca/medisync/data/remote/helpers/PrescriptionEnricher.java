@@ -15,57 +15,55 @@ import java.util.List;
 import java.util.Locale;
 
 public class PrescriptionEnricher {
-
   public static void enrichAll(
       List<PrescriptionResponse> responses,
       ParallelEnricher.Callback1<List<Prescription>> callback) {
     DoctorApi doctorApi = ApiClient.api(DoctorApi.class);
     ParallelEnricher.run(
         responses,
-        r -> doctorApi.getDoctorDetail(r.getDoctor_id()),
+        r -> doctorApi.getDoctorDetail(r.doctor_id()),
         PrescriptionEnricher::mapToPrescription,
         callback);
   }
 
   public static Prescription mapToPrescription(PrescriptionResponse r, DoctorResponse d) {
-    String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctor_id();
+    String doctorName = d != null ? d.name() : "Doctor #" + r.doctor_id();
     List<Medication> meds = new ArrayList<>();
-    if (r.getMedications() != null) {
-      for (MedicationResponse m : r.getMedications()) meds.add(mapMedication(m));
+    if (r.medications() != null) {
+      for (MedicationResponse m : r.medications()) meds.add(mapMedication(m));
     }
     return new Prescription(
-        r.getId(),
+        r.id(),
         doctorName,
-        r.getDiagnosis(),
-        r.getInstructions(),
-        formatDate(r.getCreated_at()),
-        formatDate(r.getFollow_up_date()),
-        r.getDispense_status(),
+        r.diagnosis(),
+        r.instructions(),
+        formatDate(r.created_at()),
+        formatDate(r.follow_up_date()),
+        r.dispense_status(),
         meds);
   }
 
   public static Medication mapMedication(MedicationResponse m) {
-    String displayTime = m.getDosage_time();
+    String displayTime = m.dosage_time();
     try {
-      LocalTime t = LocalTime.parse(m.getDosage_time());
+      LocalTime t = LocalTime.parse(m.dosage_time());
       displayTime = t.format(DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault()));
     } catch (Exception ignored) {
     }
-    String frequencyLabel =
-        m.getFrequency_per_day() + "x Daily \u2022 " + m.getDuration_days() + " Days";
+    String frequencyLabel = m.frequency_per_day() + "x Daily \u2022 " + m.duration_days() + " Days";
     return new Medication(
-        m.getSchedule_id(),
-        m.getMedication_id(),
-        m.getName(),
-        m.getDosage(),
+        m.schedule_id(),
+        m.medication_id(),
+        m.name(),
+        m.dosage(),
         frequencyLabel,
         displayTime,
-        m.getLabel(),
-        m.getDuration_days() + " Days",
+        m.label(),
+        m.duration_days() + " Days",
         m.is_taken(),
-        m.getInstruction(),
-        m.getDoctor_name(),
-        m.getDispense_status());
+        m.instruction(),
+        m.doctor_name(),
+        m.dispense_status());
   }
 
   public static String formatDate(String iso) {

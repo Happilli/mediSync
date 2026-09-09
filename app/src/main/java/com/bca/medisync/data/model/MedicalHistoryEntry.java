@@ -1,14 +1,4 @@
 package com.bca.medisync.data.model;
 
-import lombok.Getter;
-import lombok.AllArgsConstructor;
-
-@Getter
-@AllArgsConstructor
-public class MedicalHistoryEntry {
-  private final String date;
-  private final String title;
-  private final String description;
-  private final Integer appointmentId;
-  private final int doctorId;
-}
+public record MedicalHistoryEntry(
+    String date, String title, String description, Integer appointmentId, int doctorId) {}

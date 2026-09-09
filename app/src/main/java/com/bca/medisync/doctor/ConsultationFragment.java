@@ -60,9 +60,9 @@ public class ConsultationFragment extends BaseBindingFragment<FragmentConsultati
           Bundle args = new Bundle();
           args.putString("patient_name", patientName);
           args.putInt("appointment_id", appointmentId);
-          args.putString("diagnosis", consultation.getDiagnosis());
-          args.putString("complaint", consultation.getComplaint());
-          args.putString("notes", consultation.getNotes());
+          args.putString("diagnosis", consultation.diagnosis());
+          args.putString("complaint", consultation.complaint());
+          args.putString("notes", consultation.notes());
           PrescriptionFragment fragment = new PrescriptionFragment();
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).replaceCurrentFragment(fragment);
@@ -81,7 +81,6 @@ public class ConsultationFragment extends BaseBindingFragment<FragmentConsultati
           String hr = binding.etHeartRate.getText().toString().trim();
           String temp = binding.etTemperature.getText().toString().trim();
           String weight = binding.etWeight.getText().toString().trim();
-
           if (complaint.isEmpty()) {
             binding.etComplaint.setError("Chief compliant is required...");
             return;
@@ -150,10 +149,9 @@ public class ConsultationFragment extends BaseBindingFragment<FragmentConsultati
           Bundle args = new Bundle();
           args.putString("patient_name", patientName);
           args.putInt("appointment_id", appointmentId);
-          args.putString("diagnosis", consultation.getDiagnosis());
-          args.putString("complaint", consultation.getComplaint());
-          args.putString("notes", consultation.getNotes());
-
+          args.putString("diagnosis", consultation.diagnosis());
+          args.putString("complaint", consultation.complaint());
+          args.putString("notes", consultation.notes());
           PrescriptionFragment fragment = new PrescriptionFragment();
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).replaceCurrentFragment(fragment);

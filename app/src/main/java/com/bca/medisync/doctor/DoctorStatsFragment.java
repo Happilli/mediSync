@@ -109,41 +109,39 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
     heroStats.clear();
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getTotal_appointments()),
+            String.valueOf(stats.total_appointments()),
             "Total Appointments",
             R.drawable.cookie9sided));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getTotal_patients()), "Total Patients", R.drawable.clover4leaf));
+            String.valueOf(stats.total_patients()), "Total Patients", R.drawable.clover4leaf));
+    heroStats.add(
+        new HeroStat(String.valueOf(stats.patients_this_month()), "This Month", R.drawable.pill));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getPatients_this_month()), "This Month", R.drawable.pill));
+            String.valueOf(stats.upcoming_appointments()), "Upcoming", R.drawable.cookie6sided));
+    heroStats.add(
+        new HeroStat(String.valueOf(stats.total_consultations()), "Consultations", R.drawable.gem));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getUpcoming_appointments()), "Upcoming", R.drawable.cookie6sided));
+            String.valueOf(stats.total_prescriptions()), "Prescriptions", R.drawable.pentagon));
     heroStats.add(
         new HeroStat(
-            String.valueOf(stats.getTotal_consultations()), "Consultations", R.drawable.gem));
-    heroStats.add(
-        new HeroStat(
-            String.valueOf(stats.getTotal_prescriptions()), "Prescriptions", R.drawable.pentagon));
-    heroStats.add(
-        new HeroStat(
-            String.valueOf(stats.getUpcoming_followups()), "Follow-ups", R.drawable.ghostish));
+            String.valueOf(stats.upcoming_followups()), "Follow-ups", R.drawable.ghostish));
     heroStatIndex = 0;
     bindHero(heroStats.get(0));
     startHeroLoop();
     StatsChartHelper.bindStatusBreakdown(
         binding.statusBreakdownContainer,
-        stats.getAppointments_by_status(),
-        stats.getTotal_appointments(),
+        stats.appointments_by_status(),
+        stats.total_appointments(),
         "No appointments yet");
     List<String> months = new ArrayList<>();
     List<Integer> counts = new ArrayList<>();
-    if (stats.getAppointments_last_6_months() != null) {
-      for (MonthlyAppointmentCount m : stats.getAppointments_last_6_months()) {
-        months.add(m.getMonth());
-        counts.add(m.getCount());
+    if (stats.appointments_last_6_months() != null) {
+      for (MonthlyAppointmentCount m : stats.appointments_last_6_months()) {
+        months.add(m.month());
+        counts.add(m.count());
       }
     }
     StatsChartHelper.bindMonthlyTrend(binding.monthlyTrendContainer, months, counts, 28);

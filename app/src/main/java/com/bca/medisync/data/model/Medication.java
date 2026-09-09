@@ -1,21 +1,15 @@
 package com.bca.medisync.data.model;
 
-import lombok.Getter;
-import lombok.AllArgsConstructor;
-
-@Getter
-@AllArgsConstructor
-public class Medication {
-  private final int scheduleId;
-  private final int medicationId;
-  private final String name;
-  private final String dosage;
-  private final String frequency;
-  private final String time;
-  private final String label;
-  private final String duration;
-  private final boolean taken;
-  private final String instruction;
-  private final String doctorName;
-  private final String dispenseStatus;
-}
+public record Medication(
+    int scheduleId,
+    int medicationId,
+    String name,
+    String dosage,
+    String frequency,
+    String time,
+    String label,
+    String duration,
+    boolean taken,
+    String instruction,
+    String doctorName,
+    String dispenseStatus) {}

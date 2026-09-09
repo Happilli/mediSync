@@ -104,12 +104,12 @@ public class MainActivity extends AppCompatActivity {
               binding.loadingIndicator,
               () -> {
                 binding.btnLogin.setEnabled(true);
-                sessionManager.saveSession(body.getAccess_token(), body.getRole(), body.getEmail());
+                sessionManager.saveSession(body.access_token(), body.role(), body.email());
                 NotificationSocketHolder.get()
                     .connect(sessionManager.getToken(), globalNotificationListener);
 
                 Intent intent;
-                if ("doctor".equalsIgnoreCase(body.getRole())) {
+                if ("doctor".equalsIgnoreCase(body.role())) {
                   intent = new Intent(MainActivity.this, DoctorTabActivity.class);
                 } else {
                   intent = new Intent(MainActivity.this, MainTabActivity.class);

@@ -51,7 +51,7 @@ public class PrescriptionDetailFragment
         api.getPrescriptionDetail(prescriptionId),
         body -> {
           bind(PrescriptionEnricher.mapToPrescription(body, null));
-          fetchDoctorName(body.getDoctor_id());
+          fetchDoctorName(body.doctor_id());
         },
         "Failed to load prescription");
   }
@@ -62,16 +62,16 @@ public class PrescriptionDetailFragment
         doctorApi.getDoctorDetail(doctorId),
         this,
         d -> {
-          if (binding != null) binding.txtDoctorName.setText(d.getName());
+          if (binding != null) binding.txtDoctorName.setText(d.name());
         },
         (code, msg) -> {});
   }
 
   private void bind(Prescription p) {
     if (binding == null) return;
-    binding.txtDiagnosis.setText(p.getDiagnosis());
-    binding.txtInstructions.setText(p.getInstructions());
-    String followUp = p.getFollowUpDate();
+    binding.txtDiagnosis.setText(p.diagnosis());
+    binding.txtInstructions.setText(p.instructions());
+    String followUp = p.followUpDate();
     if (followUp == null || followUp.isEmpty()) {
       binding.txtFollowUp.setVisibility(View.GONE);
     } else {
@@ -79,9 +79,9 @@ public class PrescriptionDetailFragment
       binding.txtFollowUp.setText("Follow-up: " + followUp);
     }
     binding.txtInstructions.setVisibility(
-        p.getInstructions() == null || p.getInstructions().isEmpty() ? View.GONE : View.VISIBLE);
+        p.instructions() == null || p.instructions().isEmpty() ? View.GONE : View.VISIBLE);
     binding.medicationsContainer.removeAllViews();
-    List<Medication> meds = p.getMedications();
+    List<Medication> meds = p.medications();
     if (meds == null || meds.isEmpty()) {
       binding.txtNoMeds.setVisibility(View.VISIBLE);
       return;
@@ -98,11 +98,11 @@ public class PrescriptionDetailFragment
     ItemMedicationSummaryBinding rowBinding =
         ItemMedicationSummaryBinding.inflate(
             getLayoutInflater(), binding.medicationsContainer, false);
-    rowBinding.txtMedName.setText(m.getName() + " " + m.getDosage());
-    rowBinding.txtMedFrequency.setText(m.getFrequency() + " \u2022 " + m.getTime());
-    if (m.getInstruction() != null && !m.getInstruction().isEmpty()) {
+    rowBinding.txtMedName.setText(m.name() + " " + m.dosage());
+    rowBinding.txtMedFrequency.setText(m.frequency() + " \u2022 " + m.time());
+    if (m.instruction() != null && !m.instruction().isEmpty()) {
       rowBinding.txtMedInstruction.setVisibility(View.VISIBLE);
-      rowBinding.txtMedInstruction.setText(m.getInstruction());
+      rowBinding.txtMedInstruction.setText(m.instruction());
     }
     return rowBinding.getRoot();
   }

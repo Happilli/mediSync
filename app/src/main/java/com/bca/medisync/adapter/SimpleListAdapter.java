@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import com.bca.medisync.util.RoundedListStyler;
-import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class SimpleListAdapter<T, VB extends ViewBinding>
   private final Inflater<VB> inflater;
   private List<T> items;
   private List<T> unfiltered;
-  @Setter private Binder<T, VB> binder;
+  private Binder<T, VB> binder;
   private final OnItemClick<T> listener;
   private final Matcher<T> matcher;
   private boolean roundedList = false;
@@ -76,6 +75,10 @@ public class SimpleListAdapter<T, VB extends ViewBinding>
     items.add(0, item);
     unfiltered.add(0, item);
     notifyItemInserted(0);
+  }
+
+  public void setBinder(Binder<T, VB> binder) {
+    this.binder = binder;
   }
 
   public void filter(String query) {

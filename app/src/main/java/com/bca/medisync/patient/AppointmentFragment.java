@@ -81,7 +81,7 @@ public class AppointmentFragment extends BaseBindingFragment<FragmentAppointment
               if (adapter == null) return 0;
               Appointment a = adapter.getItemAt(position);
               if (a == null) return 0;
-              return a.getStatus().equalsIgnoreCase("Pending") ? ItemTouchHelper.LEFT : 0;
+              return a.status().equalsIgnoreCase("Pending") ? ItemTouchHelper.LEFT : 0;
             },
             (position, direction) -> {
               AppointmentAdapter adapter = (AppointmentAdapter) binding.rvUpcoming.getAdapter();
@@ -113,8 +113,7 @@ public class AppointmentFragment extends BaseBindingFragment<FragmentAppointment
     List<Appointment> upcoming = new ArrayList<>();
     List<Appointment> history = new ArrayList<>();
     for (Appointment a : all) {
-      if (a.getStatus().equalsIgnoreCase("Confirmed")
-          || a.getStatus().equalsIgnoreCase("Pending")) {
+      if (a.status().equalsIgnoreCase("Confirmed") || a.status().equalsIgnoreCase("Pending")) {
         upcoming.add(a);
       } else {
         history.add(a);
@@ -133,7 +132,7 @@ public class AppointmentFragment extends BaseBindingFragment<FragmentAppointment
   private void onAppointmentClicked(Appointment appointment) {
     Toast.makeText(
             requireContext(),
-            appointment.getStatus().equalsIgnoreCase("Pending")
+            appointment.status().equalsIgnoreCase("Pending")
                 ? "Swipe left to cancel this appointment."
                 : "This appointment can no longer be modified.",
             Toast.LENGTH_SHORT)
@@ -152,7 +151,7 @@ public class AppointmentFragment extends BaseBindingFragment<FragmentAppointment
   private void cancelAppointment(Appointment appointment) {
     int appointmentId;
     try {
-      appointmentId = Integer.parseInt(appointment.getId());
+      appointmentId = Integer.parseInt(appointment.id());
     } catch (NumberFormatException e) {
       Toast.makeText(requireContext(), "Invalid appointment reference", Toast.LENGTH_SHORT).show();
       loadAppointments();

@@ -60,20 +60,20 @@ public class MedicalHistoryFragment extends BaseBindingFragment<FragmentMedicalH
             ItemMedicalHistoryBinding::inflate,
             new ArrayList<>(),
             (rowBinding, entry, pos) -> {
-              rowBinding.txtDate.setText(entry.getDate());
-              rowBinding.txtTitle.setText(entry.getTitle());
-              rowBinding.txtDescription.setText(entry.getDescription());
+              rowBinding.txtDate.setText(entry.date());
+              rowBinding.txtTitle.setText(entry.title());
+              rowBinding.txtDescription.setText(entry.description());
             },
             entry -> {
-              if (entry.getAppointmentId() == null) return;
+              if (entry.appointmentId() == null) return;
               if (isDoctorView
-                  && (currentDoctorId == null || entry.getDoctorId() != currentDoctorId)) {
+                  && (currentDoctorId == null || entry.doctorId() != currentDoctorId)) {
                 Toast.makeText(requireContext(), "Recorded by another doctor.", Toast.LENGTH_SHORT)
                     .show();
                 return;
               }
               Bundle args = new Bundle();
-              args.putInt("appointment_id", entry.getAppointmentId());
+              args.putInt("appointment_id", entry.appointmentId());
               ConsultationDetailFragment fragment = new ConsultationDetailFragment();
               fragment.setArguments(args);
               if (isDoctorView) {
@@ -92,7 +92,6 @@ public class MedicalHistoryFragment extends BaseBindingFragment<FragmentMedicalH
     patientName = args != null ? args.getString("patient_name") : null;
     patientId = args != null ? args.getInt("patient_id", -1) : -1;
     appointmentId = args != null ? args.getInt("appointment_id", -1) : -1;
-
     if (isDoctorView) {
       binding.tvHeader.setVisibility(View.VISIBLE);
       binding.tvHeader.setText(
@@ -116,7 +115,10 @@ public class MedicalHistoryFragment extends BaseBindingFragment<FragmentMedicalH
   private void fetchCurrentDoctorId() {
     DoctorApi api = ApiClient.api(DoctorApi.class);
     ApiCallback.handle(
-        api.getMyProfile(), this, profile -> currentDoctorId = profile.getId(), (code, msg) -> {});
+        api.getMyProfile(),
+        this,
+        profile -> currentDoctorId = profile.doctor().id(),
+        (code, msg) -> {});
   }
 
   private void loadHistory() {
@@ -131,15 +133,15 @@ public class MedicalHistoryFragment extends BaseBindingFragment<FragmentMedicalH
           for (MedicalHistoryResponse r : body) {
             entries.add(
                 new MedicalHistoryEntry(
-                    PrescriptionEnricher.formatDate(r.getDate()),
-                    r.getTitle(),
-                    r.getDescription(),
-                    r.getAppointment_id(),
-                    r.getDoctor_id()));
+                    PrescriptionEnricher.formatDate(r.date()),
+                    r.title(),
+                    r.description(),
+                    r.appointment_id(),
+                    r.doctor_id()));
           }
           if (isDoctorView) {
             binding.tvRxName.setText(entries.isEmpty() ? "No records" : "Latest Record");
-            binding.tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).getTitle());
+            binding.tvRxDesc.setText(entries.isEmpty() ? "" : entries.get(0).title());
           }
           bindTimeline(entries);
         },

@@ -1,17 +1,13 @@
 package com.bca.medisync.data.remote.dto.register;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
-public class PatientRegisterRequest {
-  private String email;
-  private String password;
-  private String name;
-  private String phone;
-  private String address;
-  private String date_of_birth;
-  private String gender;
-  private String blood_group;
-  private String emergency_contact;
-  private String security_answer;
-}
+public record PatientRegisterRequest(
+    String email,
+    String password,
+    String name,
+    String phone,
+    String address,
+    String date_of_birth,
+    String gender,
+    String blood_group,
+    String emergency_contact,
+    String security_answer) {}

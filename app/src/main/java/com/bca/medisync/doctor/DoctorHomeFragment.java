@@ -109,10 +109,10 @@ public class DoctorHomeFragment extends BaseBindingFragment<FragmentDoctorHomeBi
         this,
         p -> {
           if (binding == null) return;
-          binding.txtDoctorName.setText("Dr. " + p.getName() + " !");
-          binding.txtPatientsMonth.setText(String.valueOf(p.getPatients_this_month()));
-          binding.txtTotalPatients.setText(String.valueOf(p.getTotal_patients()));
-          binding.txtFollowUps.setText(String.valueOf(p.getUpcoming_followups()));
+          binding.txtDoctorName.setText("Dr. " + p.doctor().name() + " !");
+          binding.txtPatientsMonth.setText(String.valueOf(p.patients_this_month()));
+          binding.txtTotalPatients.setText(String.valueOf(p.total_patients()));
+          binding.txtFollowUps.setText(String.valueOf(p.upcoming_followups()));
         },
         (code, msg) -> {
           if (code == 401) handleUnauthorized();
@@ -131,20 +131,17 @@ public class DoctorHomeFragment extends BaseBindingFragment<FragmentDoctorHomeBi
           String todayStr =
               new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
           List<AppointmentResponse> todayAppointments = new ArrayList<>();
-
           for (AppointmentResponse r : all) {
             String apptDate =
-                com.bca.medisync.util.DateTimeUtils.format(r.getAppointment_at(), "yyyy-MM-dd");
+                com.bca.medisync.util.DateTimeUtils.format(r.appointment_at(), "yyyy-MM-dd");
             if (todayStr.equals(apptDate)) todayAppointments.add(r);
           }
-
           binding.txtScheduledCount.setText(
               todayAppointments.size()
                   + (todayAppointments.size() == 1 ? " appointment today" : " appointments today"));
           updateStats(todayAppointments);
           EmptyState.bind(
               binding.rvAppointments, binding.txtNoAppointments, todayAppointments.isEmpty());
-
           if (!todayAppointments.isEmpty()) {
             AppointmentEnricher.enrichForDoctor(
                 todayAppointments,
@@ -190,7 +187,7 @@ public class DoctorHomeFragment extends BaseBindingFragment<FragmentDoctorHomeBi
   private void updateStats(List<AppointmentResponse> appointments) {
     int pendingCount = 0, completedCount = 0;
     for (AppointmentResponse a : appointments) {
-      String status = a.getStatus() != null ? a.getStatus().toLowerCase() : "";
+      String status = a.status() != null ? a.status().toLowerCase() : "";
       if (status.contains("pending")
           || status.contains("scheduled")
           || status.contains("confirmed")) pendingCount++;

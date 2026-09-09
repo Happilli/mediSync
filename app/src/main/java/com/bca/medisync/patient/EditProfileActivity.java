@@ -67,11 +67,11 @@ public class EditProfileActivity extends AppCompatActivity {
     ApiCallback.handle(
         api.getMyProfile(),
         p -> {
-          binding.etName.setText(p.getName());
-          binding.etPhone.setText(p.getPhone());
-          binding.etAddress.setText(p.getAddress());
-          binding.etEmergencyContact.setText(p.getEmergency_contact());
-          bindProfilePic(p.getProfile_pic_url());
+          binding.etName.setText(p.name());
+          binding.etPhone.setText(p.phone());
+          binding.etAddress.setText(p.address());
+          binding.etEmergencyContact.setText(p.emergency_contact());
+          bindProfilePic(p.profile_pic_url());
         },
         ApiErrorHandler.with(this).fallback("Failed to load current profile.").build());
   }
@@ -86,7 +86,7 @@ public class EditProfileActivity extends AppCompatActivity {
         api::updateProfilePic,
         p -> {
           Toast.makeText(this, "Profile picture updated.", Toast.LENGTH_SHORT).show();
-          bindProfilePic(p.getProfile_pic_url());
+          bindProfilePic(p.profile_pic_url());
         });
   }
 

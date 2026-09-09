@@ -77,9 +77,9 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
               if (adapter == null) return 0;
               Appointment a = adapter.getItemAt(position);
               if (a == null) return 0;
-              if (a.getStatus().equalsIgnoreCase("Pending"))
+              if (a.status().equalsIgnoreCase("Pending"))
                 return ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-              if (a.getStatus().equalsIgnoreCase("Confirmed")) return ItemTouchHelper.LEFT;
+              if (a.status().equalsIgnoreCase("Confirmed")) return ItemTouchHelper.LEFT;
               return 0;
             },
             (position, direction) -> {
@@ -87,7 +87,7 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
               if (adapter == null) return;
               Appointment a = adapter.getItemAt(position);
               if (a == null) return;
-              int appointmentId = Integer.parseInt(a.getId());
+              int appointmentId = Integer.parseInt(a.id());
               updateStatus(
                   appointmentId, direction == ItemTouchHelper.RIGHT ? "confirmed" : "cancelled");
             })
@@ -141,7 +141,7 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
     List<Appointment> filtered = new ArrayList<>();
     if (date != null) {
       for (Appointment a : allAppointments) {
-        if (date.equals(a.getDate())) filtered.add(a);
+        if (date.equals(a.date())) filtered.add(a);
       }
     }
     binding.rvSchedule.setAdapter(
@@ -150,8 +150,8 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
   }
 
   private void onAppointmentClicked(Appointment appointment) {
-    if (appointment.getStatus().equalsIgnoreCase("Confirmed")) {
-      openPatientDetail(appointment, Integer.parseInt(appointment.getId()));
+    if (appointment.status().equalsIgnoreCase("Confirmed")) {
+      openPatientDetail(appointment, Integer.parseInt(appointment.id()));
     }
   }
 
@@ -194,22 +194,22 @@ public class ScheduleFragment extends BaseBindingFragment<FragmentScheduleBindin
   private void openPatientDetail(Appointment appointment, int appointmentId) {
     PatientApi api = ApiClient.api(PatientApi.class);
     ApiCallback.handle(
-        api.getPatientDetailForDoctor(appointment.getPatientId()),
+        api.getPatientDetailForDoctor(appointment.patientId()),
         this,
         p -> {
           Bundle args = new Bundle();
-          args.putInt("patient_id", p.getId());
+          args.putInt("patient_id", p.id());
           args.putInt("appointment_id", appointmentId);
-          args.putString("booking_notes", appointment.getNotes());
-          args.putString("patient_name", p.getName());
-          args.putString("patient_phone", p.getPhone());
-          args.putString("patient_gender", p.getGender());
-          args.putString("patient_blood", p.getBlood_group());
-          args.putString("patient_emergency", p.getEmergency_contact());
-          args.putString("patient_email", p.getEmail());
-          args.putString("patient_address", p.getAddress());
-          args.putString("patient_dob", p.getDate_of_birth());
-          args.putString("patient_pic_url", p.getProfile_pic_url());
+          args.putString("booking_notes", appointment.notes());
+          args.putString("patient_name", p.name());
+          args.putString("patient_phone", p.phone());
+          args.putString("patient_gender", p.gender());
+          args.putString("patient_blood", p.blood_group());
+          args.putString("patient_emergency", p.emergency_contact());
+          args.putString("patient_email", p.email());
+          args.putString("patient_address", p.address());
+          args.putString("patient_dob", p.date_of_birth());
+          args.putString("patient_pic_url", p.profile_pic_url());
           PatientDetailsFragment fragment = new PatientDetailsFragment();
           fragment.setArguments(args);
           ((DoctorTabActivity) requireActivity()).pushFragment(fragment);

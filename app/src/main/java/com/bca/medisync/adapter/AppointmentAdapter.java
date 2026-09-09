@@ -41,14 +41,14 @@ public class AppointmentAdapter extends SimpleListAdapter<Appointment, ItemAppoi
 
   private void bindRow(
       ItemAppointmentBinding binding, Appointment a, int position, OnItemClickListener listener) {
-    boolean pending = a.getStatus().equalsIgnoreCase("Pending");
-    binding.txtDoctorName.setText(showPatientView ? a.getPatientName() : a.getDoctorName());
-    binding.txtSpeciality.setText(a.getSpeciality());
-    binding.txtDepartment.setText(a.getDepartment());
-    binding.txtStatus.setText(a.getStatus());
-    binding.txtDate.setText(a.getDate() + " - " + a.getTime());
-    StatusChip.bind(binding.txtStatus, a.getStatus());
-    boolean showHint = swipeEnabled && pending && hintShown.contains(a.getId());
+    boolean pending = a.status().equalsIgnoreCase("Pending");
+    binding.txtDoctorName.setText(showPatientView ? a.patientName() : a.doctorName());
+    binding.txtSpeciality.setText(a.speciality());
+    binding.txtDepartment.setText(a.department());
+    binding.txtStatus.setText(a.status());
+    binding.txtDate.setText(a.date() + " - " + a.time());
+    StatusChip.bind(binding.txtStatus, a.status());
+    boolean showHint = swipeEnabled && pending && hintShown.contains(a.id());
     binding.footerRow.setVisibility(showHint ? View.GONE : View.VISIBLE);
     binding.txtSwipeHint.setVisibility(showHint ? View.VISIBLE : View.GONE);
     binding.divider.setVisibility(View.GONE);
@@ -58,7 +58,7 @@ public class AppointmentAdapter extends SimpleListAdapter<Appointment, ItemAppoi
         .setOnClickListener(
             v -> {
               if (swipeEnabled && pending) {
-                if (!hintShown.add(a.getId())) hintShown.remove(a.getId());
+                if (!hintShown.add(a.id())) hintShown.remove(a.id());
                 notifyItemChanged(position);
               } else {
                 listener.onItemClick(a);

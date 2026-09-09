@@ -24,7 +24,6 @@ import com.bca.medisync.util.DateTimeUtils;
 import com.bca.medisync.util.EmptyState;
 import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.ViewUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,20 +89,23 @@ public class BookAppointmentFragment extends BaseBindingFragment<FragmentBookApp
   }
 
   private TimeSlot mapToTimeSlot(TimeSlotResponse r) {
-    String displayTime = DateTimeUtils.format(r.getAppointment_at(), "dd MMM, hh:mm a");
-    return new TimeSlot(r.getId(), r.getAppointment_at(), displayTime, r.is_available());
+    String displayTime = DateTimeUtils.format(r.appointment_at(), "dd MMM, hh:mm a");
+    return new TimeSlot(r.id(), r.appointment_at(), displayTime, r.is_available());
   }
 
   private void setupTimeSlots() {
     if (doctorId == -1) return;
     DoctorApi api = ApiClient.api(DoctorApi.class);
-    call(api.getDoctorTimeslots(doctorId, true), body -> {
+    call(
+        api.getDoctorTimeslots(doctorId, true),
+        body -> {
           List<TimeSlot> slots = new ArrayList<>();
           for (TimeSlotResponse r : body) {
             slots.add(mapToTimeSlot(r));
           }
           bindTimeSlots(slots);
-        }, "Failed to load available slots.");
+        },
+        "Failed to load available slots.");
   }
 
   private void setupConfirmButton() {
@@ -119,7 +121,7 @@ public class BookAppointmentFragment extends BaseBindingFragment<FragmentBookApp
           binding.btnConfirm.setEnabled(false);
           AppointmentApi api = ApiClient.api(AppointmentApi.class);
           ApiCallback.handle(
-              api.createAppointment(new AppointmentCreateRequest(selectedTimeSlot.getId(), notes)),
+              api.createAppointment(new AppointmentCreateRequest(selectedTimeSlot.id(), notes)),
               this,
               body -> {
                 if (binding == null) return;

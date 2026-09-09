@@ -63,7 +63,7 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
     adapter =
         new GroupedListAdapter<>(
             ItemDoctorRowBinding::inflate,
-            Doctor::getDepartment,
+            Doctor::department,
             (rowBinding, doctor, posInGroup, groupSize) -> bindDoctorRow(rowBinding, doctor),
             this::onRowClicked);
     rvDoctors.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -89,17 +89,17 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
     return new SearchSuggestionHelper.SuggestionBinder<Doctor>() {
       @Override
       public String getTitle(Doctor item) {
-        return item.getName();
+        return item.name();
       }
 
       @Override
       public String getSubtitle(Doctor item) {
-        return item.getSpeciality();
+        return item.speciality();
       }
 
       @Override
       public String getImageUrl(Doctor item) {
-        return item.getImageUrl();
+        return item.imageUrl();
       }
 
       @Override
@@ -111,7 +111,7 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
 
   @Override
   protected void onSuggestionSelected(Doctor doctor) {
-    loadResults(doctor.getName());
+    loadResults(doctor.name());
   }
 
   @Override
@@ -129,26 +129,26 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
   }
 
   private void bindDoctorRow(ItemDoctorRowBinding binding, Doctor doctor) {
-    binding.txtDoctorName.setText(doctor.getName());
-    binding.txtSpeciality.setText(doctor.getSpeciality());
-    binding.txtInfo.setText(doctor.getInfo());
-    ImageLoader.loadDoctorImage(this, binding.imgDoctor, doctor.getImageUrl());
-    boolean expanded = expandedIds.contains(doctor.getId());
+    binding.txtDoctorName.setText(doctor.name());
+    binding.txtSpeciality.setText(doctor.speciality());
+    binding.txtInfo.setText(doctor.info());
+    ImageLoader.loadDoctorImage(this, binding.imgDoctor, doctor.imageUrl());
+    boolean expanded = expandedIds.contains(doctor.id());
     binding.dividerExpand.setVisibility(expanded ? View.VISIBLE : View.GONE);
     binding.detailContainer.setVisibility(expanded ? View.VISIBLE : View.GONE);
     binding.imgExpandArrow.setRotation(expanded ? 90f : 0f);
     if (expanded) {
-      boolean hasBio = doctor.getBio() != null && !doctor.getBio().isEmpty();
+      boolean hasBio = doctor.bio() != null && !doctor.bio().isEmpty();
       binding.txtBio.setVisibility(hasBio ? View.VISIBLE : View.GONE);
-      binding.txtBio.setText(doctor.getBio());
-      binding.txtDoctorAddress.setText(doctor.getAddress());
-      binding.txtDoctorPhone.setText(doctor.getPhone());
-      String cached = hospitalNameCache.get(doctor.getHospitalId());
+      binding.txtBio.setText(doctor.bio());
+      binding.txtDoctorAddress.setText(doctor.address());
+      binding.txtDoctorPhone.setText(doctor.phone());
+      String cached = hospitalNameCache.get(doctor.hospitalId());
       if (cached != null) {
         binding.txtHospitalName.setText(cached);
       } else {
         binding.txtHospitalName.setText("Loading hospital...");
-        loadHospitalName(doctor.getHospitalId(), binding.txtHospitalName);
+        loadHospitalName(doctor.hospitalId(), binding.txtHospitalName);
       }
       binding.btnBook.setOnClickListener(v -> onBookClicked(doctor));
     }
@@ -163,8 +163,8 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
             .setInterpolator(new FastOutSlowInInterpolator());
     TransitionManager.beginDelayedTransition(rvDoctors, transition);
 
-    if (expandedIds.contains(doctor.getId())) expandedIds.remove(doctor.getId());
-    else expandedIds.add(doctor.getId());
+    if (expandedIds.contains(doctor.id())) expandedIds.remove(doctor.id());
+    else expandedIds.add(doctor.id());
     adapter.notifyDataSetChanged();
   }
 
@@ -174,20 +174,20 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
         api.getHospitalDetail(hospitalId),
         this,
         h -> {
-          hospitalNameCache.put(hospitalId, h.getName());
-          if (isAdded()) target.setText(h.getName());
+          hospitalNameCache.put(hospitalId, h.name());
+          if (isAdded()) target.setText(h.name());
         },
         (code, msg) -> target.setText("Hospital #" + hospitalId));
   }
 
   private void onBookClicked(Doctor doctor) {
     Bundle args = new Bundle();
-    args.putString("doctor_id", doctor.getId());
-    args.putString("doctor_name", doctor.getName());
-    args.putString("doctor_speciality", doctor.getSpeciality());
-    args.putString("doctor_info", doctor.getInfo());
-    args.putString("doctor_department", doctor.getDepartment());
-    args.putString("doctor_image_url", doctor.getImageUrl());
+    args.putString("doctor_id", doctor.id());
+    args.putString("doctor_name", doctor.name());
+    args.putString("doctor_speciality", doctor.speciality());
+    args.putString("doctor_info", doctor.info());
+    args.putString("doctor_department", doctor.department());
+    args.putString("doctor_image_url", doctor.imageUrl());
     BookAppointmentFragment fragment = new BookAppointmentFragment();
     fragment.setArguments(args);
     ((MainTabActivity) requireActivity()).pushFragment(fragment);
@@ -195,21 +195,21 @@ public class DoctorFragment extends SearchableListFragment<Doctor> {
 
   private Doctor mapToDoctor(DoctorResponse r) {
     String info =
-        r.getYears_experience() != null
-            ? r.getYears_experience() + "+ Years Exp"
-            : (r.getBio() != null ? r.getBio() : "");
+        r.years_experience() != null
+            ? r.years_experience() + "+ Years Exp"
+            : (r.bio() != null ? r.bio() : "");
     return new Doctor(
-        String.valueOf(r.getId()),
-        r.getName(),
-        r.getSpeciality(),
+        String.valueOf(r.id()),
+        r.name(),
+        r.speciality(),
         info,
-        r.getDepartment(),
-        r.getPhone(),
-        ApiClient.mediaUrl(r.getProfile_pic_url()),
-        r.getBio(),
-        r.getAddress(),
-        r.getHospital_id(),
-        r.getYears_experience(),
+        r.department(),
+        r.phone(),
+        ApiClient.mediaUrl(r.profile_pic_url()),
+        r.bio(),
+        r.address(),
+        r.hospital_id(),
+        r.years_experience(),
         r.is_verified());
   }
 }

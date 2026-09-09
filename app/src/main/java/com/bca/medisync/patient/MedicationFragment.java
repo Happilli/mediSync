@@ -47,7 +47,7 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
     super.onViewCreated(view, savedInstanceState);
     binding.btnMarkTaken.setOnClickListener(
         v -> {
-          if (activeMedication != null && !activeMedication.isTaken()) {
+          if (activeMedication != null && !activeMedication.taken()) {
             markTaken(activeMedication);
           }
         });
@@ -72,9 +72,9 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
   @Override
   public void onNotificationReceived(NotificationResponse n) {
     if (!isAdded() || binding == null) return;
-    if ("prescription_ready".equals(n.getType())
-        || "prescription_collected".equals(n.getType())
-        || "prescription_created".equals(n.getType())) {
+    if ("prescription_ready".equals(n.type())
+        || "prescription_collected".equals(n.type())
+        || "prescription_created".equals(n.type())) {
       loadMedications();
     }
   }
@@ -96,11 +96,11 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
     adapter =
         new GroupedListAdapter<>(
             ItemMedicationBinding::inflate,
-            med -> med.getDoctorName() == null ? "Unknown" : "Dr. " + med.getDoctorName(),
+            med -> med.doctorName() == null ? "Unknown" : "Dr. " + med.doctorName(),
             this::bindMedicationRow,
             med -> {
-              if (isCollected(med) && !med.isTaken()) {
-                Toast.makeText(requireContext(), med.getInstruction(), Toast.LENGTH_SHORT).show();
+              if (isCollected(med) && !med.taken()) {
+                Toast.makeText(requireContext(), med.instruction(), Toast.LENGTH_SHORT).show();
               } else if (!isCollected(med)) {
                 Toast.makeText(requireContext(), statusMessage(med), Toast.LENGTH_SHORT).show();
               }
@@ -110,11 +110,11 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
   }
 
   private boolean isCollected(Medication m) {
-    return "collected".equals(m.getDispenseStatus());
+    return "collected".equals(m.dispenseStatus());
   }
 
   private String statusMessage(Medication m) {
-    if ("ready".equals(m.getDispenseStatus())) {
+    if ("ready".equals(m.dispenseStatus())) {
       return "Ready! Come collect your medicine at the hospital.";
     }
     return "Your medicine is being prepared at the hospital.";
@@ -122,34 +122,34 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
 
   private void bindMedicationRow(
       ItemMedicationBinding rowBinding, Medication m, int posInGroup, int groupSize) {
-    rowBinding.tvMedName.setText(m.getName() + " " + m.getDosage());
-    rowBinding.tvMedFrequency.setText(m.getFrequency());
+    rowBinding.tvMedName.setText(m.name() + " " + m.dosage());
+    rowBinding.tvMedFrequency.setText(m.frequency());
     rowBinding.cbTaken.setOnCheckedChangeListener(null);
     if (!isCollected(m)) {
       rowBinding.cbTaken.setVisibility(View.GONE);
       rowBinding.getRoot().setAlpha(0.8f);
-      boolean ready = "ready".equals(m.getDispenseStatus());
+      boolean ready = "ready".equals(m.dispenseStatus());
       rowBinding.tvMedTime.setText(ready ? "Ready for pickup" : "Preparing...");
       rowBinding.tvMedTime.setTextColor(
           requireContext().getColor(ready ? R.color.tertiary : R.color.secondary));
       return;
     }
     rowBinding.cbTaken.setVisibility(View.VISIBLE);
-    rowBinding.cbTaken.setChecked(m.isTaken());
-    rowBinding.cbTaken.setEnabled(!m.isTaken());
-    rowBinding.cbTaken.setClickable(!m.isTaken());
-    if (!m.isTaken()) {
+    rowBinding.cbTaken.setChecked(m.taken());
+    rowBinding.cbTaken.setEnabled(!m.taken());
+    rowBinding.cbTaken.setClickable(!m.taken());
+    if (!m.taken()) {
       rowBinding.cbTaken.setOnCheckedChangeListener(
           (buttonView, isChecked) -> {
             if (isChecked) markTaken(m);
           });
     }
-    if (m.isTaken()) {
+    if (m.taken()) {
       rowBinding.tvMedTime.setText("Taken");
       rowBinding.tvMedTime.setTextColor(requireContext().getColor(R.color.primary));
       rowBinding.getRoot().setAlpha(0.6f);
     } else {
-      rowBinding.tvMedTime.setText(m.getTime());
+      rowBinding.tvMedTime.setText(m.time());
       rowBinding.tvMedTime.setTextColor(requireContext().getColor(R.color.primary));
       rowBinding.getRoot().setAlpha(1f);
     }
@@ -157,7 +157,9 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
 
   private void loadMedications() {
     MedicationApi api = ApiClient.api(MedicationApi.class);
-    call(api.getMyMedications(), body -> {
+    call(
+        api.getMyMedications(),
+        body -> {
           if (binding == null) return;
           List<Medication> meds = new ArrayList<>();
           for (MedicationResponse r : body) {
@@ -165,14 +167,15 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
           }
           bindMedications(meds);
           scheduleAllReminders(body);
-        }, "Failed to load medications.");
+        },
+        "Failed to load medications.");
   }
 
   private void scheduleAllReminders(List<MedicationResponse> responses) {
     if (!MedicationAlarmScheduler.canScheduleExactAlarms(requireContext())) return;
     for (MedicationResponse r : responses) {
-      if (!"collected".equals(r.getDispense_status())) continue;
-      String endDateStr = r.getEnd_date();
+      if (!"collected".equals(r.dispense_status())) continue;
+      String endDateStr = r.end_date();
       if (endDateStr == null) continue;
       LocalDate endDate;
       try {
@@ -182,10 +185,10 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
       }
       MedicationAlarmScheduler.schedule(
           requireContext(),
-          r.getSchedule_id(),
-          r.getName(),
-          r.getDosage(),
-          r.getDosage_time(),
+          r.schedule_id(),
+          r.name(),
+          r.dosage(),
+          r.dosage_time(),
           endDate,
           r.is_taken());
     }
@@ -194,7 +197,7 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
   private void markTaken(Medication medication) {
     MedicationApi api = ApiClient.api(MedicationApi.class);
     ApiCallback.handle(
-        api.markTaken(medication.getScheduleId()),
+        api.markTaken(medication.scheduleId()),
         this,
         body -> {
           Toast.makeText(requireContext(), "Marked as taken", Toast.LENGTH_SHORT).show();
@@ -220,22 +223,22 @@ public class MedicationFragment extends BaseBindingFragment<FragmentMedicationBi
     int total = collected.size();
     int taken = 0;
     for (Medication m : collected) {
-      if (m.isTaken()) taken++;
+      if (m.taken()) taken++;
     }
     binding.tvAdherenceCount.setText(taken + "/" + total);
     int percent = total == 0 ? 0 : (int) ((taken / (float) total) * 100);
     binding.progressAdherence.setProgressCompat(percent, true);
     activeMedication = null;
     for (Medication m : collected) {
-      if (!m.isTaken()) {
+      if (!m.taken()) {
         activeMedication = m;
         break;
       }
     }
     if (activeMedication != null) {
-      binding.tvActiveName.setText(activeMedication.getName() + " " + activeMedication.getDosage());
-      binding.tvActiveDosage.setText(activeMedication.getFrequency());
-      binding.tvActiveTime.setText(activeMedication.getTime());
+      binding.tvActiveName.setText(activeMedication.name() + " " + activeMedication.dosage());
+      binding.tvActiveDosage.setText(activeMedication.frequency());
+      binding.tvActiveTime.setText(activeMedication.time());
       binding.btnMarkTaken.setEnabled(true);
       binding.btnMarkTaken.setText("Mark as Taken");
     } else {

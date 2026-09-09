@@ -60,26 +60,26 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
             ItemHospitalCarouselBinding::inflate,
             new ArrayList<>(),
             (rowBinding, hospital, pos) -> {
-              rowBinding.txtHospitalName.setText(hospital.getName());
-              rowBinding.txtHospitalAddress.setText(hospital.getAddress());
+              rowBinding.txtHospitalName.setText(hospital.name());
+              rowBinding.txtHospitalAddress.setText(hospital.address());
               rowBinding.txtHospitalRating.setText(
-                  hospital.getRating() > 0
-                      ? "\u2605 " + String.format(Locale.getDefault(), "%.1f", hospital.getRating())
+                  hospital.rating() > 0
+                      ? "\u2605 " + String.format(Locale.getDefault(), "%.1f", hospital.rating())
                       : "");
               ImageLoader.loadHospitalImage(
-                  HospitalFragment.this, rowBinding.imgHospital, hospital.getImageUrl());
-              boolean expanded = expandedHospitalIds.contains(hospital.getId());
+                  HospitalFragment.this, rowBinding.imgHospital, hospital.imageUrl());
+              boolean expanded = expandedHospitalIds.contains(hospital.id());
               rowBinding.overlayScrim.setVisibility(expanded ? View.VISIBLE : View.GONE);
               rowBinding.textContainer.setVisibility(expanded ? View.VISIBLE : View.GONE);
               rowBinding
                   .getRoot()
                   .setOnClickListener(
                       v -> {
-                        if (expandedHospitalIds.contains(hospital.getId())) {
+                        if (expandedHospitalIds.contains(hospital.id())) {
                           onHospitalClicked(hospital);
                         } else {
                           expandedHospitalIds.clear();
-                          expandedHospitalIds.add(hospital.getId());
+                          expandedHospitalIds.add(hospital.id());
                           carouselAdapter.notifyDataSetChanged();
                         }
                       });
@@ -95,11 +95,11 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
             ItemHospitalBinding::inflate,
             new ArrayList<>(),
             (rowBinding, hospital, pos) -> {
-              rowBinding.txtHospitalName.setText(hospital.getName());
-              rowBinding.txtHospitalAddress.setText(hospital.getAddress());
+              rowBinding.txtHospitalName.setText(hospital.name());
+              rowBinding.txtHospitalAddress.setText(hospital.address());
               rowBinding.txtHospitalRating.setText(
-                  hospital.getRating() > 0
-                      ? "\u2605 " + String.format(Locale.getDefault(), "%.1f", hospital.getRating())
+                  hospital.rating() > 0
+                      ? "\u2605 " + String.format(Locale.getDefault(), "%.1f", hospital.rating())
                       : "");
               rowBinding.btnViewMore.setOnClickListener(v -> onHospitalClicked(hospital));
             },
@@ -128,17 +128,17 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
     return new SearchSuggestionHelper.SuggestionBinder<Hospital>() {
       @Override
       public String getTitle(Hospital item) {
-        return item.getName();
+        return item.name();
       }
 
       @Override
       public String getSubtitle(Hospital item) {
-        return item.getAddress();
+        return item.address();
       }
 
       @Override
       public String getImageUrl(Hospital item) {
-        return ApiClient.mediaUrl(item.getImageUrl());
+        return ApiClient.mediaUrl(item.imageUrl());
       }
 
       @Override
@@ -150,7 +150,7 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
 
   @Override
   protected void onSuggestionSelected(Hospital hospital) {
-    loadResults(hospital.getName());
+    loadResults(hospital.name());
   }
 
   @Override
@@ -190,14 +190,14 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
 
   private void onHospitalClicked(Hospital hospital) {
     Bundle args = new Bundle();
-    args.putString("hospital_id", hospital.getId());
-    args.putString("hospital_name", hospital.getName());
-    args.putString("hospital_address", hospital.getAddress());
-    args.putString("hospital_phone", hospital.getPhone());
-    args.putString("hospital_website", hospital.getWebsite());
-    args.putString("hospital_description", hospital.getDescription());
-    args.putDouble("hospital_rating", hospital.getRating());
-    args.putString("hospital_image_url", hospital.getImageUrl());
+    args.putString("hospital_id", hospital.id());
+    args.putString("hospital_name", hospital.name());
+    args.putString("hospital_address", hospital.address());
+    args.putString("hospital_phone", hospital.phone());
+    args.putString("hospital_website", hospital.website());
+    args.putString("hospital_description", hospital.description());
+    args.putDouble("hospital_rating", hospital.rating());
+    args.putString("hospital_image_url", hospital.imageUrl());
     HospitalDetailFragment fragment = new HospitalDetailFragment();
     fragment.setArguments(args);
     ((MainTabActivity) requireActivity()).pushFragment(fragment);
@@ -205,13 +205,13 @@ public class HospitalFragment extends SearchableListFragment<Hospital> {
 
   private Hospital mapToHospital(HospitalResponse r) {
     return new Hospital(
-        String.valueOf(r.getId()),
-        r.getName(),
-        r.getAddress(),
-        r.getPhone(),
-        r.getWebsite(),
-        r.getDescription(),
+        String.valueOf(r.id()),
+        r.name(),
+        r.address(),
+        r.phone(),
+        r.website(),
+        r.description(),
         0.0,
-        r.getImage_url());
+        r.image_url());
   }
 }

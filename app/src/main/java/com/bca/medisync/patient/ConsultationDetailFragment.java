@@ -42,21 +42,21 @@ public class ConsultationDetailFragment
         api.getConsultationForAppointment(appointmentId),
         c -> {
           if (binding == null) return;
-          binding.txtDiagnosis.setText(c.getDiagnosis());
-          binding.txtComplaint.setText(c.getComplaint());
-          binding.txtSymptoms.setText(c.getSymptoms());
+          binding.txtDiagnosis.setText(c.diagnosis());
+          binding.txtComplaint.setText(c.complaint());
+          binding.txtSymptoms.setText(c.symptoms());
           binding.txtVitals.setText(
               getString(
                   R.string.vitals_format,
-                  safe(c.getBlood_pressure()),
-                  safe(c.getHeart_rate()),
-                  safe(c.getTemperature()),
-                  safe(c.getWeight())));
-          if (c.getNotes() == null || c.getNotes().isEmpty()) {
+                  safe(c.blood_pressure()),
+                  safe(c.heart_rate()),
+                  safe(c.temperature()),
+                  safe(c.weight())));
+          if (c.notes() == null || c.notes().isEmpty()) {
             binding.cardNotes.setVisibility(View.GONE);
           } else {
             binding.cardNotes.setVisibility(View.VISIBLE);
-            binding.txtNotes.setText(c.getNotes());
+            binding.txtNotes.setText(c.notes());
           }
         },
         "Failed to load consultation.");

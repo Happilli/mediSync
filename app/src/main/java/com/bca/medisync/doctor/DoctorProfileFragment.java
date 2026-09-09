@@ -91,7 +91,7 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
         api::updateProfilePic,
         d -> {
           Toast.makeText(requireContext(), "Profile picture updated.", Toast.LENGTH_SHORT).show();
-          bindProfilePic(d.getProfile_pic_url());
+          bindProfilePic(d.profile_pic_url());
         });
   }
 
@@ -107,7 +107,7 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
             binding.scrollContent,
             profile -> {
               bindProfile(profile);
-              loadHospitalDetails(profile.getHospital_id());
+              loadHospitalDetails(profile.doctor().hospital_id());
             }),
         LoadingHelper.wrapError(
             binding.loadingIndicator,
@@ -122,8 +122,8 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
         this,
         h -> {
           if (binding == null) return;
-          InfoRowBinder.setValue(binding.rowHospital.getRoot(), h.getName());
-          ImageLoader.loadHospitalImage(this, binding.imgHospitalBanner, h.getImage_url());
+          InfoRowBinder.setValue(binding.rowHospital.getRoot(), h.name());
+          ImageLoader.loadHospitalImage(this, binding.imgHospitalBanner, h.image_url());
         },
         (code, msg) -> {
           if (binding == null) return;
@@ -133,31 +133,31 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
 
   private void bindProfile(DoctorProfileResponse p) {
     if (binding == null) return;
-    int years = p.getYears_experience() != null ? p.getYears_experience() : 0;
-    binding.txtDoctorName.setText("Dr. " + p.getName());
-    binding.txtRole.setText(p.getSpeciality());
-    bindVerificationBadge(p.is_verified());
-    if (p.getBio() != null && !p.getBio().trim().isEmpty()) {
+    int years = p.doctor().years_experience() != null ? p.doctor().years_experience() : 0;
+    binding.txtDoctorName.setText("Dr. " + p.doctor().name());
+    binding.txtRole.setText(p.doctor().speciality());
+    bindVerificationBadge(p.doctor().is_verified());
+    if (p.doctor().bio() != null && !p.doctor().bio().trim().isEmpty()) {
       binding.txtBio.setVisibility(View.VISIBLE);
-      binding.txtBio.setText(p.getBio());
+      binding.txtBio.setText(p.doctor().bio());
     } else {
       binding.txtBio.setVisibility(View.GONE);
     }
-    bindProfilePic(p.getProfile_pic_url());
-    binding.statPatientsMonthValue.setText(String.valueOf(p.getPatients_this_month()));
-    binding.statPatientsTotalValue.setText(String.valueOf(p.getTotal_patients()));
+    bindProfilePic(p.doctor().profile_pic_url());
+    binding.statPatientsMonthValue.setText(String.valueOf(p.patients_this_month()));
+    binding.statPatientsTotalValue.setText(String.valueOf(p.total_patients()));
     InfoRowBinder.bind(
         new InfoRowBinder.Row(
-            binding.rowSpecialization.getRoot(), "Specialization", p.getSpeciality()),
+            binding.rowSpecialization.getRoot(), "Specialization", p.doctor().speciality()),
         new InfoRowBinder.Row(
-            binding.rowHospital.getRoot(), "Hospital", "Hospital #" + p.getHospital_id()),
+            binding.rowHospital.getRoot(), "Hospital", "Hospital #" + p.doctor().hospital_id()),
         new InfoRowBinder.Row(
             binding.rowExperience.getRoot(),
             "Experience",
             years > 0 ? years + " years" : "Not specified"),
-        new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", p.getPhone()),
+        new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", p.doctor().phone()),
         new InfoRowBinder.Row(binding.rowEmail.getRoot(), "Email", sessionManager.getEmail()),
-        new InfoRowBinder.Row(binding.rowAddress.getRoot(), "Address", p.getAddress()));
+        new InfoRowBinder.Row(binding.rowAddress.getRoot(), "Address", p.doctor().address()));
   }
 
   private void bindVerificationBadge(boolean isVerified) {
@@ -184,11 +184,6 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
     int borderPx = ViewUtils.dp(requireContext(), 3);
     int borderColor = requireContext().getColor(R.color.surface);
     ImageLoader.loadProfilePicShaped(
-        this,
-        binding.imgDoctorProfile,
-        profilePicUrl,
-        R.drawable.pill,
-        borderPx,
-        borderColor);
+        this, binding.imgDoctorProfile, profilePicUrl, R.drawable.pill, borderPx, borderColor);
   }
 }

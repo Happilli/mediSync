@@ -2,9 +2,7 @@ package com.bca.medisync.data.remote.api;
 
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionCreateRequest;
 import com.bca.medisync.data.remote.dto.prescription.PrescriptionResponse;
-
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;

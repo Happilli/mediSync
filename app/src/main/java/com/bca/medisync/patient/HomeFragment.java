@@ -86,7 +86,7 @@ public class HomeFragment extends BaseBindingFragment<FragmentHomeBinding>
     call(
         api.getMyProfile(),
         body -> {
-          if (binding != null) binding.txtPatientName.setText(body.getName());
+          if (binding != null) binding.txtPatientName.setText(body.name());
         },
         "Failed to load profile.");
   }
@@ -113,13 +113,13 @@ public class HomeFragment extends BaseBindingFragment<FragmentHomeBinding>
           if (binding == null) return;
           List<AppointmentResponse> upcoming = new ArrayList<>();
           for (AppointmentResponse a : body) {
-            String status = a.getStatus();
+            String status = a.status();
             if (status != null
                 && (status.equalsIgnoreCase("Confirmed") || status.equalsIgnoreCase("Pending"))) {
               upcoming.add(a);
             }
           }
-          Collections.sort(upcoming, Comparator.comparing(AppointmentResponse::getAppointment_at));
+          Collections.sort(upcoming, Comparator.comparing(AppointmentResponse::appointment_at));
           List<AppointmentResponse> top3 = upcoming.subList(0, Math.min(3, upcoming.size()));
           if (top3.isEmpty()) {
             binding.rvUpcomingHome.setVisibility(View.GONE);

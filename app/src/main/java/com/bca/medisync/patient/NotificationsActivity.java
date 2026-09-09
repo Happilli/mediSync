@@ -76,10 +76,10 @@ public class NotificationsActivity extends AppCompatActivity
     adapter =
         new GroupedListAdapter<>(
             ItemNotificationBinding::inflate,
-            n -> n.getType() == null ? "Other" : capitalize(n.getType()),
+            n -> n.type() == null ? "Other" : capitalize(n.type()),
             this::bindNotificationRow,
             n -> {
-              if (!n.isRead()) markAsRead(n.getId());
+              if (!n.isRead()) markAsRead(n.id());
               handleNotificationClick(n);
             });
     binding.rvNotifications.setLayoutManager(new LinearLayoutManager(this));
@@ -87,15 +87,15 @@ public class NotificationsActivity extends AppCompatActivity
   }
 
   private void handleNotificationClick(Notification n) {
-    if (n.getRelatedId() == null) return;
-    if ("appointment_completed".equals(n.getType())) {
+    if (n.relatedId() == null) return;
+    if ("appointment_completed".equals(n.type())) {
       Bundle args = new Bundle();
-      args.putInt("appointment_id", n.getRelatedId());
+      args.putInt("appointment_id", n.relatedId());
       ConsultationDetailFragment fragment = new ConsultationDetailFragment();
       fragment.setArguments(args);
       Intent intent = new Intent(this, MainTabActivity.class);
       intent.putExtra("open_fragment", "consultation_detail");
-      intent.putExtra("appointment_id", n.getRelatedId());
+      intent.putExtra("appointment_id", n.relatedId());
       intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
       startActivity(intent);
       finish();
@@ -104,9 +104,9 @@ public class NotificationsActivity extends AppCompatActivity
 
   private void bindNotificationRow(
       ItemNotificationBinding rowBinding, Notification n, int posInGroup, int groupSize) {
-    rowBinding.txtNotifTitle.setText(n.getTitle());
-    rowBinding.txtNotifMessage.setText(n.getMessage());
-    rowBinding.txtNotifTime.setText(DateTimeUtils.format(n.getCreatedAt(), "dd MMM, hh:mm a"));
+    rowBinding.txtNotifTitle.setText(n.title());
+    rowBinding.txtNotifMessage.setText(n.message());
+    rowBinding.txtNotifTime.setText(DateTimeUtils.format(n.createdAt(), "dd MMM, hh:mm a"));
     if (n.isRead()) {
       rowBinding.unreadDot.setVisibility(View.INVISIBLE);
       rowBinding.getRoot().setAlpha(0.6f);
@@ -173,13 +173,13 @@ public class NotificationsActivity extends AppCompatActivity
 
   private Notification mapToNotification(NotificationResponse r) {
     return new Notification(
-        r.getId(),
-        r.getType(),
-        r.getTitle(),
-        r.getMessage(),
-        r.getRelated_id(),
-        r.getRelated_type(),
+        r.id(),
+        r.type(),
+        r.title(),
+        r.message(),
+        r.related_id(),
+        r.related_type(),
         r.is_read(),
-        r.getCreated_at());
+        r.created_at());
   }
 }

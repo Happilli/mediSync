@@ -8,7 +8,6 @@ import com.bca.medisync.data.remote.dto.appointment.AppointmentResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 import com.bca.medisync.data.remote.dto.patient.PatientPublicResponse;
 import com.bca.medisync.util.DateTimeUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Locale;
 
 public class AppointmentEnricher {
-
   private static final ThreadLocal<SimpleDateFormat> DATE_FMT =
       ThreadLocal.withInitial(() -> new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()));
   private static final ThreadLocal<SimpleDateFormat> TIME_FMT =
@@ -28,7 +26,7 @@ public class AppointmentEnricher {
     DoctorApi doctorApi = ApiClient.api(DoctorApi.class);
     ParallelEnricher.run(
         responses,
-        r -> doctorApi.getDoctorDetail(r.getDoctor_id()),
+        r -> doctorApi.getDoctorDetail(r.doctor_id()),
         AppointmentEnricher::mapToAppointment,
         callback);
   }
@@ -38,7 +36,7 @@ public class AppointmentEnricher {
     DoctorApi doctorApi = ApiClient.api(DoctorApi.class);
     ParallelEnricher.run(
         Collections.singletonList(r),
-        rr -> doctorApi.getDoctorDetail(rr.getDoctor_id()),
+        rr -> doctorApi.getDoctorDetail(rr.doctor_id()),
         AppointmentEnricher::mapToAppointment,
         list -> callback.onResult(list.get(0)));
   }
@@ -49,7 +47,7 @@ public class AppointmentEnricher {
       callback.onResult(new ArrayList<>());
       return;
     }
-    if (responses.get(0).getPatient_name() != null) {
+    if (responses.get(0).patient_name() != null) {
       List<Appointment> result = new ArrayList<>();
       for (AppointmentResponse r : responses) result.add(mapToAppointmentForDoctor(r, null));
       callback.onResult(result);
@@ -58,7 +56,7 @@ public class AppointmentEnricher {
     PatientApi patientApi = ApiClient.api(PatientApi.class);
     ParallelEnricher.run(
         responses,
-        r -> patientApi.getPatientDetailForDoctor(r.getPatient_id()),
+        r -> patientApi.getPatientDetailForDoctor(r.patient_id()),
         AppointmentEnricher::mapToAppointmentForDoctor,
         callback);
   }
@@ -69,41 +67,41 @@ public class AppointmentEnricher {
       String doctorName,
       String department,
       String speciality) {
-    Date date = parseIso(r.getAppointment_at());
+    Date date = parseIso(r.appointment_at());
     String dateStr = date != null ? DATE_FMT.get().format(date) : "";
     String timeStr = date != null ? TIME_FMT.get().format(date) : "";
     return new Appointment(
-        String.valueOf(r.getId()),
+        String.valueOf(r.id()),
         patientName,
         doctorName,
         department,
         speciality,
         dateStr,
         timeStr,
-        capitalize(r.getStatus()),
-        r.getNotes(),
-        r.getPatient_id());
+        capitalize(r.status()),
+        r.notes(),
+        r.patient_id());
   }
 
   public static Appointment mapToAppointment(AppointmentResponse r, DoctorResponse d) {
-    String doctorName = d != null ? d.getName() : "Doctor #" + r.getDoctor_id();
-    String speciality = d != null ? d.getSpeciality() : "";
-    String department = d != null ? d.getDepartment() : "";
+    String doctorName = d != null ? d.name() : "Doctor #" + r.doctor_id();
+    String speciality = d != null ? d.speciality() : "";
+    String department = d != null ? d.department() : "";
     return build(r, "", doctorName, department, speciality);
   }
 
   public static Appointment mapToAppointmentForDoctor(
       AppointmentResponse r, PatientPublicResponse p) {
-    String patientName = r.getPatient_name();
+    String patientName = r.patient_name();
     if (patientName == null || patientName.isEmpty()) {
-      patientName = p != null ? p.getName() : "Patient #" + r.getPatient_id();
+      patientName = p != null ? p.name() : "Patient #" + r.patient_id();
     }
     return build(
         r,
         patientName,
-        r.getDoctor_name() != null ? r.getDoctor_name() : "",
-        r.getDepartment() != null ? r.getDepartment() : "",
-        r.getSpeciality() != null ? r.getSpeciality() : "");
+        r.doctor_name() != null ? r.doctor_name() : "",
+        r.department() != null ? r.department() : "",
+        r.speciality() != null ? r.speciality() : "");
   }
 
   public static Date parseIso(String iso) {
@@ -118,10 +116,10 @@ public class AppointmentEnricher {
   public static AppointmentResponse findNextUpcoming(List<AppointmentResponse> all) {
     AppointmentResponse best = null;
     for (AppointmentResponse a : all) {
-      String status = a.getStatus();
+      String status = a.status();
       if (status == null) continue;
       if (!status.equalsIgnoreCase("confirmed") && !status.equalsIgnoreCase("pending")) continue;
-      if (best == null || compareIso(a.getAppointment_at(), best.getAppointment_at()) < 0) best = a;
+      if (best == null || compareIso(a.appointment_at(), best.appointment_at()) < 0) best = a;
     }
     return best;
   }

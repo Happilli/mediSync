@@ -55,37 +55,36 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
 
   private void bind(PatientStatsResponse stats) {
     if (binding == null) return;
-    int adherence = (int) Math.round(stats.getMedication_adherence_percent());
+    int adherence = (int) Math.round(stats.medication_adherence_percent());
     binding.progressAdherence.setProgressCompat(adherence, true);
     binding.txtAdherencePercent.setText(adherence + "%");
     binding.txtAdherenceSub.setText(
-        stats.getDoses_taken() + " / " + stats.getDoses_expected() + " doses taken");
-    binding.txtTotalAppointments.setText(String.valueOf(stats.getTotal_appointments()));
-    binding.txtUpcomingAppointments.setText(String.valueOf(stats.getUpcoming_appointments()));
-    binding.txtTotalPrescriptions.setText(String.valueOf(stats.getTotal_prescriptions()));
-    binding.txtTotalConsultations.setText(String.valueOf(stats.getTotal_consultations()));
+        stats.doses_taken() + " / " + stats.doses_expected() + " doses taken");
+    binding.txtTotalAppointments.setText(String.valueOf(stats.total_appointments()));
+    binding.txtUpcomingAppointments.setText(String.valueOf(stats.upcoming_appointments()));
+    binding.txtTotalPrescriptions.setText(String.valueOf(stats.total_prescriptions()));
+    binding.txtTotalConsultations.setText(String.valueOf(stats.total_consultations()));
     Map<String, Integer> capitalized = new LinkedHashMap<>();
-    if (stats.getAppointments_by_status() != null) {
-      for (Map.Entry<String, Integer> e : stats.getAppointments_by_status().entrySet()) {
+    if (stats.appointments_by_status() != null) {
+      for (Map.Entry<String, Integer> e : stats.appointments_by_status().entrySet()) {
         capitalized.put(capitalize(e.getKey()), e.getValue());
       }
     }
     StatsChartHelper.bindStatusBreakdown(
         binding.statusBreakdownContainer,
         capitalized,
-        stats.getTotal_appointments(),
+        stats.total_appointments(),
         "No appointments yet");
-
     List<String> months = new ArrayList<>();
     List<Integer> counts = new ArrayList<>();
-    if (stats.getAppointments_last_6_months() != null) {
-      for (MonthlyAppointmentCount m : stats.getAppointments_last_6_months()) {
-        months.add(m.getMonth());
-        counts.add(m.getCount());
+    if (stats.appointments_last_6_months() != null) {
+      for (MonthlyAppointmentCount m : stats.appointments_last_6_months()) {
+        months.add(m.month());
+        counts.add(m.count());
       }
     }
     StatsChartHelper.bindMonthlyTrend(binding.monthlyTrendContainer, months, counts, 20);
-    bindLatestVitals(stats.getVitals_trend());
+    bindLatestVitals(stats.vitals_trend());
   }
 
   private void bindLatestVitals(PatientStatsResponse.VitalsTrend vitals) {
@@ -95,10 +94,10 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
       return;
     }
     boolean any = false;
-    any |= addVitalIfPresent("Blood Pressure", vitals.getBlood_pressure());
-    any |= addVitalIfPresent("Heart Rate", vitals.getHeart_rate());
-    any |= addVitalIfPresent("Temperature", vitals.getTemperature());
-    any |= addVitalIfPresent("Weight", vitals.getWeight());
+    any |= addVitalIfPresent("Blood Pressure", vitals.blood_pressure());
+    any |= addVitalIfPresent("Heart Rate", vitals.heart_rate());
+    any |= addVitalIfPresent("Temperature", vitals.temperature());
+    any |= addVitalIfPresent("Weight", vitals.weight());
     binding.txtNoVitals.setVisibility(any ? View.GONE : View.VISIBLE);
   }
 
@@ -108,7 +107,7 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
     ItemVitalBinding rowBinding =
         ItemVitalBinding.inflate(getLayoutInflater(), binding.vitalsContainer, false);
     rowBinding.txtVitalLabel.setText(label);
-    rowBinding.txtVitalValue.setText(latest.getValue());
+    rowBinding.txtVitalValue.setText(latest.value());
     binding.vitalsContainer.addView(rowBinding.getRoot());
     return true;
   }

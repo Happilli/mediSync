@@ -41,11 +41,11 @@ public class PatientFragment extends SearchableListFragment<Patient> {
             ItemPatientBinding::inflate,
             new ArrayList<>(),
             (binding, patient, pos) -> {
-              binding.txtPatientName.setText(patient.getName());
-              binding.txtBloodGroup.setText(patient.getBloodGroup());
-              binding.txtPhone.setText(patient.getPhone());
+              binding.txtPatientName.setText(patient.name());
+              binding.txtBloodGroup.setText(patient.bloodGroup());
+              binding.txtPhone.setText(patient.phone());
               ImageLoader.loadProfilePic(
-                  PatientFragment.this, binding.imgPatientPic, patient.getProfilePicUrl());
+                  PatientFragment.this, binding.imgPatientPic, patient.profilePicUrl());
             },
             this::onPatientClicked);
     rvPatients.setAdapter(adapter);
@@ -72,17 +72,17 @@ public class PatientFragment extends SearchableListFragment<Patient> {
     return new SearchSuggestionHelper.SuggestionBinder<Patient>() {
       @Override
       public String getTitle(Patient item) {
-        return item.getName();
+        return item.name();
       }
 
       @Override
       public String getSubtitle(Patient item) {
-        return item.getPhone();
+        return item.phone();
       }
 
       @Override
       public String getImageUrl(Patient item) {
-        return ApiClient.mediaUrl(item.getProfilePicUrl());
+        return ApiClient.mediaUrl(item.profilePicUrl());
       }
 
       @Override
@@ -119,23 +119,22 @@ public class PatientFragment extends SearchableListFragment<Patient> {
   private void onPatientClicked(Patient patient) {
     PatientPublicResponse match = null;
     for (PatientPublicResponse r : currentResponses) {
-      if (String.valueOf(r.getId()).equals(patient.getId())) {
+      if (String.valueOf(r.id()).equals(patient.id())) {
         match = r;
         break;
       }
     }
     Bundle args = new Bundle();
-    args.putInt("patient_id", match != null ? match.getId() : -1);
-    args.putString("patient_name", patient.getName());
-    args.putString("patient_phone", patient.getPhone());
-    args.putString("patient_gender", patient.getGender());
-    args.putString("patient_blood", patient.getBloodGroup());
-    args.putString("patient_emergency", patient.getEmergencyContact());
-    args.putString("patient_email", patient.getEmail());
-    args.putString("patient_address", patient.getAddress());
-    args.putString("patient_dob", patient.getDateOfBirth());
-    args.putString("patient_pic_url", match != null ? match.getProfile_pic_url() : null);
-
+    args.putInt("patient_id", match != null ? match.id() : -1);
+    args.putString("patient_name", patient.name());
+    args.putString("patient_phone", patient.phone());
+    args.putString("patient_gender", patient.gender());
+    args.putString("patient_blood", patient.bloodGroup());
+    args.putString("patient_emergency", patient.emergencyContact());
+    args.putString("patient_email", patient.email());
+    args.putString("patient_address", patient.address());
+    args.putString("patient_dob", patient.dateOfBirth());
+    args.putString("patient_pic_url", match != null ? match.profile_pic_url() : null);
     PatientDetailsFragment fragment = new PatientDetailsFragment();
     fragment.setArguments(args);
     ((DoctorTabActivity) requireActivity()).pushFragment(fragment);
@@ -143,15 +142,15 @@ public class PatientFragment extends SearchableListFragment<Patient> {
 
   private Patient mapToPatient(PatientPublicResponse r) {
     return new Patient(
-        String.valueOf(r.getId()),
-        r.getName(),
-        r.getEmail(),
-        r.getPhone(),
-        r.getAddress(),
-        r.getDate_of_birth(),
-        r.getGender(),
-        r.getBlood_group(),
-        r.getEmergency_contact(),
-        r.getProfile_pic_url());
+        String.valueOf(r.id()),
+        r.name(),
+        r.email(),
+        r.phone(),
+        r.address(),
+        r.date_of_birth(),
+        r.gender(),
+        r.blood_group(),
+        r.emergency_contact(),
+        r.profile_pic_url());
   }
 }

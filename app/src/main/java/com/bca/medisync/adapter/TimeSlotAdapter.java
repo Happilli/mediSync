@@ -21,8 +21,8 @@ public class TimeSlotAdapter extends SimpleListAdapter<TimeSlot, ItemTimeSlotBin
 
   private void bindRow(
       ItemTimeSlotBinding binding, TimeSlot slot, int position, OnTimeSelectedListener listener) {
-    binding.tvTime.setText(slot.getDisplayTime());
-    if (!slot.isAvailable()) {
+    binding.tvTime.setText(slot.displayTime());
+    if (!slot.available()) {
       binding.tvTime.setAlpha(0.4f);
       binding.ivSlotIcon.setImageResource(R.drawable.locked);
       binding.ivSlotIcon.setColorFilter(
@@ -52,7 +52,7 @@ public class TimeSlotAdapter extends SimpleListAdapter<TimeSlot, ItemTimeSlotBin
     }
     binding.slotContainer.setOnClickListener(
         v -> {
-          if (!slot.isAvailable()) return;
+          if (!slot.available()) return;
           int prev = selectedPositon;
           selectedPositon = position;
           notifyItemChanged(prev);

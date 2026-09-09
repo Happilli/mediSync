@@ -5,9 +5,7 @@ import com.bca.medisync.data.remote.dto.doctor.DoctorProfileResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorResponse;
 import com.bca.medisync.data.remote.dto.doctor.DoctorStatsResponse;
 import com.bca.medisync.data.remote.dto.doctor.TimeSlotCreateRequest;
-
 import java.util.List;
-
 import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;

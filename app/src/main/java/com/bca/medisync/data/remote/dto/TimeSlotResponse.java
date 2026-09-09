@@ -1,12 +1,4 @@
 package com.bca.medisync.data.remote.dto;
 
-import lombok.Getter;
-
-@Getter
-public class TimeSlotResponse {
-  private int id;
-  private int doctor_id;
-  private int hospital_id;
-  private String appointment_at;
-  private boolean is_available;
-}
+public record TimeSlotResponse(
+    int id, int doctor_id, int hospital_id, String appointment_at, boolean is_available) {}

@@ -31,7 +31,6 @@ import com.bca.medisync.util.ImageLoader;
 import com.bca.medisync.util.InfoRowBinder;
 import com.bca.medisync.util.LoadingHelper;
 import com.bca.medisync.util.ViewUtils;
-
 import java.util.Calendar;
 
 public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
@@ -94,31 +93,29 @@ public class ProfileFragment extends BaseBindingFragment<FragmentProfileBinding>
   @Override
   public void onNotificationReceived(NotificationResponse notification) {
     if (!isAdded()) return;
-    if ("patient_verified".equals(notification.getType())
-        || "patient_verification_rejected".equals(notification.getType())) {
+    if ("patient_verified".equals(notification.type())
+        || "patient_verification_rejected".equals(notification.type())) {
       loadPatientData();
     }
   }
 
   private void bindPatient(PatientResponse patient) {
     if (binding == null) return;
-
-    binding.txtName.setText(patient.getName());
-    binding.txtEmergencyContact.setText(patient.getEmergency_contact());
+    binding.txtName.setText(patient.name());
+    binding.txtEmergencyContact.setText(patient.emergency_contact());
     InfoRowBinder.bind(
         new InfoRowBinder.Row(
-            binding.rowAge.getRoot(), "Age", calculateAge(patient.getDate_of_birth())),
-        new InfoRowBinder.Row(binding.rowGender.getRoot(), "Gender", patient.getGender()),
+            binding.rowAge.getRoot(), "Age", calculateAge(patient.date_of_birth())),
+        new InfoRowBinder.Row(binding.rowGender.getRoot(), "Gender", patient.gender()),
         new InfoRowBinder.Row(
-            binding.rowBloodGroup.getRoot(), "Blood Group", patient.getBlood_group()),
+            binding.rowBloodGroup.getRoot(), "Blood Group", patient.blood_group()),
         new InfoRowBinder.Row(binding.rowEmail.getRoot(), "Email", sessionManager.getEmail()),
-        new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", patient.getPhone()),
-        new InfoRowBinder.Row(
-            binding.rowDob.getRoot(), "Date of Birth", patient.getDate_of_birth()),
-        new InfoRowBinder.Row(binding.rowAddress.getRoot(), "Address", patient.getAddress()));
+        new InfoRowBinder.Row(binding.rowPhone.getRoot(), "Phone", patient.phone()),
+        new InfoRowBinder.Row(binding.rowDob.getRoot(), "Date of Birth", patient.date_of_birth()),
+        new InfoRowBinder.Row(binding.rowAddress.getRoot(), "Address", patient.address()));
     bindVerificationBadge(
-        patient.is_verified(), patient.getCitizenship_number(), patient.getRejection_reason());
-    bindProfilePic(patient.getProfile_pic_url());
+        patient.is_verified(), patient.citizenship_number(), patient.rejection_reason());
+    bindProfilePic(patient.profile_pic_url());
   }
 
   private void bindProfilePic(String profilePicUrl) {

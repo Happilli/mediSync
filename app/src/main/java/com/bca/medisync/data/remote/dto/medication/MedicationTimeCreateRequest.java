@@ -1,9 +1,3 @@
 package com.bca.medisync.data.remote.dto.medication;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
-public class MedicationTimeCreateRequest {
-  private String dosage_time;
-  private String label;
-}
+public record MedicationTimeCreateRequest(String dosage_time, String label) {}

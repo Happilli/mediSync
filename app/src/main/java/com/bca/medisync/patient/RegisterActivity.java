@@ -195,7 +195,7 @@ public class RegisterActivity extends AppCompatActivity {
                   binding.btnRegister.setEnabled(true);
                   Toast.makeText(
                           RegisterActivity.this,
-                          body.getMessage() + "\n" + body.getRemarks(),
+                          body.message() + "\n" + body.remarks(),
                           Toast.LENGTH_LONG)
                       .show();
                   finish();
