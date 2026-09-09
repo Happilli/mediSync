@@ -9,7 +9,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.bca.medisync.data.local.SessionManager;
-import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.NotificationCenter;
 import com.bca.medisync.data.remote.NotificationSocketHolder;
@@ -94,41 +93,27 @@ public class MainActivity extends AppCompatActivity {
       binding.etPassword.setError("Password is required");
       return;
     }
-    binding.btnLogin.setEnabled(false);
-    LoadingHelper.show(binding.loadingIndicator);
     AuthApi authApi = ApiClient.api(AuthApi.class);
-    ApiCallback.handle(
+    LoadingHelper.call(
+        binding.loadingIndicator,
+        binding.btnLogin,
         authApi.login(new LoginRequest(email, password)),
         body -> {
-          LoadingHelper.hide(
-              binding.loadingIndicator,
-              () -> {
-                binding.btnLogin.setEnabled(true);
-                sessionManager.saveSession(body.access_token(), body.role(), body.email());
-                NotificationSocketHolder.get()
-                    .connect(sessionManager.getToken(), globalNotificationListener);
-
-                Intent intent;
-                if ("doctor".equalsIgnoreCase(body.role())) {
-                  intent = new Intent(MainActivity.this, DoctorTabActivity.class);
-                } else {
-                  intent = new Intent(MainActivity.this, MainTabActivity.class);
-                }
-                startActivity(intent);
-                finish();
-              });
+          sessionManager.saveSession(body.access_token(), body.role(), body.email());
+          NotificationSocketHolder.get()
+              .connect(sessionManager.getToken(), globalNotificationListener);
+          Intent intent;
+          if ("doctor".equalsIgnoreCase(body.role())) {
+            intent = new Intent(MainActivity.this, DoctorTabActivity.class);
+          } else {
+            intent = new Intent(MainActivity.this, MainTabActivity.class);
+          }
+          startActivity(intent);
+          finish();
         },
-        (code, msg) -> {
-          LoadingHelper.hide(
-              binding.loadingIndicator,
-              () -> {
-                binding.btnLogin.setEnabled(true);
-                ApiErrorHandler.with(MainActivity.this)
-                    .on(401, "Login failed: invalid credentials")
-                    .fallback("Login failed: invalid credentials")
-                    .build()
-                    .run(code, msg);
-              });
-        });
+        ApiErrorHandler.with(MainActivity.this)
+            .on(401, "Login failed: invalid credentials")
+            .fallback("Login failed: invalid credentials")
+            .build());
   }
 }

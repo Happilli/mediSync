@@ -96,23 +96,17 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
   }
 
   private void loadProfile() {
-    LoadingHelper.show(binding.loadingIndicator);
-    binding.scrollContent.setVisibility(View.GONE);
     DoctorApi api = ApiClient.api(DoctorApi.class);
-    ApiCallback.handle(
-        api.getMyProfile(),
+    LoadingHelper.call(
+        binding.loadingIndicator,
+        binding.scrollContent,
         this,
-        LoadingHelper.wrapSuccess(
-            binding.loadingIndicator,
-            binding.scrollContent,
-            profile -> {
-              bindProfile(profile);
-              loadHospitalDetails(profile.doctor().hospital_id());
-            }),
-        LoadingHelper.wrapError(
-            binding.loadingIndicator,
-            binding.scrollContent,
-            ApiErrorHandler.with(requireContext()).fallback("Failed to load profile.").build()));
+        api.getMyProfile(),
+        profile -> {
+          bindProfile(profile);
+          loadHospitalDetails(profile.doctor().hospital_id());
+        },
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load profile.").build());
   }
 
   private void loadHospitalDetails(int hospitalId) {
@@ -165,10 +159,8 @@ public class DoctorProfileFragment extends BaseBindingFragment<FragmentDoctorPro
     int colorRes = isVerified ? R.color.tertiary : R.color.error;
     int iconRes = isVerified ? R.drawable.verified_on : R.drawable.verified_off;
     int color = requireContext().getColor(colorRes);
-
     binding.txtRegistrationBadge.setText(text);
     binding.txtRegistrationBadge.setTextColor(color);
-
     Drawable icon = ContextCompat.getDrawable(requireContext(), iconRes);
     if (icon != null) {
       icon = icon.mutate();

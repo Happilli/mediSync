@@ -1,8 +1,11 @@
 package com.bca.medisync.util;
 
 import android.view.View;
+import android.widget.Button;
+import androidx.fragment.app.Fragment;
 import com.bca.medisync.data.remote.ApiCallback;
 import com.google.android.material.loadingindicator.LoadingIndicator;
+import retrofit2.Call;
 
 public class LoadingHelper {
   private static final long MIN_VISIBLE_MS = 1000;
@@ -51,5 +54,47 @@ public class LoadingHelper {
               contentView.setVisibility(View.VISIBLE);
               onError.run(code, msg);
             });
+  }
+
+  public static <T> void call(
+      LoadingIndicator indicator,
+      View contentView,
+      Fragment fragment,
+      Call<T> apiCall,
+      ApiCallback.OnSuccess<T> onSuccess,
+      ApiCallback.OnError onError) {
+    show(indicator);
+    contentView.setVisibility(View.GONE);
+    ApiCallback.handle(
+        apiCall,
+        fragment,
+        wrapSuccess(indicator, contentView, onSuccess),
+        wrapError(indicator, contentView, onError));
+  }
+
+  public static <T> void call(
+      LoadingIndicator indicator,
+      Button actionButton,
+      Call<T> apiCall,
+      ApiCallback.OnSuccess<T> onSuccess,
+      ApiCallback.OnError onError) {
+    actionButton.setEnabled(false);
+    show(indicator);
+    ApiCallback.handle(
+        apiCall,
+        body ->
+            hide(
+                indicator,
+                () -> {
+                  actionButton.setEnabled(true);
+                  onSuccess.run(body);
+                }),
+        (code, msg) ->
+            hide(
+                indicator,
+                () -> {
+                  actionButton.setEnabled(true);
+                  onError.run(code, msg);
+                }));
   }
 }

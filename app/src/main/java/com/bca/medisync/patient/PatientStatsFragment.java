@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bca.medisync.BaseBindingFragment;
-import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.databinding.ItemVitalBinding;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.PatientApi;
@@ -40,17 +39,14 @@ public class PatientStatsFragment extends BaseBindingFragment<FragmentPatientSta
   }
 
   private void loadStats() {
-    LoadingHelper.show(binding.loadingIndicator);
-    binding.scrollContent.setVisibility(View.GONE);
     PatientApi api = ApiClient.api(PatientApi.class);
-    ApiCallback.handle(
-        api.getMyStats(),
+    LoadingHelper.call(
+        binding.loadingIndicator,
+        binding.scrollContent,
         this,
-        LoadingHelper.wrapSuccess(binding.loadingIndicator, binding.scrollContent, this::bind),
-        LoadingHelper.wrapError(
-            binding.loadingIndicator,
-            binding.scrollContent,
-            ApiErrorHandler.with(requireContext()).fallback("Failed to load stats.").build()));
+        api.getMyStats(),
+        this::bind,
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load stats.").build());
   }
 
   private void bind(PatientStatsResponse stats) {

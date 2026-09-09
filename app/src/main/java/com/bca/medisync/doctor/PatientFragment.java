@@ -35,7 +35,6 @@ public class PatientFragment extends SearchableListFragment<Patient> {
   protected void setupResultsView(@NonNull View view) {
     rvPatients = view.findViewById(R.id.rvPatients);
     rvPatients.setLayoutManager(new LinearLayoutManager(requireContext()));
-
     adapter =
         new SimpleListAdapter<>(
             ItemPatientBinding::inflate,

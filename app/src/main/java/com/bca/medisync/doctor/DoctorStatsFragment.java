@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.DrawableRes;
 import com.bca.medisync.BaseBindingFragment;
 import com.bca.medisync.R;
-import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.DoctorApi;
 import com.bca.medisync.data.remote.dto.MonthlyAppointmentCount;
@@ -91,17 +90,14 @@ public class DoctorStatsFragment extends BaseBindingFragment<FragmentDoctorStats
   }
 
   private void loadStats() {
-    LoadingHelper.show(binding.loadingIndicator);
-    binding.scrollContent.setVisibility(View.GONE);
     DoctorApi api = ApiClient.api(DoctorApi.class);
-    ApiCallback.handle(
-        api.getMyStats(),
+    LoadingHelper.call(
+        binding.loadingIndicator,
+        binding.scrollContent,
         this,
-        LoadingHelper.wrapSuccess(binding.loadingIndicator, binding.scrollContent, this::bind),
-        LoadingHelper.wrapError(
-            binding.loadingIndicator,
-            binding.scrollContent,
-            ApiErrorHandler.with(requireContext()).fallback("Failed to load stats.").build()));
+        api.getMyStats(),
+        this::bind,
+        ApiErrorHandler.with(requireContext()).fallback("Failed to load stats.").build());
   }
 
   private void bind(DoctorStatsResponse stats) {

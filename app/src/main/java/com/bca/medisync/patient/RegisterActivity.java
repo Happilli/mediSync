@@ -9,7 +9,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.bca.medisync.R;
-import com.bca.medisync.data.remote.ApiCallback;
 import com.bca.medisync.data.remote.ApiClient;
 import com.bca.medisync.data.remote.api.AuthApi;
 import com.bca.medisync.data.remote.dto.register.PatientRegisterRequest;
@@ -73,10 +72,8 @@ public class RegisterActivity extends AppCompatActivity {
   private void setupDobPicker() {
     MaterialDatePicker<Long> picker =
         MaterialDatePicker.Builder.datePicker().setTitleText("Select Date of Birth").build();
-
     binding.btnSelectDob.setOnClickListener(
         v -> picker.show(getSupportFragmentManager(), "DOB_PICKER"));
-
     picker.addOnPositiveButtonClickListener(
         selection -> {
           selectedDob =
@@ -118,7 +115,6 @@ public class RegisterActivity extends AppCompatActivity {
     String gender = getSelectedGender();
     String bloodGroup = getSelectedBloodGroup();
     String securityAnswer = ViewUtils.textOf(binding.etSecurityAnswer);
-
     if (name.isEmpty()) {
       binding.etName.setError("Name is required");
       return;
@@ -169,10 +165,6 @@ public class RegisterActivity extends AppCompatActivity {
       binding.etEmergencyContact.setError("Emergency contact is required");
       return;
     }
-
-    binding.btnRegister.setEnabled(false);
-    LoadingHelper.show(binding.loadingIndicator);
-
     PatientRegisterRequest request =
         new PatientRegisterRequest(
             email,
@@ -186,29 +178,18 @@ public class RegisterActivity extends AppCompatActivity {
             emergencyContact,
             securityAnswer);
     AuthApi authApi = ApiClient.api(AuthApi.class);
-    ApiCallback.handle(
+    LoadingHelper.call(
+        binding.loadingIndicator,
+        binding.btnRegister,
         authApi.registerPatient(request),
-        body ->
-            LoadingHelper.hide(
-                binding.loadingIndicator,
-                () -> {
-                  binding.btnRegister.setEnabled(true);
-                  Toast.makeText(
-                          RegisterActivity.this,
-                          body.message() + "\n" + body.remarks(),
-                          Toast.LENGTH_LONG)
-                      .show();
-                  finish();
-                }),
-        (code, msg) ->
-            LoadingHelper.hide(
-                binding.loadingIndicator,
-                () -> {
-                  binding.btnRegister.setEnabled(true);
-                  ApiErrorHandler.with(RegisterActivity.this)
-                      .fallback("Registration failed. Email may already be in use.")
-                      .build()
-                      .run(code, msg);
-                }));
+        body -> {
+          Toast.makeText(
+                  RegisterActivity.this, body.message() + "\n" + body.remarks(), Toast.LENGTH_LONG)
+              .show();
+          finish();
+        },
+        ApiErrorHandler.with(RegisterActivity.this)
+            .fallback("Registration failed. Email may already be in use.")
+            .build());
   }
 }
