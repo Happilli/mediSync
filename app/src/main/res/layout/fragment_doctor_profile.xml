@@ -193,19 +193,9 @@
                 android:layout_marginTop="16dp"
                 android:background="?attr/colorOutlineVariant" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:text="Practice Information"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
                 android:orientation="vertical">
 
                 <include
