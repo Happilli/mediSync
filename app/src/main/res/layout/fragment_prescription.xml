@@ -34,296 +34,266 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingHorizontal="20dp">
 
-            <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.MediSync.Card.Flat"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="8dp"
+                android:paddingBottom="20dp">
+
+                <TextView
+                    android:id="@+id/tvPatientName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvDiagnosis"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:letterSpacing="0.06"
+                android:text="MEDICATION"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MediSync.TextInputLayout.Rounded"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Medicine Name">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etMedicine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MediSync.TextInputLayout.Rounded"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:hint="Dosage (mg)">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDosage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MediSync.TextInputLayout.Rounded"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:hint="Duration (days)">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDuration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="20dp"
+                android:background="?attr/colorOutlineVariant" />
+
+            <!-- INSTRUCTIONS -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:letterSpacing="0.06"
+                android:text="INSTRUCTIONS"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MediSync.TextInputLayout.Rounded"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Special Instructions">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etInstructions"
+                    android:layout_width="match_parent"
+                    android:layout_height="110dp"
+                    android:gravity="top"
+                    android:inputType="textMultiLine" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="20dp"
+                android:background="?attr/colorOutlineVariant" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="null"
+                    android:src="@drawable/ic_nav_medicine"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Dosage Times"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelectDosageTime"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:text="Add Dosage Time"
+                android:textAllCaps="false"
+                app:cornerRadius="14dp" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipDosageTimes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:chipSpacingHorizontal="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddMedicine"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="Add Medicine to Prescription"
+                android:textAllCaps="false"
+                app:cornerRadius="14dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="20dp"
+                android:background="?attr/colorOutlineVariant" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.06"
+                android:text="MEDICINES ADDED"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtNoMedicinesAdded"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="No medicines added yet"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/addedMedicinesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="20dp"
+                android:background="?attr/colorOutlineVariant" />
+
+            <!-- FOLLOW-UP -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="null"
+                    android:src="@drawable/ic_nav_calendar"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Follow-up Date"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelectFollowUp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:text="Select Follow-up Date"
+                android:textAllCaps="false"
+                app:cornerRadius="14dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
                 android:layout_marginBottom="20dp"
-                app:cardBackgroundColor="?attr/colorPrimaryContainer">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/txtSelectedFollowUp"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="18dp">
+                    android:layout_weight="1"
+                    android:text="Optional — leave blank if no follow-up is needed"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="13sp" />
 
-                    <TextView
-                        android:id="@+id/tvPatientName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="?attr/colorOnPrimaryContainer"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvDiagnosis"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="?attr/colorOnPrimaryContainer"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnClearFollowUp"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:letterSpacing="0.06"
-                        android:text="MEDICATION"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:hint="Medicine Name">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etMedicine"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textCapWords" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:hint="Dosage (mg)">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etDosage"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:hint="Duration (days)">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etDuration"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="18dp"
-                        android:background="?attr/colorOutlineVariant" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:letterSpacing="0.06"
-                        android:text="INSTRUCTIONS"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MediSync.TextInputLayout.Rounded"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:hint="Special Instructions">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etInstructions"
-                            android:layout_width="match_parent"
-                            android:layout_height="110dp"
-                            android:gravity="top"
-                            android:inputType="textMultiLine" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="18dp"
-                        android:background="?attr/colorOutlineVariant" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:contentDescription="null"
-                            android:src="@drawable/ic_nav_medicine"
-                            app:tint="?attr/colorOnSurfaceVariant" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="Dosage Times"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            android:textSize="13sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSelectDosageTime"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginTop="10dp"
-                        android:text="Add Dosage Time"
-                        android:textAllCaps="false"
-                        app:cornerRadius="14dp" />
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/chipDosageTimes"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        app:chipSpacingHorizontal="8dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAddMedicine"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginTop="16dp"
-                        android:text="Add Medicine to Prescription"
-                        android:textAllCaps="false"
-                        app:cornerRadius="14dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:letterSpacing="0.06"
-                        android:text="MEDICINES ADDED"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/txtNoMedicinesAdded"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="No medicines added yet"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="13sp" />
-
-                    <LinearLayout
-                        android:id="@+id/addedMedicinesContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:orientation="vertical" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:contentDescription="null"
-                            android:src="@drawable/ic_nav_calendar"
-                            app:tint="?attr/colorOnSurfaceVariant" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="Follow-up Date"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            android:textSize="13sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSelectFollowUp"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginTop="10dp"
-                        android:text="Select Follow-up Date"
-                        android:textAllCaps="false"
-                        app:cornerRadius="14dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/txtSelectedFollowUp"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Optional — leave blank if no follow-up is needed"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            android:textSize="13sp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnClearFollowUp"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Clear"
-                            android:textAllCaps="false"
-                            android:visibility="gone" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                    android:text="Clear"
+                    android:textAllCaps="false"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
