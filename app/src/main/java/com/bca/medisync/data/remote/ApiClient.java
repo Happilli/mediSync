@@ -2,12 +2,10 @@ package com.bca.medisync.data.remote;
 
 import android.content.Context;
 import com.bca.medisync.data.local.SessionManager;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -18,8 +16,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
   //  ** for using commentone, uncomment other**
-    public static final String BASE_URL = "http://192.168.100.224:8000/";
-//  public static final String BASE_URL = "http://192.168.240.1:8000/";
+  //  public static final String BASE_URL = "http://192.168.100.224:8000/";
+  public static final String BASE_URL = "http://192.168.240.1:8000/";
   private static Retrofit retrofit;
   private static SessionManager sessionManager;
   private static final Map<Class<?>, Object> apiCache = new ConcurrentHashMap<>();

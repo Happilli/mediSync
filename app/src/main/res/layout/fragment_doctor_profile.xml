@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
 
-
     <ImageView
         android:id="@+id/imgHospitalBanner"
         android:layout_width="match_parent"
@@ -17,16 +16,12 @@
         android:scaleType="centerCrop"
         android:src="@drawable/ic_medisync_logo" />
 
-
-
     <View
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_gravity="top"
         android:layout_marginTop="178dp"
         android:background="?attr/colorSurface" />
-
-
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnEditDoctorProfile"
@@ -50,8 +45,6 @@
         app:iconSize="18dp"
         app:iconTint="@android:color/white" />
 
-
-
     <ImageView
         android:id="@+id/imgDoctorProfile"
         android:layout_width="96dp"
@@ -64,8 +57,6 @@
         android:focusable="true"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_nav_profile" />
-
-
 
     <ScrollView
         android:layout_width="match_parent"
@@ -85,7 +76,6 @@
             android:paddingEnd="20dp"
             android:paddingBottom="24dp"
             android:visibility="gone">
-
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -113,10 +103,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/txtDoctorName"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@id/txtDoctorName" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
             <TextView
                 android:id="@+id/txtRole"
@@ -126,7 +113,6 @@
                 android:textColor="?attr/colorPrimary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
-
 
             <TextView
                 android:id="@+id/txtBio"
@@ -139,8 +125,6 @@
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="13sp"
                 android:visibility="gone" />
-
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -171,15 +155,12 @@
                         android:text="This Month"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:textSize="12sp" />
-
                 </LinearLayout>
-
 
                 <View
                     android:layout_width="1dp"
                     android:layout_height="32dp"
                     android:background="?attr/colorOutlineVariant" />
-
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -203,20 +184,14 @@
                         android:text="Total Patients"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:textSize="12sp" />
-
                 </LinearLayout>
-
             </LinearLayout>
-
-
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="16dp"
                 android:background="?attr/colorOutlineVariant" />
-
-
 
             <TextView
                 android:layout_width="match_parent"
@@ -226,7 +201,6 @@
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="12sp"
                 android:textStyle="bold" />
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -257,30 +231,20 @@
                 <include
                     android:id="@+id/rowAddress"
                     layout="@layout/item_profile_row_plain" />
-
             </LinearLayout>
-
-
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogoutDoctor"
                 style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="140dp"
-                android:layout_height="44dp"
-                android:layout_gravity="end"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
                 android:layout_marginTop="20dp"
                 android:text="Logout"
-                android:textAllCaps="false"
                 android:textColor="?attr/colorError"
-                android:textSize="13sp"
-                app:cornerRadius="22dp"
+                android:textStyle="bold"
                 app:strokeColor="?attr/colorError" />
-
         </LinearLayout>
-
     </ScrollView>
-
-
 
     <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/loadingIndicator"
@@ -290,5 +254,4 @@
         android:layout_gravity="center"
         android:elevation="20dp"
         android:visibility="visible" />
-
 </FrameLayout>

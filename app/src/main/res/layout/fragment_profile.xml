@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
 
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,18 +15,16 @@
         android:overScrollMode="never"
         android:scrollbars="none">
 
-
         <LinearLayout
             android:id="@+id/scrollContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="20dp"
-            android:paddingEnd="20dp"
             android:paddingTop="238dp"
+            android:paddingEnd="20dp"
             android:paddingBottom="24dp"
             android:visibility="visible">
-
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -55,10 +52,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/txtName"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@id/txtName" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
             <TextView
                 android:layout_width="match_parent"
@@ -90,10 +84,7 @@
                 <include
                     android:id="@+id/rowDob"
                     layout="@layout/item_profile_row_plain" />
-
             </LinearLayout>
-
-
 
             <TextView
                 android:layout_width="match_parent"
@@ -121,10 +112,7 @@
                 <include
                     android:id="@+id/rowAddress"
                     layout="@layout/item_profile_row_plain" />
-
             </LinearLayout>
-
-
 
             <TextView
                 android:layout_width="match_parent"
@@ -144,14 +132,11 @@
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="20dp"
                 android:background="?attr/colorOutlineVariant" />
-
-
 
             <TextView
                 android:layout_width="match_parent"
@@ -186,11 +171,7 @@
                     android:minHeight="0dp"
                     android:scaleX="0.8"
                     android:scaleY="0.8" />
-
             </LinearLayout>
-
-
-
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogout"
@@ -202,11 +183,8 @@
                 android:textColor="?attr/colorError"
                 android:textStyle="bold"
                 app:strokeColor="?attr/colorError" />
-
         </LinearLayout>
-
     </ScrollView>
-
 
     <ImageView
         android:id="@+id/imgEverestHeader"
@@ -217,15 +195,12 @@
         android:scaleType="centerCrop"
         android:src="@drawable/bg_everest" />
 
-
     <View
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_gravity="top"
         android:layout_marginTop="178dp"
         android:background="?attr/colorSurface" />
-
-
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnEditProfile"
@@ -243,8 +218,6 @@
         app:iconGravity="textStart"
         app:iconTint="@android:color/white" />
 
-
-
     <ImageView
         android:id="@+id/imgProfile"
         android:layout_width="96dp"
@@ -256,8 +229,6 @@
         android:scaleType="centerCrop"
         android:src="@drawable/ic_nav_profile" />
 
-
-
     <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/loadingIndicator"
         style="@style/Widget.MediSync.LoadingIndicator"
@@ -266,5 +237,4 @@
         android:layout_gravity="center"
         android:elevation="20dp"
         android:visibility="gone" />
-
 </FrameLayout>
