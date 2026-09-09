@@ -67,12 +67,12 @@ public class HomeFragment extends BaseBindingFragment<FragmentHomeBinding>
   @Override
   public void onNotificationReceived(NotificationResponse notification) {
     if (!isAdded() || binding == null) return;
-    NotificationBadgeHelper.showUnread(this, binding.btnNotification);
+    NotificationBadgeHelper.refresh(this, binding.imgNotification, binding.notificationContainer);
   }
 
   private void initViews() {
     binding.rvUpcomingHome.setLayoutManager(new LinearLayoutManager(requireContext()));
-    binding.btnNotification.setOnClickListener(
+    binding.imgNotification.setOnClickListener(
         v -> startActivity(new Intent(requireContext(), NotificationsActivity.class)));
   }
 
@@ -101,7 +101,7 @@ public class HomeFragment extends BaseBindingFragment<FragmentHomeBinding>
   }
 
   private void loadUnreadCount() {
-    NotificationBadgeHelper.refresh(this, binding.btnNotification);
+    NotificationBadgeHelper.refresh(this, binding.imgNotification, binding.notificationContainer);
   }
 
   private void loadUpcomingAppointment() {

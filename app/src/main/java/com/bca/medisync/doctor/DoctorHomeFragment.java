@@ -68,7 +68,7 @@ public class DoctorHomeFragment extends BaseBindingFragment<FragmentDoctorHomeBi
   @Override
   public void onNotificationReceived(NotificationResponse notification) {
     if (isAdded() && binding != null)
-      NotificationBadgeHelper.showUnread(this, binding.btnNotification);
+      NotificationBadgeHelper.refresh(this, binding.imgNotification, binding.notificationContainer);
   }
 
   public void refresh() {
@@ -99,7 +99,7 @@ public class DoctorHomeFragment extends BaseBindingFragment<FragmentDoctorHomeBi
   }
 
   private void loadUnreadCount() {
-    NotificationBadgeHelper.refresh(this, binding.btnNotification);
+    NotificationBadgeHelper.refresh(this, binding.imgNotification, binding.notificationContainer);
   }
 
   private void loadDashboardData() {
@@ -198,7 +198,7 @@ public class DoctorHomeFragment extends BaseBindingFragment<FragmentDoctorHomeBi
   }
 
   private void setupListeners() {
-    binding.btnNotification.setOnClickListener(
+    binding.imgNotification.setOnClickListener(
         v -> startActivity(new Intent(requireContext(), NotificationsActivity.class)));
   }
 }
