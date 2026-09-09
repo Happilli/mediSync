@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
@@ -6,13 +7,225 @@
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
 
-    <ImageView
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
+
+
+        <LinearLayout
+            android:id="@+id/scrollContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="238dp"
+            android:paddingBottom="24dp"
+            android:visibility="visible">
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/txtName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="19sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/txtVerifiedBadge"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/txtVerifiedBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/txtName"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/txtName" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Personal Information"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical">
+
+                <include
+                    android:id="@+id/rowAge"
+                    layout="@layout/item_profile_row_plain" />
+
+                <include
+                    android:id="@+id/rowGender"
+                    layout="@layout/item_profile_row_plain" />
+
+                <include
+                    android:id="@+id/rowBloodGroup"
+                    layout="@layout/item_profile_row_plain" />
+
+                <include
+                    android:id="@+id/rowDob"
+                    layout="@layout/item_profile_row_plain" />
+
+            </LinearLayout>
+
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="Contact Information"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical">
+
+                <include
+                    android:id="@+id/rowEmail"
+                    layout="@layout/item_profile_row_plain" />
+
+                <include
+                    android:id="@+id/rowPhone"
+                    layout="@layout/item_profile_row_plain" />
+
+                <include
+                    android:id="@+id/rowAddress"
+                    layout="@layout/item_profile_row_plain" />
+
+            </LinearLayout>
+
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="Emergency Contact"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtEmergencyContact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="?attr/colorOutlineVariant" />
+
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="Settings"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:minHeight="48dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="System Notifications"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchNotifications"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:scaleX="0.8"
+                    android:scaleY="0.8" />
+
+            </LinearLayout>
+
+
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogout"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="20dp"
+                android:text="Logout"
+                android:textColor="?attr/colorError"
+                android:textStyle="bold"
+                app:strokeColor="?attr/colorError" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+    <ImageView
+        android:id="@+id/imgEverestHeader"
+        android:layout_width="match_parent"
+        android:layout_height="190dp"
         android:contentDescription="@null"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop"
         android:src="@drawable/bg_everest" />
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_gravity="top"
+        android:layout_marginTop="178dp"
+        android:background="?attr/colorSurface" />
+
+
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnEditProfile"
@@ -20,144 +233,17 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="top|end"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:contentDescription="Edit profile"
+        android:elevation="8dp"
         app:backgroundTint="#66000000"
         app:cornerRadius="10dp"
         app:icon="@drawable/edit"
         app:iconGravity="textStart"
         app:iconTint="@android:color/white" />
 
-    <LinearLayout
-        android:id="@+id/scrollContent"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="200dp"
-        android:visibility="visible">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/txtName"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="19sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/txtVerifiedBadge"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/txtVerifiedBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:orientation="vertical">
-
-            <include
-                android:id="@+id/rowAge"
-                layout="@layout/item_profile_row_plain" />
-
-            <include
-                android:id="@+id/rowGender"
-                layout="@layout/item_profile_row_plain" />
-
-            <include
-                android:id="@+id/rowBloodGroup"
-                layout="@layout/item_profile_row_plain" />
-
-            <include
-                android:id="@+id/rowEmail"
-                layout="@layout/item_profile_row_plain" />
-
-            <include
-                android:id="@+id/rowPhone"
-                layout="@layout/item_profile_row_plain" />
-
-            <include
-                android:id="@+id/rowDob"
-                layout="@layout/item_profile_row_plain" />
-
-            <include
-                android:id="@+id/rowAddress"
-                layout="@layout/item_profile_row_plain" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Emergency Contact"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/txtEmergencyContact"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="18dp"
-            android:background="?attr/colorOutlineVariant" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingVertical="2dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="System Notifications"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="13sp" />
-
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/switchNotifications"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:scaleX="0.8"
-                android:scaleY="0.8" />
-        </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogout"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="140dp"
-            android:layout_height="44dp"
-            android:layout_marginBottom="16dp"
-            android:text="Logout"
-            android:textColor="?attr/colorError"
-            app:strokeColor="?attr/colorError" />
-    </LinearLayout>
 
     <ImageView
         android:id="@+id/imgProfile"
@@ -166,8 +252,11 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="132dp"
         android:contentDescription="profile photo"
+        android:elevation="10dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_nav_profile" />
+
+
 
     <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/loadingIndicator"
@@ -175,5 +264,7 @@
         android:layout_width="wrap_content"
         android:layout_height="64dp"
         android:layout_gravity="center"
+        android:elevation="20dp"
         android:visibility="gone" />
+
 </FrameLayout>
